@@ -12,7 +12,16 @@ repositories {
 }
 
 dependencies {
+    val versions = mapOf(
+            "junit" to "5.0.0",
+            "junitPlatform" to "1.0.0"
+    )
+
     compile(kotlin("stdlib-jdk8"))
+
+    testCompile("org.junit.jupiter:junit-jupiter-api:${versions["junit"]}")
+
+    runtime("org.junit.jupiter:junit-jupiter-engine:${versions["junitPlatform"]}\"")
 }
 
 tasks.withType<KotlinCompile> {
