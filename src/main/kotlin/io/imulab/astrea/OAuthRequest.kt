@@ -2,6 +2,8 @@ package io.imulab.astrea
 
 import io.imulab.astrea.client.OAuthClient
 import java.time.LocalDateTime
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * All requests in the context of OAuth2.
@@ -66,7 +68,7 @@ interface OAuthRequest {
     /**
      * Returns the raw http request form.
      */
-    fun getRequestForm(): Map<String, List<String>>
+    fun getRequestForm(): UrlValues
 
     /**
      * Merge parameters from [another] [OAuthRequest] into this one.
@@ -77,4 +79,71 @@ interface OAuthRequest {
      * Returns a clone stripped of invalid parameters, so it can used for safe storage.
      */
     fun sanitize(validParameters: List<String>): OAuthRequest
+}
+
+class Request(private var id: String = UUID.randomUUID().toString(),
+              private var reqTime: LocalDateTime = LocalDateTime.now(),
+              private var client: OAuthClient,
+              private val scopes: MutableSet<String> = hashSetOf(),
+              private val grantedScopes: MutableSet<String> = hashSetOf(),
+              private val form: MutableMap<String, List<String>> = mutableMapOf(),
+              private var session: OAuthSession? = null): OAuthRequest {
+
+    override fun setId(id: String) {
+        this.id = id
+    }
+
+    override fun getId(): String = this.id
+
+    override fun getRequestTime(): LocalDateTime = this.reqTime
+
+    override fun getClient(): OAuthClient = this.client
+
+    override fun getRequestScopes(): List<String> = this.scopes.toList()
+
+    override fun setRequestScopes(scopes: List<String>) {
+        this.scopes.clear()
+        this.scopes.addAll(scopes)
+    }
+
+    override fun addRequestScope(scope: String) {
+        if (scope.isNotBlank())
+            this.scopes.add(scope)
+    }
+
+    override fun getGrantedScopes(): List<String> = this.grantedScopes.toList()
+
+    override fun grantScope(scope: String) {
+        if (scope.isNotBlank())
+            this.grantedScopes.add(scope)
+    }
+
+    override fun getSession(): OAuthSession? = this.session
+
+    override fun setSession(session: OAuthSession) {
+        this.session = session
+    }
+
+    override fun getRequestForm(): UrlValues = this.form
+
+    override fun merge(another: OAuthRequest) {
+        this.reqTime = another.getRequestTime()
+        this.client = another.getClient()
+        this.session = another.getSession()
+        another.getRequestScopes().forEach(this::addRequestScope)
+        another.getGrantedScopes().forEach(this::grantScope)
+        another.getRequestForm().forEach(this.form::set)
+    }
+
+    override fun sanitize(validParameters: List<String>): OAuthRequest {
+        return Request(
+                id = this.id,
+                reqTime = this.reqTime,
+                client = this.client,
+                scopes = this.scopes,
+                grantedScopes = this.grantedScopes,
+                form = this.form.filterKeys { validParameters.contains(it) }.toMutableMap(),
+                session = this.session
+        )
+    }
 }
