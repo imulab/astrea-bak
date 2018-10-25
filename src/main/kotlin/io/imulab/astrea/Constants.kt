@@ -15,3 +15,16 @@ enum class TokenType(val specValue: String) {
     IdToken("id_token"),
     Unknown(""),
 }
+
+enum class AuthMethod(val specValue: String) {
+    ClientSecretJwt("client_secret_jwt"),
+    ClientSecretBasic("client_secret_basic"),
+    ClientSecretPost("client_secret_post"),
+    PrivateKeyJwt("private_key_jwt"),
+    None("none"),
+}
+
+enum class SigningAlgorithm {
+    RS256,
+    None,
+}
