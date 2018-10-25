@@ -37,9 +37,41 @@ interface AuthorizeRequest: OAuthRequest {
     fun setResponseTypeHandled(responseType: ResponseType)
 
     /**
-     * Returns true if all requested [ResponseType] ([responseTypes]) has been properly
+     * Returns true if all requested [ResponseType] ([getResponseTypes]) has been properly
      * handled. It is achieved by calling [setResponseTypeHandled] on each requested
      * [ResponseType]; otherwise false.
      */
     fun hasAllResponseTypesBeenHandled(): Boolean
+}
+
+class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,
+                              private val responseTypes: Set<ResponseType> = emptySet(),
+                              private val redirectUri: String?,
+                              private val state: String): OAuthRequest by baseRequest, AuthorizeRequest {
+
+    private val handled = mutableSetOf<ResponseType>()
+
+    override fun getResponseTypes(): Set<ResponseType> = this.responseTypes
+
+    override fun getRedirectUri(): String? = this.redirectUri
+
+    override fun isRedirectUriValid(): Boolean {
+        try {
+            determineRedirectUri(this.redirectUri, this.baseRequest.getClient().getRedirectUris())
+                    .checkValidRedirectUri()
+        } catch (_: IllegalRedirectUriException) {
+            return false
+        }
+
+        return true
+    }
+
+    override fun getState(): String = this.state
+
+    override fun setResponseTypeHandled(responseType: ResponseType) {
+        this.handled.add(responseType)
+    }
+
+    override fun hasAllResponseTypesBeenHandled(): Boolean =
+            this.handled.containsAll(this.getResponseTypes())
 }
