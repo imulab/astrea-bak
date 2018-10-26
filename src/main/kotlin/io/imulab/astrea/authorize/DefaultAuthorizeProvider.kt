@@ -8,7 +8,8 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder
 import java.time.LocalDateTime
 import java.util.*
 
-class DefaultAuthorizeProvider(private val clientStore: ClientManager,
+class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeHandler,
+                               private val clientStore: ClientManager,
                                private val httpClient: HttpClient,
                                private val scopeStrategy: OAuthScopeStrategy,
                                private val minStateEntropy: Int = 8,
@@ -42,7 +43,7 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
 
         // scope
         reader.formValue("scope").also {
-            if (it.isBlank)
+            if (it.isBlank())
                 throw IllegalArgumentException("scope is mandatory.")
         }.split(" ")
                 .filter { it.isNotEmpty() }
@@ -55,7 +56,7 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
 
         // response_type
         reader.formValue("response_type").also {
-            if (it.isBlank)
+            if (it.isBlank())
                 throw IllegalArgumentException("response_type is mandatory.")
         }.split(" ")
                 .filter { it.isNotEmpty() }
@@ -66,7 +67,7 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
         // state
         reader.formValue("state").also {
             when {
-                it.isBlank -> throw IllegalArgumentException("state is mandatory.")
+                it.isBlank() -> throw IllegalArgumentException("state is mandatory.")
                 it.length < minStateEntropy -> throw IllegalArgumentException("state length must be no less than $minStateEntropy.")
                 else -> builder.setState(it)
             }
@@ -76,7 +77,12 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
     }
 
     override fun newAuthorizeResponse(request: AuthorizeRequest, session: OAuthSession): AuthorizeResponse {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val response = DefaultAuthorizeResponse()
+
+        request.setSession(session)
+        authorizeHandler.handleAuthorizeRequest(request, response)
+
+        return response
     }
 
     override fun encodeAuthorizeResponse(writer: HttpResponseWriter, request: AuthorizeRequest, response: AuthorizeResponse) {
@@ -100,7 +106,7 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
         // request, request_uri
         var assertion = form.singleValue("request")
         val location = form.singleValue("request_uri")
-        if (assertion.isBlank && location.isBlank)
+        if (assertion.isBlank() && location.isBlank())
             return
         else if (location.isNotBlank()) {
             if (assertion.isNotBlank())
@@ -118,7 +124,7 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
         if (builder.client !is OpenIdConnectClient)
             throw IllegalStateException("Non-OIDC client specifies OIDC context.")
         val client = builder.client!! as OpenIdConnectClient
-        if (client.getJsonWebKeys() == null && client.getJsonKeyKeysUri().isBlank)
+        if (client.getJsonWebKeys() == null && client.getJsonKeyKeysUri().isBlank())
             throw IllegalStateException("OIDC client did not register JWK.")
 
         // JWT

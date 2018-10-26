@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    java
     kotlin("jvm") version "1.2.51"
 }
 
@@ -13,8 +14,8 @@ repositories {
 
 dependencies {
     val versions = mapOf(
-            "junit" to "5.0.0",
-            "junitPlatform" to "1.0.0",
+            "junit" to "5.3.1",
+            "junitPlatform" to "5.3.1",
             "jose4j" to "0.6.4",
             "mockito" to "2.23.0"
     )
@@ -25,9 +26,13 @@ dependencies {
     testCompile("org.junit.jupiter:junit-jupiter-api:${versions["junit"]}")
     testCompile("org.mockito:mockito-core:${versions["mockito"]}")
 
-    runtime("org.junit.jupiter:junit-jupiter-engine:${versions["junitPlatform"]}\"")
+    runtime("org.junit.jupiter:junit-jupiter-engine:${versions["junitPlatform"]}")
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

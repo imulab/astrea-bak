@@ -226,6 +226,9 @@ class NewAuthorizeRequestTest {
      * [DefaultAuthorizeProvider.httpClient] is set to a mocked [HttpClient]. No method invocation was mocked
      * as this test case does not intend to test download cases.
      *
+     * [DefaultAuthorizeProvider.authorizeHandler] is set to a mocked [AuthorizeHandler]. No method invocation was mocked
+     * as this test case does not intend to test actual request processing.
+     *
      * [DefaultAuthorizeProvider.scopeStrategy] is set to a [StringEqualityScopeStrategy].
      *
      * [DefaultAuthorizeProvider.expectedAudience] is set to 'test'.
@@ -256,8 +259,11 @@ class NewAuthorizeRequestTest {
                 ))
 
         val httpClient = mock(HttpClient::class.java)
+        val authorizeHandler = mock(AuthorizeHandler::class.java)
+
 
         return DefaultAuthorizeProvider(
+                authorizeHandler = authorizeHandler,
                 clientStore = clientManager,
                 httpClient = httpClient,
                 scopeStrategy = StringEqualityScopeStrategy,

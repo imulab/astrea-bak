@@ -2,3 +2,5 @@
 .idea/
 *.iml
 /out
+/build
+.DS_Store
