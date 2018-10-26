@@ -14,7 +14,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.function.Executable
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.mockito.invocation.InvocationOnMock
 
 class NewAuthorizeRequestTest {
@@ -101,7 +102,7 @@ class NewAuthorizeRequestTest {
                 it.setGeneratedJwtId()
                 it.setIssuedAtToNow()
                 it.setNotBeforeMinutesInThePast(2f)
-                it.setStringListClaim("scope","email")
+                it.setStringListClaim("scope", "email")
             }.toJson()
             it.key = (firstKey as RsaJsonWebKey).rsaPrivateKey
             it.keyIdHeaderValue = "first"
@@ -143,7 +144,7 @@ class NewAuthorizeRequestTest {
                 it.setGeneratedJwtId()
                 it.setIssuedAtToNow()
                 it.setNotBeforeMinutesInThePast(2f)
-                it.setStringListClaim("scope","email")
+                it.setStringListClaim("scope", "email")
             }.toJson()
             it.key = (firstKey as RsaJsonWebKey).rsaPrivateKey
             it.keyIdHeaderValue = "first"
@@ -176,7 +177,7 @@ class NewAuthorizeRequestTest {
                 it.setGeneratedJwtId()
                 it.setIssuedAtToNow()
                 it.setNotBeforeMinutesInThePast(2f)
-                it.setStringListClaim("scope","email")
+                it.setStringListClaim("scope", "email")
             }.toJson()
             it.key = (firstKey as RsaJsonWebKey).rsaPrivateKey
             it.keyIdHeaderValue = "first"

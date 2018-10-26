@@ -13,7 +13,7 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
                                private val scopeStrategy: OAuthScopeStrategy,
                                private val minStateEntropy: Int = 8,
                                private val clockSkewToleranceSecond: Int = 30,
-                               private val expectedAudience: String): AuthorizeProvider {
+                               private val expectedAudience: String) : AuthorizeProvider {
 
     override fun newAuthorizeRequest(reader: HttpRequestReader): AuthorizeRequest {
         val builder = DefaultAuthorizeRequest.Builder().also {
@@ -135,7 +135,7 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
         jwtConsumer.processToClaims(assertion).claimsMap.forEach { k, v ->
             if (k == "scope") {
                 when (v) {
-                    is Collection<*> -> v.map { it.toString() }.filter { it.isNotBlank() }.forEach{ builder.addScopes(it) }
+                    is Collection<*> -> v.map { it.toString() }.filter { it.isNotBlank() }.forEach { builder.addScopes(it) }
                     is String -> v.split(" ").filter { it.isNotEmpty() }.forEach { builder.addScopes(it) }
                     else -> throw IllegalArgumentException("scope in request object can only be list or string")
                 }

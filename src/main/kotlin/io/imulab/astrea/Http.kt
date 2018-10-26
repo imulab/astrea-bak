@@ -34,6 +34,7 @@ interface HttpResponseReader {
      * Returns the HTTP response status
      */
     fun statusCode(): Int
+
     /**
      * Returns response body as an byte array.
      */

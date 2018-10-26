@@ -7,7 +7,7 @@ import io.imulab.astrea.ResponseType
 /**
  * Context for the OAuth2 Authorize Endpoint.
  */
-interface AuthorizeRequest: OAuthRequest {
+interface AuthorizeRequest : OAuthRequest {
 
     /**
      * Returns requested [ResponseType]
@@ -48,7 +48,7 @@ interface AuthorizeRequest: OAuthRequest {
 class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,
                               private val responseTypes: Set<ResponseType> = emptySet(),
                               private val redirectUri: String?,
-                              private val state: String): OAuthRequest by baseRequest, AuthorizeRequest {
+                              private val state: String) : OAuthRequest by baseRequest, AuthorizeRequest {
 
     private val handled = mutableSetOf<ResponseType>()
 

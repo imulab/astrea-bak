@@ -9,7 +9,7 @@ class DefaultOidcClient(private val oauth: OAuthClient,
                         private val jwkUri: String = "",
                         private val jwk: JsonWebKeySet?,
                         private val tokenEndpointAuth: AuthMethod = AuthMethod.None,
-                        private val reqObjSignAlg: SigningAlgorithm = SigningAlgorithm.None): OAuthClient by oauth, OpenIdConnectClient {
+                        private val reqObjSignAlg: SigningAlgorithm = SigningAlgorithm.None) : OAuthClient by oauth, OpenIdConnectClient {
 
     override fun getRequestUris(): List<String> = this.requestUris
 

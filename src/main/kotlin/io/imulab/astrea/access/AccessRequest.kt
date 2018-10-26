@@ -6,7 +6,7 @@ import io.imulab.astrea.OAuthRequest
 /**
  * Context for an OAuth Access Request.
  */
-interface AccessRequest: OAuthRequest {
+interface AccessRequest : OAuthRequest {
 
     /**
      * Returns the requested grant types.

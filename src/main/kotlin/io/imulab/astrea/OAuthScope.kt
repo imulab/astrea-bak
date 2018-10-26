@@ -10,7 +10,7 @@ interface OAuthScopeStrategy {
     fun accepts(one: String, another: String): Boolean
 }
 
-object StringEqualityScopeStrategy: OAuthScopeStrategy {
+object StringEqualityScopeStrategy : OAuthScopeStrategy {
     override fun accepts(one: String, another: String): Boolean = one.equals(another, ignoreCase = false)
 }
 

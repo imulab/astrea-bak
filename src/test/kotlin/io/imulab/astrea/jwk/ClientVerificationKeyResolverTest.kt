@@ -52,7 +52,7 @@ class ClientVerificationKeyResolverTest {
         }
     }
 
-    private object NoOpHttpClient: HttpClient {
+    private object NoOpHttpClient : HttpClient {
         override fun get(url: String): HttpResponseReader {
             throw UnsupportedOperationException()
         }

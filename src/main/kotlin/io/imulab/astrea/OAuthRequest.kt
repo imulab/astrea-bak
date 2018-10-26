@@ -3,7 +3,6 @@ package io.imulab.astrea
 import io.imulab.astrea.client.OAuthClient
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * All requests in the context of OAuth2.
@@ -87,7 +86,7 @@ class Request(private var id: String = UUID.randomUUID().toString(),
               private val scopes: MutableSet<String> = hashSetOf(),
               private val grantedScopes: MutableSet<String> = hashSetOf(),
               private val form: MutableMap<String, List<String>> = mutableMapOf(),
-              private var session: OAuthSession? = null): OAuthRequest {
+              private var session: OAuthSession? = null) : OAuthRequest {
 
     override fun setId(id: String) {
         this.id = id

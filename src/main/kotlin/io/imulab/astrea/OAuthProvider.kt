@@ -10,7 +10,7 @@ import io.imulab.astrea.introspection.IntrospectResponse
 /**
  * Interface to provide heavy lifting to most of the OAuth2 functions.
  */
-interface OAuthProvider: AuthorizeProvider, AccessProvider, RevocationProvider, IntrospectionProvider
+interface OAuthProvider : AuthorizeProvider, AccessProvider, RevocationProvider, IntrospectionProvider
 
 /**
  * Interface to provide the functions related to the authorize endpoint.
@@ -70,6 +70,7 @@ interface RevocationProvider {
      * Handle the incoming revocation http request and perform a revocation if necessary.
      */
     fun revoke(reader: HttpRequestReader)
+
     /**
      * Encode http revocation response, either as a success, or with the supplied [error].
      */
@@ -84,14 +85,17 @@ interface IntrospectionProvider {
      * Initiate and create an introspection request.
      */
     fun newIntrospectRequest(reader: HttpRequestReader): IntrospectRequest
+
     /**
      * Conducts introspection and returns result of the introspection.
      */
     fun newIntrospectResponse(request: IntrospectRequest): IntrospectResponse
+
     /**
      * Encode successful introspection response to http.
      */
     fun encodeIntrospectReponse(writer: HttpResponseWriter, response: IntrospectResponse)
+
     /**
      * Encode error introspection response to http.
      */

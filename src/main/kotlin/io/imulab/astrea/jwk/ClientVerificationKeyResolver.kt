@@ -12,7 +12,7 @@ import org.jose4j.keys.resolvers.VerificationKeyResolver
 import java.security.Key
 
 class ClientVerificationKeyResolver(private val client: OpenIdConnectClient,
-                                    private val httpClient: HttpClient): VerificationKeyResolver {
+                                    private val httpClient: HttpClient) : VerificationKeyResolver {
 
     override fun resolveKey(jws: JsonWebSignature?, nestingContext: MutableList<JsonWebStructure>?): Key {
         if (jws?.keyIdHeaderValue?.isEmpty() == true)
