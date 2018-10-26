@@ -4,12 +4,18 @@ import org.jose4j.jwa.AlgorithmConstraints
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jws.AlgorithmIdentifiers
 
-enum class GrantType {
-    AuthorizationCode
+enum class GrantType(val specValue: String) {
+    AuthorizationCode("authorization_code"),
+    Password("password"),
+    ClientCredentials("client_credentials"),
+    RefreshToken("refresh_token")
 }
 
 enum class ResponseType(val specValue: String) {
-    Code("code");
+    Code("code"),
+    Token("token"),
+    IdToken("id_token"),
+    None("none");
 
     companion object {
         fun fromSpecValue(value: String, ignoreCase: Boolean = false): ResponseType {

@@ -84,7 +84,7 @@ class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,
 
         fun setRedirectUri(uri: String) = apply { this.redirectUri = uri }
 
-        fun setState(state: String) = apply { this.state }
+        fun setState(state: String) = apply { this.state = state }
 
         override fun build(): OAuthRequest {
             if (this.state.isNullOrBlank())

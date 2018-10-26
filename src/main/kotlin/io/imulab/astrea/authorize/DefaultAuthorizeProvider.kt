@@ -134,10 +134,11 @@ class DefaultAuthorizeProvider(private val clientStore: ClientManager,
                 .build()
         jwtConsumer.processToClaims(assertion).claimsMap.forEach { k, v ->
             if (k == "scope") {
-                v.toString()
-                        .split(" ")
-                        .filter { it.isNotEmpty() }
-                        .forEach { builder.addScopes(it) }
+                when (v) {
+                    is Collection<*> -> v.map { it.toString() }.filter { it.isNotBlank() }.forEach{ builder.addScopes(it) }
+                    is String -> v.split(" ").filter { it.isNotEmpty() }.forEach { builder.addScopes(it) }
+                    else -> throw IllegalArgumentException("scope in request object can only be list or string")
+                }
                 builder.setForm("scope", builder.scopes.joinToString(separator = " "))
             } else {
                 builder.setForm(k, v.toString())

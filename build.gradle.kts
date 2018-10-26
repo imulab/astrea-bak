@@ -15,13 +15,15 @@ dependencies {
     val versions = mapOf(
             "junit" to "5.0.0",
             "junitPlatform" to "1.0.0",
-            "jose4j" to "0.6.4"
+            "jose4j" to "0.6.4",
+            "mockito" to "2.23.0"
     )
 
     compile(kotlin("stdlib-jdk8"))
     compile("org.bitbucket.b_c:jose4j:${versions["jose4j"]}")
 
     testCompile("org.junit.jupiter:junit-jupiter-api:${versions["junit"]}")
+    testCompile("org.mockito:mockito-core:${versions["mockito"]}")
 
     runtime("org.junit.jupiter:junit-jupiter-engine:${versions["junitPlatform"]}\"")
 }
