@@ -1,6 +1,7 @@
 package io.imulab.astrea.authorize
 
 import io.imulab.astrea.OAuthRequest
+import io.imulab.astrea.Request
 import io.imulab.astrea.ResponseType
 
 /**
@@ -74,4 +75,27 @@ class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,
 
     override fun hasAllResponseTypesBeenHandled(): Boolean =
             this.handled.containsAll(this.getResponseTypes())
+
+    class Builder(var responseTypes: MutableSet<ResponseType> = mutableSetOf(),
+                  var redirectUri: String? = null,
+                  var state: String? = null) : Request.Builder() {
+
+        fun addResponseTypes(vararg responseTypes: ResponseType) = apply { this.responseTypes.addAll(responseTypes) }
+
+        fun setRedirectUri(uri: String) = apply { this.redirectUri = uri }
+
+        fun setState(state: String) = apply { this.state }
+
+        override fun build(): OAuthRequest {
+            if (this.state.isNullOrBlank())
+                throw IllegalStateException("state must be set.")
+
+            return DefaultAuthorizeRequest(
+                    baseRequest = super.build(),
+                    responseTypes = this.responseTypes,
+                    redirectUri = this.redirectUri,
+                    state = this.state!!
+            )
+        }
+    }
 }

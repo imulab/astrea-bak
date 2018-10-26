@@ -146,4 +146,68 @@ class Request(private var id: String = UUID.randomUUID().toString(),
                 session = this.session
         )
     }
+
+    open class Builder(var id: String? = null,
+                       var reqTime: LocalDateTime? = null,
+                       var client: OAuthClient? = null,
+                       val scopes: MutableSet<String> = hashSetOf(),
+                       val grantedScopes: MutableSet<String> = hashSetOf(),
+                       val form: MutableMap<String, List<String>> = mutableMapOf(),
+                       var session: OAuthSession? = null) {
+
+        fun setId(id: String? = null) =
+                if (id == null)
+                    apply { this.id = UUID.randomUUID().toString() }
+                else
+                    apply { this.id = id }
+
+        fun setRequestTime(reqTime: LocalDateTime? = null) =
+                if (reqTime == null)
+                    apply { this.reqTime = LocalDateTime.now() }
+                else
+                    apply { this.reqTime = reqTime }
+
+        fun setClient(client: OAuthClient) = apply { this.client = client }
+
+        fun addScopes(vararg scopes: String) = apply { this.scopes.addAll(scopes) }
+
+        fun addGrantedScopes(vararg scopes: String) = apply { this.grantedScopes.addAll(scopes) }
+
+        fun clearForm() = apply { form.clear() }
+
+        fun setForm(form: UrlValues) = apply { form.forEach(this.form::set) }
+
+        fun setForm(key: String, value: String) = apply { this.form[key] = listOf(value) }
+
+        fun appendForm(key: String, value: String) = apply {
+            if (this.form.containsKey(key))
+                this.form[key] = mutableListOf<String>().apply {
+                    this@apply.addAll(this@Builder.form[key]!!)
+                    this@apply.add(value)
+                }
+            else
+                setForm(key, value)
+        }
+
+        fun setSession(session: OAuthSession) = apply { this.session = session }
+
+        open fun build(): OAuthRequest {
+            if (this.id == null)
+                setId()
+            if (this.reqTime == null)
+                setRequestTime()
+            if (this.client == null)
+                throw IllegalStateException("client must be set.")
+
+            return Request(
+                    id = this.id!!,
+                    reqTime = this.reqTime!!,
+                    client = this.client!!,
+                    scopes = this.scopes,
+                    grantedScopes = this.grantedScopes,
+                    form = this.form,
+                    session = this.session
+            )
+        }
+    }
 }

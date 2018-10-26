@@ -97,5 +97,3 @@ interface IntrospectionProvider {
      */
     fun encodeIntrospectError(writer: HttpResponseWriter, error: Throwable)
 }
-
-typealias Scope = String

@@ -1,11 +1,24 @@
 package io.imulab.astrea
 
+import org.jose4j.jwa.AlgorithmConstraints
+import org.jose4j.jwk.RsaJsonWebKey
+import org.jose4j.jws.AlgorithmIdentifiers
+
 enum class GrantType {
     AuthorizationCode
 }
 
-enum class ResponseType {
-    Code
+enum class ResponseType(val specValue: String) {
+    Code("code");
+
+    companion object {
+        fun fromSpecValue(value: String, ignoreCase: Boolean = false): ResponseType {
+            val found = values().find {
+                it.specValue.equals(value, ignoreCase)
+            }
+            return found ?: throw IllegalArgumentException("$value does not match any response type.")
+        }
+    }
 }
 
 enum class TokenType(val specValue: String) {
@@ -24,7 +37,15 @@ enum class AuthMethod(val specValue: String) {
     None("none"),
 }
 
-enum class SigningAlgorithm {
-    RS256,
-    None,
+enum class SigningAlgorithm(val specValue: String, val keyType: String) {
+    RS256(AlgorithmIdentifiers.RSA_USING_SHA256, RsaJsonWebKey.KEY_TYPE) {
+        override fun toJwsAlgorithmConstraints(): AlgorithmConstraints =
+                AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, AlgorithmIdentifiers.RSA_USING_SHA256)
+    },
+    None(AlgorithmIdentifiers.NONE, "none") {
+        override fun toJwsAlgorithmConstraints(): AlgorithmConstraints =
+                AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, AlgorithmIdentifiers.NONE)
+    };
+
+    abstract fun toJwsAlgorithmConstraints(): AlgorithmConstraints
 }
