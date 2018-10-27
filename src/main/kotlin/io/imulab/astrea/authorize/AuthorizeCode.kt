@@ -28,15 +28,15 @@ interface AuthorizeCodeStrategy {
      * Returns the signature of the authorization code. Typically used to
      * identify the code from storage.
      */
-    fun computeCodeSignature(code: String): String
+    fun computeAuthorizeCodeSignature(code: String): String
 
     /**
      * Create a new authorization code, with signature computed.
      */
-    fun generateNewCode(request: OAuthRequest): AuthorizeCode
+    fun generateNewAuthorizeCode(request: OAuthRequest): AuthorizeCode
 
     /**
      * Validate the provided [code].
      */
-    fun validateCode(request: OAuthRequest, code: String)
+    fun validateAuthorizeCode(request: OAuthRequest, code: String)
 }

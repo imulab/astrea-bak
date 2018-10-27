@@ -32,7 +32,7 @@ class HmacSha256Strategy(
     private val base64Decoder = Base64.getUrlDecoder()
 
 
-    override fun computeCodeSignature(code: String): String {
+    override fun computeAuthorizeCodeSignature(code: String): String {
         return base64Encoder.encodeToString(computeCodeSignatureRaw(base64Decoder.decode(code)))
     }
 
@@ -40,7 +40,7 @@ class HmacSha256Strategy(
         return hmac.sign(secretKey, code, ProviderContext())
     }
 
-    override fun generateNewCode(request: OAuthRequest): AuthorizeCode {
+    override fun generateNewAuthorizeCode(request: OAuthRequest): AuthorizeCode {
         val code = ByteArray(authorizeCodeEntropy)
         ThreadLocalRandom.current().nextBytes(code)
 
@@ -50,7 +50,7 @@ class HmacSha256Strategy(
         )
     }
 
-    override fun validateCode(request: OAuthRequest, code: String) {
+    override fun validateAuthorizeCode(request: OAuthRequest, code: String) {
         if (request.getSession()?.getExpiry(TokenType.AuthorizeCode)
                         ?.isBefore(LocalDateTime.now().plus(authorizeCodeLifespan)) == true) {
             throw InvalidAuthorizeCodeException(code, "expired")

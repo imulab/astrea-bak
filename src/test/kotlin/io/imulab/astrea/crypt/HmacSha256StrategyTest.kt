@@ -26,11 +26,11 @@ class HmacSha256StrategyTest {
         )
         val oauthReq = mock(OAuthRequest::class.java)
 
-        strategy.generateNewCode(oauthReq).also {
+        strategy.generateNewAuthorizeCode(oauthReq).also {
             assertNotNull(it.token)
             assertNotNull(it.signature)
         }.also {
-            strategy.validateCode(oauthReq, it.toString())
+            strategy.validateAuthorizeCode(oauthReq, it.toString())
         }
     }
 
@@ -42,8 +42,8 @@ class HmacSha256StrategyTest {
         )
         val oauthReq = mock(OAuthRequest::class.java)
         val shouldFail = Executable {
-            strategy.generateNewCode(oauthReq).also {
-                strategy.validateCode(oauthReq, AuthorizeCode(
+            strategy.generateNewAuthorizeCode(oauthReq).also {
+                strategy.validateAuthorizeCode(oauthReq, AuthorizeCode(
                         token = it.token + "x",
                         signature = it.signature
                 ).toString())
@@ -66,8 +66,8 @@ class HmacSha256StrategyTest {
             `when`(it.getSession()).thenReturn(session)
         }
         val shouldFail = Executable {
-            strategy.generateNewCode(oauthReq).also {
-                strategy.validateCode(oauthReq, it.toString())
+            strategy.generateNewAuthorizeCode(oauthReq).also {
+                strategy.validateAuthorizeCode(oauthReq, it.toString())
             }
         }
 

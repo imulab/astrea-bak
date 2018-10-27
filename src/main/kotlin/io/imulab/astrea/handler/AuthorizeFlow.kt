@@ -35,7 +35,7 @@ class AuthorizeFlow(
                 throw IllegalArgumentException("scope $illegalScope cannot be accepted.")
         }
 
-        val authCode = authorizeCodeStrategy.generateNewCode(request)
+        val authCode = authorizeCodeStrategy.generateNewAuthorizeCode(request)
         authorizeCodeStorage.createAuthorizeCodeSession(authCode, request.also {
             it.getSession()?.setExpiry(
                     TokenType.AuthorizeCode,
