@@ -20,7 +20,7 @@ class AuthorizeFlow(
 ) : AuthorizeHandler {
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
-        if (request.hasSingleCodeResponseType())
+        if (!request.hasSingleCodeResponseType())
             return
 
         if (request.getRedirectUri()?.isSecureRedirectUri() != true)
