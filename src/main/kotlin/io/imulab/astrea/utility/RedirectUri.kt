@@ -1,5 +1,8 @@
-package io.imulab.astrea.authorize
+package io.imulab.astrea.utility
 
+import io.imulab.astrea.authorize.MalformedRedirectUriException
+import io.imulab.astrea.authorize.RedirectUriHasFragmentException
+import io.imulab.astrea.authorize.UnmatchedRedirectUriException
 import java.net.URI
 
 /**
@@ -37,5 +40,19 @@ fun String.checkValidRedirectUri() {
             throw RedirectUriHasFragmentException(this)
     } catch (e: IllegalArgumentException) {
         throw MalformedRedirectUriException(this)
+    }
+}
+
+/**
+ * Check if the redirect uri is secure. We only allow localhost requests or https.
+ */
+fun String.isSecureRedirectUri(): Boolean {
+    return try {
+        val uri = URI.create(this)
+        (uri.scheme.toLowerCase() == "https") ||
+                (uri.host.toLowerCase() == "localhost") ||
+                (uri.host == "127.0.0.1")
+    } catch (_: Exception) {
+        false
     }
 }

@@ -1,8 +1,10 @@
 package io.imulab.astrea.authorize
 
-import io.imulab.astrea.OAuthRequest
-import io.imulab.astrea.Request
-import io.imulab.astrea.ResponseType
+import io.imulab.astrea.oauth.OAuthRequest
+import io.imulab.astrea.oauth.Request
+import io.imulab.astrea.oauth.ResponseType
+import io.imulab.astrea.utility.checkValidRedirectUri
+import io.imulab.astrea.utility.determineRedirectUri
 
 /**
  * Context for the OAuth2 Authorize Endpoint.

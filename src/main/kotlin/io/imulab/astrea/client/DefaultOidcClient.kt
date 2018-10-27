@@ -1,7 +1,7 @@
 package io.imulab.astrea.client
 
-import io.imulab.astrea.AuthMethod
-import io.imulab.astrea.SigningAlgorithm
+import io.imulab.astrea.oauth.AuthMethod
+import io.imulab.astrea.oauth.SigningAlgorithm
 import org.jose4j.jwk.JsonWebKeySet
 
 class DefaultOidcClient(private val oauth: OAuthClient,

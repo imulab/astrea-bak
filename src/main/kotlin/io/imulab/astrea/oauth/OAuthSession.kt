@@ -1,4 +1,4 @@
-package io.imulab.astrea
+package io.imulab.astrea.oauth
 
 import java.time.LocalDateTime
 

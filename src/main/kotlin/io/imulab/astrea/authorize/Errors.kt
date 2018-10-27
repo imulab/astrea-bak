@@ -11,3 +11,9 @@ class MalformedRedirectUriException(uriText: String) :
 
 class RedirectUriHasFragmentException(uriText: String) :
         IllegalRedirectUriException("redirect uri [$uriText] cannot contain fragment.")
+
+/**
+ * Thrown when the provided authorize cannot be verified.
+ */
+class InvalidAuthorizeCodeException(code: String, reason: String):
+        RuntimeException("authorize code \"$code\" is invalid: $reason")

@@ -1,4 +1,4 @@
-package io.imulab.astrea
+package io.imulab.astrea.oauth
 
 import org.jose4j.jwa.AlgorithmConstraints
 import org.jose4j.jwk.RsaJsonWebKey

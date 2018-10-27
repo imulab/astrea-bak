@@ -1,4 +1,4 @@
-package io.imulab.astrea
+package io.imulab.astrea.oauth
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import org.junit.jupiter.api.Assertions.*

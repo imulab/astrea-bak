@@ -1,4 +1,4 @@
-package io.imulab.astrea.jwk
+package io.imulab.astrea.crypt
 
 import io.imulab.astrea.HttpClient
 import io.imulab.astrea.client.OpenIdConnectClient

@@ -1,7 +1,7 @@
 package io.imulab.astrea.access
 
-import io.imulab.astrea.GrantType
-import io.imulab.astrea.OAuthRequest
+import io.imulab.astrea.oauth.GrantType
+import io.imulab.astrea.oauth.OAuthRequest
 
 /**
  * Context for an OAuth Access Request.

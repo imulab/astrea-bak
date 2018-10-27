@@ -4,6 +4,10 @@ import io.imulab.astrea.*
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.DefaultOidcClient
+import io.imulab.astrea.handler.AuthorizeHandler
+import io.imulab.astrea.oauth.ResponseType
+import io.imulab.astrea.oauth.SigningAlgorithm
+import io.imulab.astrea.oauth.StringEqualityScopeStrategy
 import org.jose4j.jwk.*
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature

@@ -1,8 +1,8 @@
 package io.imulab.astrea.introspection
 
-import io.imulab.astrea.OAuthSession
-import io.imulab.astrea.Scope
-import io.imulab.astrea.TokenType
+import io.imulab.astrea.oauth.OAuthSession
+import io.imulab.astrea.oauth.Scope
+import io.imulab.astrea.oauth.TokenType
 
 /**
  * Request context for an introspection.

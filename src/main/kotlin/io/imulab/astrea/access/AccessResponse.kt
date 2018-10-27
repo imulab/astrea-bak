@@ -1,6 +1,6 @@
 package io.imulab.astrea.access
 
-import io.imulab.astrea.TokenType
+import io.imulab.astrea.oauth.TokenType
 import java.time.LocalDateTime
 
 /**

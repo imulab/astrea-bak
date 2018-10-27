@@ -1,4 +1,7 @@
-package io.imulab.astrea.authorize
+package io.imulab.astrea.handler
+
+import io.imulab.astrea.authorize.AuthorizeRequest
+import io.imulab.astrea.authorize.AuthorizeResponse
 
 /**
  * Main logic for handling an authorize request.

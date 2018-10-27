@@ -1,11 +1,14 @@
-package io.imulab.astrea.authorize
+package io.imulab.astrea.utility
 
+import io.imulab.astrea.authorize.MalformedRedirectUriException
+import io.imulab.astrea.authorize.RedirectUriHasFragmentException
+import io.imulab.astrea.authorize.UnmatchedRedirectUriException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.function.Executable
 
-class UtilitiesTest {
+class RedirectUriTest {
 
     @Test
     fun `relative uri is not a valid redirect uri`() {

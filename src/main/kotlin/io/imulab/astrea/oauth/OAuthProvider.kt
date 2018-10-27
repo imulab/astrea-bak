@@ -1,5 +1,7 @@
-package io.imulab.astrea
+package io.imulab.astrea.oauth
 
+import io.imulab.astrea.HttpRequestReader
+import io.imulab.astrea.HttpResponseWriter
 import io.imulab.astrea.access.AccessRequest
 import io.imulab.astrea.access.AccessResponse
 import io.imulab.astrea.authorize.AuthorizeRequest

@@ -1,8 +1,8 @@
-package io.imulab.astrea.jwk
+package io.imulab.astrea.crypt
 
 import io.imulab.astrea.HttpClient
 import io.imulab.astrea.HttpResponseReader
-import io.imulab.astrea.SigningAlgorithm
+import io.imulab.astrea.oauth.SigningAlgorithm
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.DefaultOidcClient
 import org.jose4j.jwk.JsonWebKeySet

@@ -17,7 +17,8 @@ dependencies {
             "junit" to "5.3.1",
             "junitPlatform" to "5.3.1",
             "jose4j" to "0.6.4",
-            "mockito" to "2.23.0"
+            "mockito" to "2.23.0",
+            "bouncyCastle" to "1.60"
     )
 
     compile(kotlin("stdlib-jdk8"))

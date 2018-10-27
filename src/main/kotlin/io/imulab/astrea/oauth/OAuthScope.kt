@@ -1,4 +1,4 @@
-package io.imulab.astrea
+package io.imulab.astrea.oauth
 
 /**
  * Interface that tells if one scope accepts another scope.

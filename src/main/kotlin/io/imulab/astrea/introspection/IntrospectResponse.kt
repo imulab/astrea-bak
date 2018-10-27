@@ -1,6 +1,6 @@
 package io.imulab.astrea.introspection
 
-import io.imulab.astrea.TokenType
+import io.imulab.astrea.oauth.TokenType
 import io.imulab.astrea.access.AccessRequest
 
 /**

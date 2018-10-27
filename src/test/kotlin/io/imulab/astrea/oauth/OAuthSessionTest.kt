@@ -1,4 +1,4 @@
-package io.imulab.astrea
+package io.imulab.astrea.oauth
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
