@@ -1,7 +1,7 @@
 package io.imulab.astrea.client
 
-import io.imulab.astrea.oauth.AuthMethod
-import io.imulab.astrea.oauth.SigningAlgorithm
+import io.imulab.astrea.domain.AuthMethod
+import io.imulab.astrea.domain.SigningAlgorithm
 import org.jose4j.jwk.JsonWebKeySet
 
 /**

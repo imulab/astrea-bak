@@ -1,7 +1,7 @@
 package io.imulab.astrea.error
 
 import io.imulab.astrea.client.OAuthClient
-import io.imulab.astrea.oauth.GrantType
+import io.imulab.astrea.domain.GrantType
 
 /**
  * Thrown when client does not have a necessary grant type in order to keep the processing going.

@@ -1,10 +1,10 @@
 package io.imulab.astrea.provider
 
-import io.imulab.astrea.HttpRequestReader
-import io.imulab.astrea.HttpResponseWriter
-import io.imulab.astrea.authorize.AuthorizeRequest
-import io.imulab.astrea.authorize.AuthorizeResponse
-import io.imulab.astrea.oauth.OAuthSession
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
+import io.imulab.astrea.domain.request.AuthorizeRequest
+import io.imulab.astrea.domain.response.AuthorizeResponse
+import io.imulab.astrea.domain.OAuthSession
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 
 /**

@@ -1,6 +1,6 @@
 package io.imulab.astrea.crypt
 
-import io.imulab.astrea.HttpClient
+import io.imulab.astrea.spi.HttpClient
 import io.imulab.astrea.client.OpenIdConnectClient
 import org.jose4j.jwk.HttpsJwks
 import org.jose4j.jwk.JsonWebKeySet

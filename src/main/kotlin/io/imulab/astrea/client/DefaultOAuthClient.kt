@@ -1,7 +1,7 @@
 package io.imulab.astrea.client
 
-import io.imulab.astrea.oauth.GrantType
-import io.imulab.astrea.oauth.ResponseType
+import io.imulab.astrea.domain.GrantType
+import io.imulab.astrea.domain.ResponseType
 
 class DefaultOAuthClient(private val id: String,
                          private val secret: ByteArray,

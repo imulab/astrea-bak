@@ -1,7 +1,7 @@
 package io.imulab.astrea.provider
 
-import io.imulab.astrea.HttpRequestReader
-import io.imulab.astrea.HttpResponseWriter
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
 
 /**
  * Interface to provide functions related to token revocation.

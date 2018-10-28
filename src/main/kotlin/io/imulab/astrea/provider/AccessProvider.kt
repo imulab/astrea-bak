@@ -1,11 +1,11 @@
 package io.imulab.astrea.provider
 
-import io.imulab.astrea.HttpRequestReader
-import io.imulab.astrea.HttpResponseWriter
-import io.imulab.astrea.access.AccessRequest
-import io.imulab.astrea.access.AccessResponse
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
+import io.imulab.astrea.domain.request.AccessRequest
+import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.oauth.OAuthSession
+import io.imulab.astrea.domain.OAuthSession
 
 /**
  * Sub-interface to [OAuthProvider] in order to provide access request and response related functions.

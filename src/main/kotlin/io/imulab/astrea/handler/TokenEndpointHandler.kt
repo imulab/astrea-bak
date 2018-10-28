@@ -1,7 +1,7 @@
 package io.imulab.astrea.handler
 
-import io.imulab.astrea.access.AccessRequest
-import io.imulab.astrea.access.AccessResponse
+import io.imulab.astrea.domain.request.AccessRequest
+import io.imulab.astrea.domain.response.AccessResponse
 
 /**
  * Main logic for handling an token endpoint request.

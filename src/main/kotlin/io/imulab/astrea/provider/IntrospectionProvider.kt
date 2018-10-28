@@ -1,9 +1,9 @@
 package io.imulab.astrea.provider
 
-import io.imulab.astrea.HttpRequestReader
-import io.imulab.astrea.HttpResponseWriter
-import io.imulab.astrea.introspection.IntrospectRequest
-import io.imulab.astrea.introspection.IntrospectResponse
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
+import io.imulab.astrea.domain.request.IntrospectRequest
+import io.imulab.astrea.domain.response.IntrospectResponse
 
 /**
  * Interface to provide functions related to token introspection.
