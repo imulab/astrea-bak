@@ -3,7 +3,9 @@ package io.imulab.astrea.error
 enum class TokenInvalidity(val text: String) {
     Expired("expired"),
     BadFormat("bad_format"),
-    BadSignature("bad_signature")
+    BadSignature("bad_signature"),
+    NotFound("not_found"),
+    Inactive("inactive")
 }
 
 class InvalidAuthorizeCodeException(invalidity: TokenInvalidity, reason: String? = null)

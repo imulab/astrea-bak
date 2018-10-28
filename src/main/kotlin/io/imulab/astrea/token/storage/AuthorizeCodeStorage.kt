@@ -6,6 +6,7 @@ import io.imulab.astrea.token.AuthorizeCode
 
 /**
  * Storage related to authorization codes
+ * Implementations should throw exception TODO consult memory impl and finish doc
  */
 interface AuthorizeCodeStorage {
 

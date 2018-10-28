@@ -7,7 +7,7 @@ import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
-import io.imulab.astrea.domain.response.DefaultAuthorizeResponse
+import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.provider.AuthorizeProvider

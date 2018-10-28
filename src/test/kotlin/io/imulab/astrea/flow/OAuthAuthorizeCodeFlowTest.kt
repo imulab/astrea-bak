@@ -2,19 +2,20 @@ package io.imulab.astrea.flow
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.OAuthClient
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.ResponseType
-import io.imulab.astrea.domain.ScopeStrategy
-import io.imulab.astrea.domain.StringEqualityScopeStrategy
+import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
+import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
-import io.imulab.astrea.domain.response.DefaultAuthorizeResponse
+import io.imulab.astrea.domain.response.AuthorizeResponse
+import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
+import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
+import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession
+import io.imulab.astrea.error.InvalidAuthorizeCodeException
 import io.imulab.astrea.handler.flow.OAuthAuthorizeCodeFlow
 import io.imulab.astrea.spi.singleValue
-import io.imulab.astrea.token.storage.AccessTokenStorage
-import io.imulab.astrea.token.storage.AuthorizeCodeStorage
-import io.imulab.astrea.token.storage.RefreshTokenStorage
+import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.RefreshTokenStrategy
@@ -23,79 +24,122 @@ import io.imulab.astrea.token.strategy.impl.JwtRs256Strategy
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator
 import org.jose4j.jwk.Use
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
 
 class OAuthAuthorizeCodeFlowTest {
 
-    /**
-     * The test design is based on a narrative:
-     * ----
-     * One client exists:
-     * - client_id = test-client
-     * - secret = s3cret
-     * - response_types = code, token
-     * - redirect_uri = https://test.com/callback
-     * - grant_types = authorization_code
-     *
-     *
-     */
+    @AfterEach
+    fun afterEach() {
+        TestContext.memoryStore.clearAll()
+    }
 
     @Test
-    fun `handle proper authorize request`() {
-        val flow = getAuthorizeFlowFirstLeg()
-        val request = DefaultAuthorizeRequest.Builder().also {
+    fun `normal authorize code flow`() {
+        val flow = TestContext.getFlow()
+
+        assertDoesNotThrow {
+            val authorizeResponse = testAuthorize(flow)
+            val accessRequest = testHandleAccess(flow, authorizeResponse)
+            testPopulateAccessResponse(flow, accessRequest)
+        }
+    }
+
+    @Test
+    fun `expired authorize code should fail`() {
+        val flow = TestContext.getFlow()
+
+        assertThrows(InvalidAuthorizeCodeException::class.java) {
+            val authorizeResponse = testAuthorize(flow)
+            TestContext.memoryStore.expireAuthorizeCode(authorizeResponse.getCode().split(".")[1])
+            testHandleAccess(flow, authorizeResponse)
+        }
+    }
+
+    @Test
+    fun `altered authorize code should fail`() {
+        val flow = TestContext.getFlow()
+
+        assertThrows(InvalidAuthorizeCodeException::class.java) {
+            val authorizeResponse = testAuthorize(flow)
+            flow.handleAccessRequest(DefaultAccessRequest.Builder().also {
+                it.setForm("code", "altered" + authorizeResponse.getCode())
+                it.setForm("redirect_uri", "https://test.com/callback")
+                it.addGrantType(GrantType.AuthorizationCode)
+                it.session = DefaultSession()
+                it.client = TestContext.client
+            }.build() as AccessRequest)
+        }
+    }
+
+    @Test
+    fun `non-existing code should fail`() {
+        val flow = TestContext.getFlow()
+
+        assertThrows(InvalidAuthorizeCodeException::class.java) {
+            val authorizeResponse = testAuthorize(flow)
+            TestContext.memoryStore.clearAuthorizeCodes()
+            testHandleAccess(flow, authorizeResponse)
+        }
+    }
+
+    private fun testAuthorize(flow: OAuthAuthorizeCodeFlow): AuthorizeResponse {
+        val authorizeRequest = DefaultAuthorizeRequest.Builder().also {
             it.client = TestContext.client
             it.responseTypes = mutableSetOf(ResponseType.Code)
             it.redirectUri = "https://test.com/callback"
-            it.addScopes("foo", "bar")
-            it.addGrantedScopes("foo")
+            it.addScopes("foo", "bar", "offline")
+            it.addGrantedScopes("foo", "offline")
             it.state = "1234567890"
-            it.session = DefaultSession()
+            it.session = DefaultJwtSession.Builder().also {
+                it.getClaims().setStringClaim("foo", "bar")
+            }.build()
         }.build() as AuthorizeRequest
-        val response = DefaultAuthorizeResponse()
+        val authorizeResponse = DefaultAuthorizeResponse()
 
-        flow.handleAuthorizeRequest(request, response)
+        flow.handleAuthorizeRequest(authorizeRequest, authorizeResponse)
 
-        assertTrue(request.hasAllResponseTypesBeenHandled())
-        assertTrue(response.getCode().isNotBlank())
-        assertEquals(request.getState(), response.getQueries().singleValue("state"))
-        assertEquals("foo", response.getQueries().singleValue("scope"))
+        assertTrue(authorizeRequest.hasAllResponseTypesBeenHandled())
+        assertTrue(authorizeResponse.getCode().isNotBlank())
+        assertEquals(authorizeRequest.getState(), authorizeResponse.getQueries().singleValue("state"))
+        assertTrue(authorizeResponse.getQueries().singleValue("scope").split(" ").contains("foo"))
+        assertTrue(authorizeResponse.getQueries().singleValue("scope").split(" ").contains("offline"))
+
+        return authorizeResponse
+    }
+
+    private fun testHandleAccess(flow: OAuthAuthorizeCodeFlow, authorizeResponse: AuthorizeResponse): AccessRequest {
+        val accessRequest = DefaultAccessRequest.Builder().also {
+            it.setForm("code", authorizeResponse.getCode())
+            it.setForm("redirect_uri", "https://test.com/callback")
+            it.addGrantType(GrantType.AuthorizationCode)
+            it.session = DefaultSession()
+            it.client = TestContext.client
+        }.build() as AccessRequest
+        assertTrue(flow.handleAccessRequest(accessRequest))
+
+        return accessRequest
+    }
+
+    private fun testPopulateAccessResponse(flow: OAuthAuthorizeCodeFlow, accessRequest: AccessRequest) {
+        val accessResponse = DefaultAccessResponse()
+        assertTrue(flow.populateAccessResponse(accessRequest, accessResponse))
+
+        assertTrue(accessResponse.getAccessToken().isNotBlank())
+        assertEquals(TokenType.Bearer, accessResponse.getTokenType())
+        assertTrue(accessResponse.getExtra("refresh_token").toString().isNotBlank())
+        assertTrue(accessResponse.getExtra("expires_in") as Long > 0)
     }
 
     /**
-     * Returns an [OAuthAuthorizeCodeFlow] whose really set parameters are only those pertaining the first leg
-     * of the authorize flow (namely issuing the authorize code). Any other parameters (i.e. related to
-     * exchanging for an token) can either be mocked or set, whichever is easier.
+     * Context for this test. Defines all necessary dependencies.
      */
-    private fun getAuthorizeFlowFirstLeg(): OAuthAuthorizeCodeFlow =
-            OAuthAuthorizeCodeFlow(
-                    scopeStrategy = TestContext.scopeStrategy,
-                    authorizeCodeStorage = TestContext.authorizeCodeStorage,
-                    authorizeCodeStrategy = TestContext.authorizeCodeStrategy,
-                    accessTokenStorage = mock(AccessTokenStorage::class.java),
-                    accessTokenStrategy = mock(AccessTokenStrategy::class.java),
-                    refreshTokenStorage = mock(RefreshTokenStorage::class.java),
-                    refreshTokenStrategy = mock(RefreshTokenStrategy::class.java)
-            )
-
     private object TestContext {
 
-        val scopeStrategy: ScopeStrategy = StringEqualityScopeStrategy
-
-        val authorizeCodeStrategy: AuthorizeCodeStrategy by lazy {
-            val key = KeyGenerator.getInstance("AES").generateKey()
-            return@lazy HmacSha256Strategy(secretKey = key)
-        }
-
-        val authorizeCodeStorage: AuthorizeCodeStorage by lazy {
-            val storage = mock(AuthorizeCodeStorage::class.java)
-            // TODO
-            return@lazy storage
-        }
+        val memoryStore: MemoryStorage by lazy { MemoryStorage() }
 
         val jwk: RsaJsonWebKey by lazy {
             RsaJwkGenerator.generateJwk(2048).also {
@@ -104,40 +148,40 @@ class OAuthAuthorizeCodeFlowTest {
             }
         }
 
-        val accessTokenStrategy: AccessTokenStrategy by lazy {
-            JwtRs256Strategy(
-                    issuer = "astrea",
-                    jwk = this.jwk
-            )
+        val hmacKey: SecretKey by lazy {
+            KeyGenerator.getInstance("AES").generateKey()
         }
 
-        val accessTokenStorage: AccessTokenStorage by lazy {
-            val storage = mock(AccessTokenStorage::class.java)
-            // TODO
-            return@lazy storage
-        }
+        val authorizeCodeStrategy: AuthorizeCodeStrategy = HmacSha256Strategy(secretKey = hmacKey)
 
-        val refreshTokenStrategy: RefreshTokenStrategy by lazy {
-            val key = KeyGenerator.getInstance("AES").generateKey()
-            return@lazy HmacSha256Strategy(secretKey = key)
-        }
+        val accessTokenStrategy: AccessTokenStrategy = JwtRs256Strategy(
+                issuer = "astrea",
+                jwk = this.jwk
+        )
 
-        val refreshTokenStorage: RefreshTokenStorage by lazy {
-            val storage = mock(RefreshTokenStorage::class.java)
-            // TODO
-            return@lazy storage
-        }
+        val refreshTokenStrategy: RefreshTokenStrategy = HmacSha256Strategy(secretKey = hmacKey)
 
-        val client: OAuthClient by lazy {
-            DefaultOAuthClient(
-                    id = "test-client",
-                    secret = "s3cret".toByteArray(),
-                    redirectUris = listOf("https://test.com/callback"),
-                    scopes = listOf("foo", "bar"),
-                    responseTypes = listOf(ResponseType.Code, ResponseType.Token),
-                    grantTypes = listOf(GrantType.AuthorizationCode)
-            )
-        }
+        val scopeStrategy: ScopeStrategy = StringEqualityScopeStrategy
+
+        val client: OAuthClient = DefaultOAuthClient(
+                id = "test-client",
+                secret = "s3cret".toByteArray(),
+                redirectUris = listOf("https://test.com/callback"),
+                scopes = listOf("foo", "bar", "offline"),
+                responseTypes = listOf(ResponseType.Code, ResponseType.Token),
+                grantTypes = listOf(GrantType.AuthorizationCode)
+        )
+
+        fun getFlow(): OAuthAuthorizeCodeFlow =
+                OAuthAuthorizeCodeFlow(
+                        scopeStrategy = scopeStrategy,
+                        authorizeCodeStrategy = authorizeCodeStrategy,
+                        authorizeCodeStorage = memoryStore,
+                        accessTokenStrategy = accessTokenStrategy,
+                        accessTokenStorage = memoryStore,
+                        refreshTokenStrategy = refreshTokenStrategy,
+                        refreshTokenStorage = memoryStore
+                )
 
         /**
          * https://medium.com/@elye.project/befriending-kotlin-and-mockito-1c2e7b0ef791
