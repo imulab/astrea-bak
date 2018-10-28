@@ -1,11 +1,11 @@
 package io.imulab.astrea.provider
 
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.HttpResponseWriter
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
-import io.imulab.astrea.domain.OAuthSession
+import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
 
 /**
  * Sub-interface to [OAuthProvider] in order to provide authorize request and response related functions.
@@ -18,7 +18,7 @@ import io.imulab.astrea.handler.AuthorizeEndpointHandler
  *
  * Processing the authorize request may potentially rely on stateful information. For example, the server
  * needs to remember the authorization code issued to the client and know how to deal with it when client comes back
- * with the code. An [OAuthSession] is introduced to encapsulate this stateful information.
+ * with the code. An [Session] is introduced to encapsulate this stateful information.
  *
  * Because this SDK does not express an opinion on a HTTP library, it utilizes an abstraction over http request and http
  * response to access necessary data from whichever HTTP provider library the user chooses. Users can freely adapt their
@@ -62,7 +62,7 @@ interface AuthorizeProvider {
      *
      * @return an [AuthorizeResponse] which captures all necessary return data.
      */
-    fun newAuthorizeResponse(request: AuthorizeRequest, session: OAuthSession): AuthorizeResponse
+    fun newAuthorizeResponse(request: AuthorizeRequest, session: Session): AuthorizeResponse
 
     /**
      * Writes the [AuthorizeResponse] generated from [newAuthorizeResponse] as http response.

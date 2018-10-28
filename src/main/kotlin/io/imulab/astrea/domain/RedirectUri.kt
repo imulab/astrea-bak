@@ -5,6 +5,8 @@ import io.imulab.astrea.error.RedirectUriHasFragmentException
 import io.imulab.astrea.error.UnmatchedRedirectUriException
 import java.net.URI
 
+typealias RedirectUri = String
+
 /**
  * Match the supplied URI with registered URIs. According to the spec, if user does not
  * supply a redirect URI, it must be determined from the only registered redirect URI; if
@@ -12,16 +14,16 @@ import java.net.URI
  *
  * @throws UnmatchedRedirectUriException when a match cannot be determined.
  */
-fun determineRedirectUri(supplied: String?, registered: List<String>): String {
-    if (supplied.isNullOrBlank()) {
+fun RedirectUri?.determineRedirectUri(registered: List<String>): String {
+    if (this.isNullOrBlank()) {
         if (registered.size == 1)
             return registered[0]
         else
             throw UnmatchedRedirectUriException()
     }
 
-    if (registered.contains(supplied!!))
-        return supplied
+    if (registered.contains(this!!))
+        return this
     else
         throw UnmatchedRedirectUriException()
 }
@@ -31,7 +33,7 @@ fun determineRedirectUri(supplied: String?, registered: List<String>): String {
  * - redirect uri must be properly formed. absolute-URI = scheme ":" hier-part [ "?" query ]
  * - redirect uri cannot have fragments
  */
-fun String.checkValidRedirectUri() {
+fun RedirectUri.checkValidRedirectUri() {
     try {
         val uri = URI.create(this)
         if (!uri.isAbsolute)
@@ -46,7 +48,7 @@ fun String.checkValidRedirectUri() {
 /**
  * Check if the redirect uri is secure. We only allow localhost requests or https.
  */
-fun String.isSecureRedirectUri(): Boolean {
+fun RedirectUri.isSecureRedirectUri(): Boolean {
     return try {
         val uri = URI.create(this)
         (uri.scheme.toLowerCase() == "https") ||

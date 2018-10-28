@@ -1,11 +1,11 @@
 package io.imulab.astrea.provider
 
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.HttpResponseWriter
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
+import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.domain.OAuthSession
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
 
 /**
  * Sub-interface to [OAuthProvider] in order to provide access request and response related functions.
@@ -18,7 +18,7 @@ import io.imulab.astrea.domain.OAuthSession
  *
  * Processing the authorize request may potentially rely on stateful information. For example, the server
  * needs to remember the refresh token issued to the client and know how to deal with it when client comes back
- * to exchange for a new access token. An [OAuthSession] is introduced to encapsulate this stateful information.
+ * to exchange for a new access token. An [Session] is introduced to encapsulate this stateful information.
  *
  * Because this SDK does not express an opinion on a HTTP library, it utilizes an abstraction over http request and http
  * response to access necessary data from whichever HTTP provider library the user chooses. Users can freely adapt their
@@ -47,7 +47,7 @@ interface AccessProvider {
      *
      * @return a valid [AccessRequest] to encapsulate request parameters.
      */
-    fun newAccessRequest(reader: HttpRequestReader, session: OAuthSession): AccessRequest
+    fun newAccessRequest(reader: HttpRequestReader, session: Session): AccessRequest
 
     /**
      * Process the [request] parsed in [newAccessRequest].

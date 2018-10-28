@@ -1,8 +1,8 @@
 package io.imulab.astrea.domain.request
 
-import io.imulab.astrea.domain.OAuthSession
 import io.imulab.astrea.domain.Scope
 import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.session.Session
 
 /**
  * Request context for an introspection.
@@ -31,12 +31,12 @@ interface IntrospectRequest {
     /**
      * Returns the previous oauth session. If not set, returns null.
      */
-    fun getSession(): OAuthSession?
+    fun getSession(): Session?
 
     /**
      * Set the previous oauth session.
      */
-    fun setSession(session: OAuthSession)
+    fun setSession(session: Session)
 
     /**
      * Returns the list of scopes. If not set, should return empty list.

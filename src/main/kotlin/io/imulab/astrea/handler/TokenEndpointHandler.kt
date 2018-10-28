@@ -29,7 +29,7 @@ interface TokenEndpointHandler {
      */
     fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean
 
-    private class DelegatingTokenEndpointHandler(private val delegates: List<TokenEndpointHandler>): TokenEndpointHandler {
+    private class DelegatingTokenEndpointHandler(private val delegates: List<TokenEndpointHandler>) : TokenEndpointHandler {
 
         override fun handleAccessRequest(request: AccessRequest): Boolean {
             val hasHandler = delegates.firstOrNull { it.handleAccessRequest(request) } != null
@@ -39,7 +39,7 @@ interface TokenEndpointHandler {
         }
 
         override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-            delegates.forEach{ it.populateAccessResponse(request, response) }
+            delegates.forEach { it.populateAccessResponse(request, response) }
             return true
         }
     }

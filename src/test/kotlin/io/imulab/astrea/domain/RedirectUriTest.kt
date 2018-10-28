@@ -30,28 +30,28 @@ class RedirectUriTest {
     fun `registered redirect uri should be determined`() {
         val registered = "https://hello.imulab.io/callback"
         val another = "https://world.imulab.io/callback"
-        assertEquals(registered, determineRedirectUri(registered, listOf(registered, another)))
+        assertEquals(registered, registered.determineRedirectUri(listOf(registered, another)))
     }
 
     @Test
     fun `non-registered redirect uri should be rejected`() {
         val notRegistered = "https://hello.imulab.io/callback"
         val another = "https://world.imulab.io/callback"
-        val shouldThrow = Executable { determineRedirectUri(notRegistered, listOf(another)) }
+        val shouldThrow = Executable { notRegistered.determineRedirectUri(listOf(another)) }
         assertThrows(UnmatchedRedirectUriException::class.java, shouldThrow)
     }
 
     @Test
     fun `empty supply should match the only registered redirect uri`() {
         val registered = "https://hello.imulab.io/callback"
-        assertEquals(registered, determineRedirectUri(null, listOf(registered)))
+        assertEquals(registered, null.determineRedirectUri(listOf(registered)))
     }
 
     @Test
     fun `empty supply should fail when multiple redirect uri registered`() {
         val one = "https://hello.imulab.io/callback"
         val another = "https://world.imulab.io/callback"
-        val shouldThrow = Executable { determineRedirectUri("", listOf(one, another)) }
+        val shouldThrow = Executable { "".determineRedirectUri(listOf(one, another)) }
         assertThrows(UnmatchedRedirectUriException::class.java, shouldThrow)
     }
 

@@ -1,21 +1,20 @@
 package io.imulab.astrea.provider.impl
 
-import io.imulab.astrea.spi.HttpClient
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.HttpResponseWriter
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.handler.AuthorizeEndpointHandler
-import io.imulab.astrea.provider.AuthorizeProvider
-import io.imulab.astrea.spi.singleValue
-import io.imulab.astrea.domain.checkValidRedirectUri
-import io.imulab.astrea.domain.determineRedirectUri
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.response.DefaultAuthorizeResponse
+import io.imulab.astrea.domain.session.Session
+import io.imulab.astrea.handler.AuthorizeEndpointHandler
+import io.imulab.astrea.provider.AuthorizeProvider
+import io.imulab.astrea.spi.HttpClient
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
+import io.imulab.astrea.spi.singleValue
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
 import java.time.LocalDateTime
 import java.util.*
@@ -23,7 +22,7 @@ import java.util.*
 class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHandler,
                                private val clientStore: ClientManager,
                                private val httpClient: HttpClient,
-                               private val scopeStrategy: OAuthScopeStrategy,
+                               private val scopeStrategy: ScopeStrategy,
                                private val minStateEntropy: Int = 8,
                                private val clockSkewToleranceSecond: Int = 30,
                                private val expectedAudience: String) : AuthorizeProvider {
@@ -45,13 +44,12 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         tryParseOidcParameters(builder)
 
         // redirect_uri
-        determineRedirectUri(
-                reader.formValueUnescaped("redirect_uri"),
-                client.getRedirectUris()
-        ).also {
-            it.checkValidRedirectUri()
-            builder.setRedirectUri(it)
-        }
+        reader.formValueUnescaped("redirect_uri")
+                .determineRedirectUri(client.getRedirectUris())
+                .also {
+                    it.checkValidRedirectUri()
+                    builder.setRedirectUri(it)
+                }
 
         // scope
         reader.formValue("scope").also {
@@ -88,7 +86,7 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         return builder.build() as AuthorizeRequest
     }
 
-    override fun newAuthorizeResponse(request: AuthorizeRequest, session: OAuthSession): AuthorizeResponse {
+    override fun newAuthorizeResponse(request: AuthorizeRequest, session: Session): AuthorizeResponse {
         val response = DefaultAuthorizeResponse()
 
         request.setSession(session)

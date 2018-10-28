@@ -1,8 +1,8 @@
 package io.imulab.astrea.domain.request
 
-import io.imulab.astrea.spi.UrlValues
 import io.imulab.astrea.client.OAuthClient
-import io.imulab.astrea.domain.OAuthSession
+import io.imulab.astrea.domain.session.Session
+import io.imulab.astrea.spi.UrlValues
 import java.time.LocalDateTime
 import java.util.*
 
@@ -59,12 +59,12 @@ interface OAuthRequest {
     /**
      * Returns the current user session, if exists; nil otherwise.
      */
-    fun getSession(): OAuthSession?
+    fun getSession(): Session?
 
     /**
-     * Sets the [OAuthSession] for current request.
+     * Sets the [Session] for current request.
      */
-    fun setSession(session: OAuthSession)
+    fun setSession(session: Session)
 
     /**
      * Returns the raw http request form.
@@ -88,7 +88,7 @@ class Request(private var id: String = UUID.randomUUID().toString(),
               private val scopes: MutableSet<String> = hashSetOf(),
               private val grantedScopes: MutableSet<String> = hashSetOf(),
               private val form: MutableMap<String, List<String>> = mutableMapOf(),
-              private var session: OAuthSession? = null) : OAuthRequest {
+              private var session: Session? = null) : OAuthRequest {
 
     override fun setId(id: String) {
         this.id = id
@@ -119,9 +119,9 @@ class Request(private var id: String = UUID.randomUUID().toString(),
             this.grantedScopes.add(scope)
     }
 
-    override fun getSession(): OAuthSession? = this.session
+    override fun getSession(): Session? = this.session
 
-    override fun setSession(session: OAuthSession) {
+    override fun setSession(session: Session) {
         this.session = session
     }
 
@@ -154,7 +154,7 @@ class Request(private var id: String = UUID.randomUUID().toString(),
                        val scopes: MutableSet<String> = hashSetOf(),
                        val grantedScopes: MutableSet<String> = hashSetOf(),
                        val form: MutableMap<String, List<String>> = mutableMapOf(),
-                       var session: OAuthSession? = null) {
+                       var session: Session? = null) {
 
         fun setId(id: String? = null) =
                 if (id == null)
@@ -190,7 +190,7 @@ class Request(private var id: String = UUID.randomUUID().toString(),
                 setForm(key, value)
         }
 
-        fun setSession(session: OAuthSession) = apply { this.session = session }
+        fun setSession(session: Session) = apply { this.session = session }
 
         open fun build(): OAuthRequest {
             if (this.id == null)

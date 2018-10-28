@@ -2,6 +2,7 @@ package io.imulab.astrea.domain
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.domain.request.Request
+import io.imulab.astrea.domain.session.impl.DefaultSession
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -14,14 +15,14 @@ class OAuthRequestTest {
                 scopes = mutableSetOf("one", "two"),
                 grantedScopes = mutableSetOf("one"),
                 form = mutableMapOf("x" to listOf("1", "2")),
-                session = DefaultOAuthSession()
+                session = DefaultSession()
         )
         val merger = Request(
                 client = DefaultOAuthClient("bar", ByteArray(0), emptyList()),
                 scopes = mutableSetOf("three"),
                 grantedScopes = mutableSetOf("three"),
                 form = mutableMapOf("y" to listOf("3", "4")),
-                session = DefaultOAuthSession()
+                session = DefaultSession()
         )
 
         original.merge(merger)

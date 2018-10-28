@@ -1,15 +1,15 @@
 package io.imulab.astrea.provider.impl
 
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.HttpResponseWriter
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
+import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.provider.AccessProvider
-import io.imulab.astrea.domain.OAuthSession
+import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.HttpResponseWriter
 
 class DefaultAccessProvider : AccessProvider {
 
-    override fun newAccessRequest(reader: HttpRequestReader, session: OAuthSession): AccessRequest {
+    override fun newAccessRequest(reader: HttpRequestReader, session: Session): AccessRequest {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

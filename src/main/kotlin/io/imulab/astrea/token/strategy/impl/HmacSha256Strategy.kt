@@ -1,10 +1,10 @@
 package io.imulab.astrea.token.strategy.impl
 
+import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.request.OAuthRequest
+import io.imulab.astrea.error.InvalidAuthorizeCodeException
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
-import io.imulab.astrea.error.InvalidAuthorizeCodeException
-import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.domain.TokenType
 import org.jose4j.jca.ProviderContext
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.HmacUsingShaAlgorithm

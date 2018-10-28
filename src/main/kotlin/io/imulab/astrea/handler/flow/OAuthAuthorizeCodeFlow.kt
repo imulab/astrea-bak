@@ -1,34 +1,31 @@
 package io.imulab.astrea.handler.flow
 
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AccessRequest
-import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.request.AuthorizeRequest
+import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
-import io.imulab.astrea.domain.OAuthScopeStrategy
-import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.MissingSessionException
 import io.imulab.astrea.error.RedirectUriMismatchException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.spi.singleValue
-import io.imulab.astrea.token.*
+import io.imulab.astrea.token.AuthorizeCode
+import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.storage.AuthorizeCodeStorage
 import io.imulab.astrea.token.storage.RefreshTokenStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.RefreshTokenStrategy
-import io.imulab.astrea.domain.isSecureRedirectUri
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAmount
 
 class OAuthAuthorizeCodeFlow(
-        private val scopeStrategy: OAuthScopeStrategy,
+        private val scopeStrategy: ScopeStrategy,
         private val authorizeCodeStrategy: AuthorizeCodeStrategy,
         private val authorizeCodeLifespan: TemporalAmount = Duration.ofMinutes(10),
         private val authorizeCodeStorage: AuthorizeCodeStorage,

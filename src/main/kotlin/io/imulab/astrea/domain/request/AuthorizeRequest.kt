@@ -1,6 +1,8 @@
 package io.imulab.astrea.domain.request
 
-import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.ResponseType
+import io.imulab.astrea.domain.checkValidRedirectUri
+import io.imulab.astrea.domain.determineRedirectUri
 import io.imulab.astrea.error.IllegalRedirectUriException
 
 /**
@@ -57,7 +59,8 @@ class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,
 
     override fun isRedirectUriValid(): Boolean {
         try {
-            determineRedirectUri(this.redirectUri, this.baseRequest.getClient().getRedirectUris())
+            this.redirectUri
+                    .determineRedirectUri(this.baseRequest.getClient().getRedirectUris())
                     .checkValidRedirectUri()
         } catch (_: IllegalRedirectUriException) {
             return false

@@ -1,10 +1,10 @@
 package io.imulab.astrea.strategy
 
-import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.client.DefaultOAuthClient
-import io.imulab.astrea.domain.DefaultJwtSession
-import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
+import io.imulab.astrea.domain.request.OAuthRequest
+import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.token.strategy.impl.JwtRs256Strategy
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator

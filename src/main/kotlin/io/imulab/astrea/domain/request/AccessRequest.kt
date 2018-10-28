@@ -19,7 +19,7 @@ class DefaultAccessRequest(private val baseRequest: OAuthRequest,
 
     override fun getGrantTypes(): List<GrantType> = grantTypes
 
-    class Builder(private var grantTypes: MutableList<GrantType> = arrayListOf()): Request.Builder() {
+    class Builder(private var grantTypes: MutableList<GrantType> = arrayListOf()) : Request.Builder() {
 
         fun addGrantType(vararg grantTypes: GrantType) {
             this.grantTypes.addAll(grantTypes)

@@ -1,23 +1,23 @@
 package io.imulab.astrea.flow
 
-import io.imulab.astrea.token.storage.AccessTokenStorage
-import io.imulab.astrea.token.strategy.AccessTokenStrategy
-import io.imulab.astrea.token.storage.RefreshTokenStorage
-import io.imulab.astrea.token.strategy.RefreshTokenStrategy
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.OAuthClient
-import io.imulab.astrea.domain.request.AuthorizeRequest
-import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
-import io.imulab.astrea.domain.response.DefaultAuthorizeResponse
-import io.imulab.astrea.token.strategy.impl.HmacSha256Strategy
-import io.imulab.astrea.handler.flow.OAuthAuthorizeCodeFlow
-import io.imulab.astrea.domain.DefaultOAuthSession
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.StringEqualityScopeStrategy
+import io.imulab.astrea.domain.request.AuthorizeRequest
+import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
+import io.imulab.astrea.domain.response.DefaultAuthorizeResponse
+import io.imulab.astrea.domain.session.impl.DefaultSession
+import io.imulab.astrea.handler.flow.OAuthAuthorizeCodeFlow
 import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.storage.AuthorizeCodeStorage
+import io.imulab.astrea.token.storage.RefreshTokenStorage
+import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
+import io.imulab.astrea.token.strategy.RefreshTokenStrategy
+import io.imulab.astrea.token.strategy.impl.HmacSha256Strategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -36,7 +36,7 @@ class OAuthAuthorizeCodeFlowTest {
             it.addScopes("foo", "bar")
             it.addGrantedScopes("foo")
             it.state = "1234567890"
-            it.session = DefaultOAuthSession()
+            it.session = DefaultSession()
         }.build() as AuthorizeRequest
         val response = DefaultAuthorizeResponse()
 
@@ -81,7 +81,7 @@ class OAuthAuthorizeCodeFlowTest {
 
     private fun mockAuthorizeCodeStorage(): AuthorizeCodeStorage =
             mock(AuthorizeCodeStorage::class.java).also {
-//                `when`(it.getAuthorizeCodeSession(any(), any())).thenReturn(
+                //                `when`(it.getAuthorizeCodeSession(any(), any())).thenReturn(
 //                        DefaultAuthorizeRequest.Builder().also {
 //
 //                        }.build()
