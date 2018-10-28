@@ -30,30 +30,7 @@ interface OAuthProvider :
 
 
 
-/**
- * Interface to provide functions related to the access endpoint.
- */
-interface AccessProvider {
-    /**
-     * Parse incoming http request and previous session information into the context for the access endpoint.
-     */
-    fun newAccessRequest(reader: HttpRequestReader, session: OAuthSession): AccessRequest
 
-    /**
-     * Returns an access response which can be used to encode http response.
-     */
-    fun newAccessResponse(request: AccessRequest): AccessResponse
-
-    /**
-     * Encode access endpoint response to the http through [HttpResponseWriter].
-     */
-    fun encodeAccessResponse(writer: HttpResponseWriter, request: AccessRequest, response: AccessResponse)
-
-    /**
-     * Encode error as the access endpoint response.
-     */
-    fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest, error: Throwable)
-}
 
 /**
  * Interface to provide functions related to token revocation.

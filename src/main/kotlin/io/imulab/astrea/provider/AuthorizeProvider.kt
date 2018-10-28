@@ -5,15 +5,16 @@ import io.imulab.astrea.HttpResponseWriter
 import io.imulab.astrea.authorize.AuthorizeRequest
 import io.imulab.astrea.authorize.AuthorizeResponse
 import io.imulab.astrea.oauth.OAuthSession
+import io.imulab.astrea.handler.AuthorizeEndpointHandler
 
 /**
  * Sub-interface to [OAuthProvider] in order to provide authorize request and response related functions.
  *
  * This interface is intended to be employed inside a `/oauth/authorize` endpoint handler:
- * - [AuthorizeProvider.newAuthorizeRequest] helps parses the incoming request into a [AuthorizeRequest].
- * - [AuthorizeProvider.newAuthorizeResponse] helps generate a [AuthorizeResponse].
- * - [AuthorizeProvider.encodeAuthorizeResponse] helps render a successful http response.
- * - [AuthorizeProvider.encodeAuthorizeError] helps render a error http response.
+ * - [newAuthorizeRequest] helps parses the incoming request into a [AuthorizeRequest].
+ * - [newAuthorizeResponse] helps generate a [AuthorizeResponse].
+ * - [encodeAuthorizeResponse] helps render a successful http response.
+ * - [encodeAuthorizeError] helps render an error http response.
  *
  * Processing the authorize request may potentially rely on stateful information. For example, the server
  * needs to remember the authorization code issued to the client and know how to deal with it when client comes back
@@ -27,13 +28,11 @@ import io.imulab.astrea.oauth.OAuthSession
  * related to issuing an authorization code. For example, in an implicit flow, a registered client may exchange its
  * credentials directly for an access token at the `/oauth/authorize` endpoint. These scenarios are abstracted by this
  * interface as well. Therefore, implementations to this interface shall look to cover parts of different OAuth defined
- * flows which interact with the `/oauth/authorize` endpoint.
+ * flows which interact with the `/oauth/authorize` endpoint. This is typically provided via implementations to the
+ * [AuthorizeEndpointHandler] interface. In this SDK, they are the `*Flow` classes.
  *
  * @see OAuthProvider
- * @see AuthorizeRequest
- * @see AuthorizeResponse
- * @see HttpRequestReader
- * @see HttpResponseWriter
+ * @see AuthorizeEndpointHandler
  */
 interface AuthorizeProvider {
 
