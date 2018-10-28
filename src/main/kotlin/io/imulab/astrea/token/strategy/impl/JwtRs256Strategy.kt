@@ -5,6 +5,7 @@ import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.JwtSession
 import io.imulab.astrea.error.InvalidAccessTokenException
+import io.imulab.astrea.error.TokenInvalidity
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import org.jose4j.jwk.RsaJsonWebKey
@@ -76,7 +77,11 @@ class JwtRs256Strategy(private val issuer: String,
     private fun doComputeSignature(token: String): String {
         val parts = token.split(".")
         if (parts.size != 3)
-            throw InvalidAccessTokenException("malformed jwt.")
+            throw InvalidAccessTokenException(TokenInvalidity.BadFormat, accessTokenFormatInstruction)
         return parts[2]
+    }
+
+    companion object {
+        const val accessTokenFormatInstruction = "Proper access token should have three parts, delimited by \".(dot)\"."
     }
 }

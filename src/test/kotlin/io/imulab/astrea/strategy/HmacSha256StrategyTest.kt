@@ -30,10 +30,10 @@ class HmacSha256StrategyTest {
         val oauthReq = mock(OAuthRequest::class.java)
 
         strategy.generateNewAuthorizeCode(oauthReq).also {
-            assertNotNull(it.token)
+            assertNotNull(it.code)
             assertNotNull(it.signature)
         }.also {
-            strategy.validateAuthorizeCode(oauthReq, it.toString())
+            strategy.validateAuthorizeCode(oauthReq, it.code)
         }
     }
 
@@ -47,9 +47,9 @@ class HmacSha256StrategyTest {
         val shouldFail = Executable {
             strategy.generateNewAuthorizeCode(oauthReq).also {
                 strategy.validateAuthorizeCode(oauthReq, AuthorizeCode(
-                        token = it.token + "x",
+                        code = "x" + it.code,
                         signature = it.signature
-                ).toString())
+                ).code)
             }
         }
 
@@ -59,8 +59,7 @@ class HmacSha256StrategyTest {
     @Test
     fun `authorize code which is expired should fail verification`() {
         val strategy = HmacSha256Strategy(
-                secretKey = KeyGenerator.getInstance("AES").generateKey(),
-                authorizeCodeLifespan = Duration.ofMinutes(10)
+                secretKey = KeyGenerator.getInstance("AES").generateKey()
         )
 
         val session = mock(Session::class.java)
@@ -71,7 +70,7 @@ class HmacSha256StrategyTest {
 
         val shouldFail = Executable {
             strategy.generateNewAuthorizeCode(oauthReq).also {
-                strategy.validateAuthorizeCode(oauthReq, it.toString())
+                strategy.validateAuthorizeCode(oauthReq, it.code)
             }
         }
 
