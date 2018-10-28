@@ -7,7 +7,7 @@ import java.time.temporal.ChronoUnit
 
 class DefaultAccessResponse(private val extra: MutableMap<String, Any> = hashMapOf(),
                             private var accessToken: String = "",
-                            private var tokenType: TokenType = TokenType.Bearer) : AccessResponse {
+                            private var tokenType: TokenType = TokenType.Unknown) : AccessResponse {
 
     override fun setExtra(key: String, value: Any) {
         this.extra[key] = value

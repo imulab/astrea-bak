@@ -6,6 +6,11 @@ package io.imulab.astrea.spi
 interface HttpRequestReader {
 
     /**
+     * Return upper cased http method
+     */
+    fun method(): String
+
+    /**
      * Get the **first** corresponding value of [key] in the http form. Returns empty
      * string if not found.
      */
@@ -17,6 +22,11 @@ interface HttpRequestReader {
      * Return the http form.
      */
     fun getForm(): UrlValues
+
+    /**
+     * Return the header value, or empty string if it does not exist.
+     */
+    fun getHeader(key: String): String
 }
 
 /**

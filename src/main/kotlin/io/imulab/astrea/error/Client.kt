@@ -14,3 +14,8 @@ class ClientGrantTypeException(client: OAuthClient, missingGrantType: GrantType)
  */
 class ClientIdentityMismatchException(stored: OAuthClient, presented: OAuthClient) :
         RuntimeException("Client presented (client_id=${presented.getId()}) is not the client stored in session (client_id=${stored.getId()}).")
+
+/**
+ * Thrown when client authentication fails.
+ */
+class ClientAuthenticationException(reason: String = ""): RuntimeException("Client authentication failed. $reason")
