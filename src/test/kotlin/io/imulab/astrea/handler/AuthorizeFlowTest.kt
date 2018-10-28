@@ -1,5 +1,9 @@
 package io.imulab.astrea.handler
 
+import io.imulab.astrea.access.AccessTokenStorage
+import io.imulab.astrea.access.AccessTokenStrategy
+import io.imulab.astrea.access.RefreshTokenStorage
+import io.imulab.astrea.access.RefreshTokenStrategy
 import io.imulab.astrea.authorize.*
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.OAuthClient
@@ -12,6 +16,7 @@ import io.imulab.astrea.singleValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import javax.crypto.KeyGenerator
 
@@ -48,7 +53,11 @@ class AuthorizeFlowTest {
             AuthorizeFlow(
                     scopeStrategy = StringEqualityScopeStrategy,
                     authorizeCodeStorage = mockAuthorizeCodeStorage(),
-                    authorizeCodeStrategy = hmacAuthorizeCodeStrategy()
+                    authorizeCodeStrategy = hmacAuthorizeCodeStrategy(),
+                    accessTokenStorage = mock(AccessTokenStorage::class.java),
+                    accessTokenStrategy = mock(AccessTokenStrategy::class.java),
+                    refreshTokenStorage = mock(RefreshTokenStorage::class.java),
+                    refreshTokenStrategy = mock(RefreshTokenStrategy::class.java)
             )
 
     private fun getClient(): OAuthClient =
@@ -67,7 +76,13 @@ class AuthorizeFlowTest {
             )
 
     private fun mockAuthorizeCodeStorage(): AuthorizeCodeStorage =
-            mock(AuthorizeCodeStorage::class.java)
+            mock(AuthorizeCodeStorage::class.java).also {
+//                `when`(it.getAuthorizeCodeSession(any(), any())).thenReturn(
+//                        DefaultAuthorizeRequest.Builder().also {
+//
+//                        }.build()
+//                )
+            }
 
     /**
      * https://medium.com/@elye.project/befriending-kotlin-and-mockito-1c2e7b0ef791

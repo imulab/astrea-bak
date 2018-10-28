@@ -1,10 +1,13 @@
 package io.imulab.astrea.authorize
 
-import io.imulab.astrea.*
+import io.imulab.astrea.HttpClient
+import io.imulab.astrea.HttpRequestReader
+import io.imulab.astrea.UrlValues
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.DefaultOidcClient
-import io.imulab.astrea.handler.AuthorizeHandler
+import io.imulab.astrea.error.IllegalRedirectUriException
+import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.oauth.ResponseType
 import io.imulab.astrea.oauth.SigningAlgorithm
 import io.imulab.astrea.oauth.StringEqualityScopeStrategy
@@ -263,7 +266,7 @@ class NewAuthorizeRequestTest {
                 ))
 
         val httpClient = mock(HttpClient::class.java)
-        val authorizeHandler = mock(AuthorizeHandler::class.java)
+        val authorizeHandler = mock(AuthorizeEndpointHandler::class.java)
 
 
         return DefaultAuthorizeProvider(

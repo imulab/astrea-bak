@@ -1,8 +1,8 @@
 package io.imulab.astrea.utility
 
-import io.imulab.astrea.authorize.MalformedRedirectUriException
-import io.imulab.astrea.authorize.RedirectUriHasFragmentException
-import io.imulab.astrea.authorize.UnmatchedRedirectUriException
+import io.imulab.astrea.error.MalformedRedirectUriException
+import io.imulab.astrea.error.RedirectUriHasFragmentException
+import io.imulab.astrea.error.UnmatchedRedirectUriException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test

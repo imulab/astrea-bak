@@ -2,7 +2,7 @@ package io.imulab.astrea.crypt
 
 import io.imulab.astrea.access.AccessToken
 import io.imulab.astrea.access.AccessTokenStrategy
-import io.imulab.astrea.access.InvalidAccessTokenException
+import io.imulab.astrea.error.InvalidAccessTokenException
 import io.imulab.astrea.oauth.JwtSession
 import io.imulab.astrea.oauth.OAuthRequest
 import io.imulab.astrea.oauth.SigningAlgorithm

@@ -2,7 +2,7 @@ package io.imulab.astrea.crypt
 
 import io.imulab.astrea.authorize.AuthorizeCode
 import io.imulab.astrea.authorize.AuthorizeCodeStrategy
-import io.imulab.astrea.authorize.InvalidAuthorizeCodeException
+import io.imulab.astrea.error.InvalidAuthorizeCodeException
 import io.imulab.astrea.oauth.OAuthRequest
 import io.imulab.astrea.oauth.TokenType
 import org.jose4j.jca.ProviderContext

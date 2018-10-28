@@ -1,7 +1,7 @@
 package io.imulab.astrea.crypt
 
 import io.imulab.astrea.authorize.AuthorizeCode
-import io.imulab.astrea.authorize.InvalidAuthorizeCodeException
+import io.imulab.astrea.error.InvalidAuthorizeCodeException
 import io.imulab.astrea.oauth.OAuthRequest
 import io.imulab.astrea.oauth.OAuthSession
 import io.imulab.astrea.oauth.TokenType
@@ -59,12 +59,13 @@ class HmacSha256StrategyTest {
                 secretKey = KeyGenerator.getInstance("AES").generateKey(),
                 authorizeCodeLifespan = Duration.ofMinutes(10)
         )
-        val session = mock(OAuthSession::class.java).also {
-            `when`(it.getExpiry(TokenType.AuthorizeCode)).thenReturn(LocalDateTime.now().minusDays(1))
-        }
-        val oauthReq = mock(OAuthRequest::class.java).also {
-            `when`(it.getSession()).thenReturn(session)
-        }
+
+        val session = mock(OAuthSession::class.java)
+        `when`(session.getExpiry(TokenType.AuthorizeCode)).thenReturn(LocalDateTime.now().minusDays(1))
+
+        val oauthReq = mock(OAuthRequest::class.java)
+        `when`(oauthReq.getSession()).thenReturn(session)
+
         val shouldFail = Executable {
             strategy.generateNewAuthorizeCode(oauthReq).also {
                 strategy.validateAuthorizeCode(oauthReq, it.toString())

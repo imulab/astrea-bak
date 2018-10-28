@@ -1,5 +1,6 @@
 package io.imulab.astrea.authorize
 
+import io.imulab.astrea.error.IllegalRedirectUriException
 import io.imulab.astrea.oauth.OAuthRequest
 import io.imulab.astrea.oauth.Request
 import io.imulab.astrea.oauth.ResponseType

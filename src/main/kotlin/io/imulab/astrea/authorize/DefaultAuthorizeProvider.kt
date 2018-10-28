@@ -1,18 +1,21 @@
 package io.imulab.astrea.authorize
 
-import io.imulab.astrea.*
+import io.imulab.astrea.HttpClient
+import io.imulab.astrea.HttpRequestReader
+import io.imulab.astrea.HttpResponseWriter
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OpenIdConnectClient
-import io.imulab.astrea.handler.AuthorizeHandler
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
+import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.oauth.*
+import io.imulab.astrea.singleValue
 import io.imulab.astrea.utility.checkValidRedirectUri
 import io.imulab.astrea.utility.determineRedirectUri
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
 import java.time.LocalDateTime
 import java.util.*
 
-class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeHandler,
+class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHandler,
                                private val clientStore: ClientManager,
                                private val httpClient: HttpClient,
                                private val scopeStrategy: OAuthScopeStrategy,
