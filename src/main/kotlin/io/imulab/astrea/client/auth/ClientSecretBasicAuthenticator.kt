@@ -9,7 +9,7 @@ import java.util.*
 
 /**
  * This implementation of [ClientAuthenticator] handles the 'client_secret_basic' type authentication. The request
- * from have HTTP Basic authentication header set in order to trigger this implementation.
+ * must have HTTP Basic authentication header set in order to trigger this implementation.
  */
 class ClientSecretBasicAuthenticator(private val clientManager: ClientManager,
                                      private val passwordEncoder: PasswordEncoder): ClientAuthenticator {
