@@ -8,6 +8,7 @@ import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.oauth.*
+import io.imulab.astrea.provider.AuthorizeProvider
 import io.imulab.astrea.singleValue
 import io.imulab.astrea.utility.checkValidRedirectUri
 import io.imulab.astrea.utility.determineRedirectUri

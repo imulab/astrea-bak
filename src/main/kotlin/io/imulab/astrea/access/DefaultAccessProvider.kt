@@ -2,7 +2,7 @@ package io.imulab.astrea.access
 
 import io.imulab.astrea.HttpRequestReader
 import io.imulab.astrea.HttpResponseWriter
-import io.imulab.astrea.oauth.AccessProvider
+import io.imulab.astrea.provider.AccessProvider
 import io.imulab.astrea.oauth.OAuthSession
 
 class DefaultAccessProvider : AccessProvider {

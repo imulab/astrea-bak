@@ -1,4 +1,4 @@
-package io.imulab.astrea.oauth
+package io.imulab.astrea.provider
 
 import io.imulab.astrea.HttpRequestReader
 import io.imulab.astrea.HttpResponseWriter
@@ -8,36 +8,27 @@ import io.imulab.astrea.authorize.AuthorizeRequest
 import io.imulab.astrea.authorize.AuthorizeResponse
 import io.imulab.astrea.introspection.IntrospectRequest
 import io.imulab.astrea.introspection.IntrospectResponse
+import io.imulab.astrea.oauth.OAuthSession
 
 /**
- * Interface to provide heavy lifting to most of the OAuth2 functions.
+ * The main entry point of the SDK. This interface provides heavy lifting to most of the OAuth2 functions.
+ *
+ * The interface itself is a placeholder, it does not declare any methods. Instead, it is composed of a series of
+ * sub-interfaces in order to clearly separate boundaries between functions. This is intended to promote readability
+ * and maintainability of source codes.
+ *
+ * @see AuthorizeProvider
+ * @see AccessProvider
+ * @see RevocationProvider
+ * @see IntrospectionProvider
  */
-interface OAuthProvider : AuthorizeProvider, AccessProvider, RevocationProvider, IntrospectionProvider
+interface OAuthProvider :
+        AuthorizeProvider,
+        AccessProvider,
+        RevocationProvider,
+        IntrospectionProvider
 
-/**
- * Interface to provide the functions related to the authorize endpoint.
- */
-interface AuthorizeProvider {
-    /**
-     * Parse incoming http request into the context for the authorize endpoint.
-     */
-    fun newAuthorizeRequest(reader: HttpRequestReader): AuthorizeRequest
 
-    /**
-     * Returns an authorize response which can be used to encode http response.
-     */
-    fun newAuthorizeResponse(request: AuthorizeRequest, session: OAuthSession): AuthorizeResponse
-
-    /**
-     * Encode authorize endpoint response to the http through [HttpResponseWriter].
-     */
-    fun encodeAuthorizeResponse(writer: HttpResponseWriter, request: AuthorizeRequest, response: AuthorizeResponse)
-
-    /**
-     * Encode error as the authorize endpoint response.
-     */
-    fun encodeAuthorizeError(writer: HttpResponseWriter, request: AuthorizeRequest, error: Throwable)
-}
 
 /**
  * Interface to provide functions related to the access endpoint.
