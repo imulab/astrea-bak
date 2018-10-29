@@ -1,7 +1,6 @@
 package io.imulab.astrea.crypt
 
 import io.imulab.astrea.client.OpenIdConnectClient
-import io.imulab.astrea.spi.HttpClient
 import org.jose4j.jwk.HttpsJwks
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.Use
@@ -11,8 +10,7 @@ import org.jose4j.keys.resolvers.HttpsJwksVerificationKeyResolver
 import org.jose4j.keys.resolvers.VerificationKeyResolver
 import java.security.Key
 
-class ClientVerificationKeyResolver(private val client: OpenIdConnectClient,
-                                    private val httpClient: HttpClient) : VerificationKeyResolver {
+class ClientVerificationKeyResolver(private val client: OpenIdConnectClient) : VerificationKeyResolver {
 
     override fun resolveKey(jws: JsonWebSignature?, nestingContext: MutableList<JsonWebStructure>?): Key {
         if (jws?.keyIdHeaderValue?.isEmpty() == true)

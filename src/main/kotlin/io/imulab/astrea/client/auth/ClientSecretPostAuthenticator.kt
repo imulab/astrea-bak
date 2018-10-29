@@ -2,10 +2,11 @@ package io.imulab.astrea.client.auth
 
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
+import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.PasswordEncoder
+import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.error.ClientAuthenticationException
 import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.singleValue
 
 /**
  * This implementation of [ClientAuthenticator] handles the 'client_secret_post' type authentication. The request
@@ -25,6 +26,9 @@ class ClientSecretPostAuthenticator(private val clientManager: ClientManager,
         val password = reader.formValue("client_secret")
 
         val client = clientManager.getClient(username)
+        if ((client is OpenIdConnectClient) && (client.getTokenEndpointAuthMethod() != AuthMethod.ClientSecretPost))
+            throw ClientAuthenticationException("Client is not capable of performing Open ID Connect client_secret_post authentication.")
+
         if (!passwordEncoder.matches(password, String(client.getHashedSecret())))
             throw ClientAuthenticationException("Invalid credentials.")
 

@@ -7,7 +7,7 @@ import org.jose4j.jwk.JsonWebKeySet
 class DefaultOidcClient(private val oauth: OAuthClient,
                         private val requestUris: List<String> = emptyList(),
                         private val jwkUri: String = "",
-                        private val jwk: JsonWebKeySet?,
+                        private val jwk: JsonWebKeySet? = null,
                         private val tokenEndpointAuth: AuthMethod = AuthMethod.ClientSecretBasic,
                         private val reqObjSignAlg: SigningAlgorithm = SigningAlgorithm.None) : OAuthClient by oauth, OpenIdConnectClient {
 

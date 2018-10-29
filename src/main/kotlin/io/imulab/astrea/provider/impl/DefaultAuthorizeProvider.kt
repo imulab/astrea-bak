@@ -141,7 +141,7 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         val jwtConsumer = JwtConsumerBuilder()
                 .setJwsAlgorithmConstraints(client.getRequestObjectSigningAlgorithm().toJwsAlgorithmConstraints())
                 .setSkipVerificationKeyResolutionOnNone()
-                .setVerificationKeyResolver(ClientVerificationKeyResolver(client, httpClient))
+                .setVerificationKeyResolver(ClientVerificationKeyResolver(client))
                 .setAllowedClockSkewInSeconds(clockSkewToleranceSecond)
                 .setExpectedAudience(true, expectedAudience)
                 .setExpectedIssuer(true, client.getId())

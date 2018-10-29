@@ -10,7 +10,7 @@ interface TokenEndpointHandler {
 
     companion object {
         /**
-         * Main entry point to create an [AuthorizeHandler] with delegates.
+         * Main entry point to create an [TokenEndpointHandler] with delegates.
          */
         fun with(vararg handlers: TokenEndpointHandler): TokenEndpointHandler =
                 TokenEndpointHandler.DelegatingTokenEndpointHandler(handlers.toList())

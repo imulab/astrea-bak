@@ -43,7 +43,7 @@ class ClientVerificationKeyResolverTest {
                 it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
             }
 
-            val resolved = ClientVerificationKeyResolver(client = testClient, httpClient = NoOpHttpClient)
+            val resolved = ClientVerificationKeyResolver(client = testClient)
                     .resolveKey(jws, null)
 
             Assertions.assertNotNull(resolved)

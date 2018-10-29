@@ -2,7 +2,9 @@ package io.imulab.astrea.client.auth
 
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
+import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.PasswordEncoder
+import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.error.ClientAuthenticationException
 import io.imulab.astrea.spi.HttpRequestReader
 import java.util.*
@@ -12,7 +14,7 @@ import java.util.*
  * must have HTTP Basic authentication header set in order to trigger this implementation.
  */
 class ClientSecretBasicAuthenticator(private val clientManager: ClientManager,
-                                     private val passwordEncoder: PasswordEncoder): ClientAuthenticator {
+                                     private val passwordEncoder: PasswordEncoder) : ClientAuthenticator {
 
     private val base64Decoder = Base64.getDecoder()
 
@@ -37,6 +39,9 @@ class ClientSecretBasicAuthenticator(private val clientManager: ClientManager,
         }
 
         val client = clientManager.getClient(username)
+        if ((client is OpenIdConnectClient) && (client.getTokenEndpointAuthMethod() != AuthMethod.ClientSecretBasic))
+            throw ClientAuthenticationException("Client is not capable of performing Open ID Connect client_secret_basic authentication.")
+
         if (!passwordEncoder.matches(password, String(client.getHashedSecret())))
             throw ClientAuthenticationException("Invalid credentials.")
 

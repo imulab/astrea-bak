@@ -18,4 +18,4 @@ class ClientIdentityMismatchException(stored: OAuthClient, presented: OAuthClien
 /**
  * Thrown when client authentication fails.
  */
-class ClientAuthenticationException(reason: String = ""): RuntimeException("Client authentication failed. $reason")
+class ClientAuthenticationException(reason: String = "") : RuntimeException("Client authentication failed. $reason")
