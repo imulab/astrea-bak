@@ -13,6 +13,7 @@ import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.storage.AuthorizeCodeStorage
 import io.imulab.astrea.token.storage.RefreshTokenStorage
+import io.imulab.astrea.token.storage.TokenRevocationStorage
 import java.time.LocalDateTime
 
 /**
@@ -24,7 +25,11 @@ import java.time.LocalDateTime
  *
  * This class is intended to be used in test cases to relieve the burden of excessive mocking.
  */
-class MemoryStorage : AuthorizeCodeStorage, AccessTokenStorage, RefreshTokenStorage {
+class MemoryStorage :
+        AuthorizeCodeStorage,
+        AccessTokenStorage,
+        RefreshTokenStorage,
+        TokenRevocationStorage {
 
     // start: AuthorizeCodeStorage -------------------------------------------------------------------------------------
 
@@ -61,11 +66,13 @@ class MemoryStorage : AuthorizeCodeStorage, AccessTokenStorage, RefreshTokenStor
     // start: AccessTokenStorage ---------------------------------------------------------------------------------------
 
     override fun createAccessTokenSession(token: AccessToken, request: OAuthRequest) {
-        this.accessTokenMap[token.signature] = AccessTokenSession(
+        val session = AccessTokenSession(
                 token = token,
                 request = request,
                 active = true
         )
+        this.accessTokenMap[token.signature] = session
+        this.accessTokenToRequestIdMap[request.getId()] = session
     }
 
     override fun getAccessTokenSession(token: AccessToken, session: Session): OAuthRequest {
@@ -91,11 +98,13 @@ class MemoryStorage : AuthorizeCodeStorage, AccessTokenStorage, RefreshTokenStor
     // start: RefreshTokenStorage --------------------------------------------------------------------------------------
 
     override fun createRefreshTokenSession(token: RefreshToken, request: OAuthRequest) {
-        this.refreshTokenMap[token.signature] = RefreshTokenSession(
+        val session = RefreshTokenSession(
                 token = token,
                 request = request,
                 active = true
         )
+        this.refreshTokenMap[token.signature] = session
+        this.refreshTokenToRequestIdMap[request.getId()] = session
     }
 
     override fun getRefreshTokenSession(token: RefreshToken, session: Session): OAuthRequest {
@@ -118,6 +127,26 @@ class MemoryStorage : AuthorizeCodeStorage, AccessTokenStorage, RefreshTokenStor
 
     // end: RefreshTokenStorage ----------------------------------------------------------------------------------------
 
+    // start: TokenRevocationStorage -----------------------------------------------------------------------------------
+
+    override fun revokeRefreshToken(requestId: String) {
+        if (this.refreshTokenToRequestIdMap.containsKey(requestId)) {
+            val session = this.refreshTokenToRequestIdMap[requestId]!!
+            this.refreshTokenToRequestIdMap.remove(requestId)
+            this.refreshTokenMap.remove(session.token.signature)
+        }
+    }
+
+    override fun revokeAccessToken(requestId: String) {
+        if (this.accessTokenToRequestIdMap.containsKey(requestId)) {
+            val session = this.accessTokenToRequestIdMap[requestId]!!
+            this.accessTokenToRequestIdMap.remove(requestId)
+            this.accessTokenMap.remove(session.token.signature)
+        }
+    }
+
+    // end: TokenRevocationStorage -------------------------------------------------------------------------------------
+
     // start: test utilities -------------------------------------------------------------------------------------------
 
     fun clearAuthorizeCodes() {
@@ -126,10 +155,12 @@ class MemoryStorage : AuthorizeCodeStorage, AccessTokenStorage, RefreshTokenStor
 
     fun clearAccessTokens() {
         this.accessTokenMap.clear()
+        this.accessTokenToRequestIdMap.clear()
     }
 
     fun clearRefreshTokens() {
         this.refreshTokenMap.clear()
+        this.refreshTokenToRequestIdMap.clear()
     }
 
     fun clearAll() {
@@ -150,10 +181,20 @@ class MemoryStorage : AuthorizeCodeStorage, AccessTokenStorage, RefreshTokenStor
                 ?.request
                 ?.getSession()
                 ?.setExpiry(TokenType.AccessToken, LocalDateTime.now().minusDays(1))
+
+        this.accessTokenToRequestIdMap[this.accessTokenMap[signature]?.request?.getId()]
+                ?.request
+                ?.getSession()
+                ?.setExpiry(TokenType.AccessToken, LocalDateTime.now().minusDays(1))
     }
 
     fun expireRefreshToken(signature: String) {
         this.refreshTokenMap[signature]
+                ?.request
+                ?.getSession()
+                ?.setExpiry(TokenType.RefreshToken, LocalDateTime.now().minusDays(1))
+
+        this.refreshTokenToRequestIdMap[this.refreshTokenMap[signature]?.request?.getId()]
                 ?.request
                 ?.getSession()
                 ?.setExpiry(TokenType.RefreshToken, LocalDateTime.now().minusDays(1))
@@ -164,6 +205,8 @@ class MemoryStorage : AuthorizeCodeStorage, AccessTokenStorage, RefreshTokenStor
     private val authorizeCodeMap: MutableMap<String, AuthorizeCodeSession> = hashMapOf()
     private val accessTokenMap: MutableMap<String, AccessTokenSession> = hashMapOf()
     private val refreshTokenMap: MutableMap<String, RefreshTokenSession> = hashMapOf()
+    private val accessTokenToRequestIdMap: MutableMap<String, AccessTokenSession> = hashMapOf()
+    private val refreshTokenToRequestIdMap: MutableMap<String, RefreshTokenSession> = hashMapOf()
 
     private class AuthorizeCodeSession(val code: AuthorizeCode, val request: OAuthRequest, var active: Boolean)
     private class AccessTokenSession(val token: AccessToken, val request: OAuthRequest, var active: Boolean)

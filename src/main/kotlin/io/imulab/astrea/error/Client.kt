@@ -18,4 +18,12 @@ class ClientIdentityMismatchException(stored: OAuthClient, presented: OAuthClien
 /**
  * Thrown when client authentication fails.
  */
-class ClientAuthenticationException(reason: String = "") : RuntimeException("Client authentication failed. $reason")
+class ClientAuthenticationException(reason: String = "") :
+        RuntimeException("Client authentication failed. $reason")
+
+
+/**
+ * Thrown when public client is trying to conduct a private operation.
+ */
+class PublicClientConductingPrivateOpException(opName: String) :
+        RuntimeException("Client is public, thus not allowed to perform $opName.")
