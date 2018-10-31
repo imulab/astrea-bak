@@ -9,6 +9,7 @@ group = "io.imulab"
 version = "0.0.1-SNAPSHOT"
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
@@ -19,7 +20,8 @@ dependencies {
             "jose4j" to "0.6.4",
             "mockito" to "2.23.0",
             "jBCrypt" to "0.4",
-            "apacheHttpClient" to "4.5.6"
+            "apacheHttpClient" to "4.5.6",
+            "klaxon" to "3.0.1"
     )
 
     compile(kotlin("stdlib-jdk8"))
@@ -29,6 +31,7 @@ dependencies {
 
     testCompile("org.junit.jupiter:junit-jupiter-api:${versions["junit"]}")
     testCompile("org.mockito:mockito-core:${versions["mockito"]}")
+    testCompile("com.beust:klaxon:${versions["klaxon"]}")
 
     runtime("org.junit.jupiter:junit-jupiter-engine:${versions["junitPlatform"]}")
 }
