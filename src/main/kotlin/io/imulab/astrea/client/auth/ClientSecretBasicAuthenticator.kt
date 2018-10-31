@@ -6,7 +6,7 @@ import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.PasswordEncoder
 import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.error.ClientAuthenticationException
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 import java.util.*
 
 /**

@@ -1,7 +1,7 @@
 package io.imulab.astrea.client.auth
 
 import io.imulab.astrea.client.OAuthClient
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 
 /**
  * Implementation of [ClientAuthenticator] which is supported to handle 'client_secret_jwt'. However, we decided to

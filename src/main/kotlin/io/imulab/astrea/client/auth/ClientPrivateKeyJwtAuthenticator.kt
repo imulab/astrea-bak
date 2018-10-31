@@ -6,7 +6,7 @@ import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
 import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.error.ClientAuthenticationException
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 import org.jose4j.jwt.consumer.InvalidJwtException
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
 

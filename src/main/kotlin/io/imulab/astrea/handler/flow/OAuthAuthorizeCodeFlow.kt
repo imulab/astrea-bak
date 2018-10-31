@@ -11,7 +11,7 @@ import io.imulab.astrea.error.MissingSessionException
 import io.imulab.astrea.error.RedirectUriMismatchException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage

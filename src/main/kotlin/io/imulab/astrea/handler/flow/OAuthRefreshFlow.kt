@@ -8,7 +8,7 @@ import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.TokenRevocationStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy

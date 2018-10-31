@@ -12,9 +12,9 @@ import io.imulab.astrea.error.EmptyRequestException
 import io.imulab.astrea.error.HttpMethodMismatchException
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.provider.AccessProvider
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.HttpResponseWriter
-import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpResponseWriter
+import io.imulab.astrea.spi.http.singleValue
 
 class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator,
                             private val tokenEndpointHandler: TokenEndpointHandler) : AccessProvider {

@@ -11,10 +11,10 @@ import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.provider.AuthorizeProvider
-import io.imulab.astrea.spi.HttpClient
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.HttpResponseWriter
-import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.spi.http.HttpClient
+import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpResponseWriter
+import io.imulab.astrea.spi.http.singleValue
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
 import java.time.LocalDateTime
 import java.util.*

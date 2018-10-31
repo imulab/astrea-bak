@@ -3,7 +3,7 @@ package io.imulab.astrea.client
 import io.imulab.astrea.client.auth.ClientSecretBasicAuthenticator
 import io.imulab.astrea.crypt.BCryptPasswordEncoder
 import io.imulab.astrea.error.ClientAuthenticationException
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mindrot.jbcrypt.BCrypt

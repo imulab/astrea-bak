@@ -4,8 +4,8 @@ import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.HttpResponseWriter
+import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpResponseWriter
 
 /**
  * Sub-interface to [OAuthProvider] in order to provide authorize request and response related functions.

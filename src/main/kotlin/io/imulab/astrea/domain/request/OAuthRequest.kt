@@ -2,7 +2,7 @@ package io.imulab.astrea.domain.request
 
 import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.domain.session.Session
-import io.imulab.astrea.spi.UrlValues
+import io.imulab.astrea.spi.http.UrlValues
 import java.time.LocalDateTime
 import java.util.*
 

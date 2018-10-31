@@ -1,8 +1,8 @@
 package io.imulab.astrea.domain.response.impl
 
 import io.imulab.astrea.domain.response.AuthorizeResponse
-import io.imulab.astrea.spi.HttpHeaders
-import io.imulab.astrea.spi.UrlValues
+import io.imulab.astrea.spi.http.HttpHeaders
+import io.imulab.astrea.spi.http.UrlValues
 
 class DefaultAuthorizeResponse(private val headers: MutableMap<String, MutableList<String>> = mutableMapOf(),
                                private val queries: MutableMap<String, MutableList<String>> = mutableMapOf(),

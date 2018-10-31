@@ -1,7 +1,7 @@
 package io.imulab.astrea.domain.response
 
-import io.imulab.astrea.spi.HttpHeaders
-import io.imulab.astrea.spi.UrlValues
+import io.imulab.astrea.spi.http.HttpHeaders
+import io.imulab.astrea.spi.http.UrlValues
 
 /**
  * Response data for the OAuth Authorize Endpoint

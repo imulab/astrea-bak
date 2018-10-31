@@ -2,7 +2,7 @@ package io.imulab.astrea.client
 
 import io.imulab.astrea.client.auth.ClientNoneAuthenticator
 import io.imulab.astrea.domain.AuthMethod
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mindrot.jbcrypt.BCrypt

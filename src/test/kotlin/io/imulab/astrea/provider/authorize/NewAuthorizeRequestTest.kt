@@ -9,9 +9,9 @@ import io.imulab.astrea.domain.StringEqualityScopeStrategy
 import io.imulab.astrea.error.IllegalRedirectUriException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.provider.impl.DefaultAuthorizeProvider
-import io.imulab.astrea.spi.HttpClient
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.UrlValues
+import io.imulab.astrea.spi.http.HttpClient
+import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.spi.http.UrlValues
 import org.jose4j.jwk.*
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature

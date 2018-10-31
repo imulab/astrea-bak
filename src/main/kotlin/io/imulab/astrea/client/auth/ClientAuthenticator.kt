@@ -4,7 +4,7 @@ import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.crypt.PasswordEncoder
 import io.imulab.astrea.error.ClientAuthenticationException
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 
 /**
  * This interface authenticates a client making the HTTP request. Implementations may decide whether to use assertion

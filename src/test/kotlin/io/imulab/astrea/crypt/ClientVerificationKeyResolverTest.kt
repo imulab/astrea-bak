@@ -2,8 +2,8 @@ package io.imulab.astrea.crypt
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.DefaultOidcClient
-import io.imulab.astrea.spi.HttpClient
-import io.imulab.astrea.spi.HttpResponseReader
+import io.imulab.astrea.spi.http.HttpClient
+import io.imulab.astrea.spi.http.HttpResponseReader
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.RsaJwkGenerator
 import org.jose4j.jwk.Use

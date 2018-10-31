@@ -14,7 +14,7 @@ import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.InvalidAuthorizeCodeException
 import io.imulab.astrea.handler.flow.OAuthAuthorizeCodeFlow
-import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy

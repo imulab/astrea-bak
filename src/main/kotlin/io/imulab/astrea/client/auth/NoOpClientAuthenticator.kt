@@ -2,8 +2,8 @@ package io.imulab.astrea.client.auth
 
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
-import io.imulab.astrea.spi.HttpRequestReader
-import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.spi.http.singleValue
 
 /**
  * A no-op implementation of [ClientAuthenticator]. This implementation simply looks up the 'client_id' parameter from

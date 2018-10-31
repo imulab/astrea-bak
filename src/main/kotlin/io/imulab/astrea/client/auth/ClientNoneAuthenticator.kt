@@ -5,7 +5,7 @@ import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.error.ClientAuthenticationException
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 
 /**
  * Implementation of [ClientAuthenticator] to handle none authentication method of the token endpoint.

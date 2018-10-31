@@ -4,7 +4,7 @@ import io.imulab.astrea.client.auth.ClientPrivateKeyJwtAuthenticator
 import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.error.ClientAuthenticationException
-import io.imulab.astrea.spi.HttpRequestReader
+import io.imulab.astrea.spi.http.HttpRequestReader
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator

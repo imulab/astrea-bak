@@ -12,7 +12,7 @@ import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.flow.OAuthImplicitFlow
-import io.imulab.astrea.spi.singleValue
+import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import io.imulab.astrea.token.strategy.impl.JwtRs256Strategy
