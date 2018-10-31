@@ -25,7 +25,7 @@ class OAuthRefreshFlow(
 ) : TokenEndpointHandler {
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOfRefreshToken())
+        if (!request.hasSingleGrantTypeOf(GrantType.RefreshToken))
             return false
 
         if (!request.getClient().getGrantTypes().contains(GrantType.RefreshToken))
@@ -58,7 +58,7 @@ class OAuthRefreshFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOfRefreshToken())
+        if (!request.hasSingleGrantTypeOf(GrantType.RefreshToken))
             return false
 
         val oldRefreshToken = request.getRequestForm().singleValue("refresh_token").let { rawToken ->
@@ -86,7 +86,4 @@ class OAuthRefreshFlow(
 
         return true
     }
-
-    private fun AccessRequest.hasSingleGrantTypeOfRefreshToken(): Boolean =
-            this.getGrantTypes().size == 1 && this.getGrantTypes().contains(GrantType.RefreshToken)
 }

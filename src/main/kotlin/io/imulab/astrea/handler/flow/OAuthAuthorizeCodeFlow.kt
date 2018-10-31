@@ -40,7 +40,7 @@ class OAuthAuthorizeCodeFlow(
     // start: AuthorizeEndpointHandler ---------------------------------------------------------------------------------
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
-        if (!request.hasSingleResponseTypeOfCode())
+        if (!request.hasSingleResponseTypeOf(ResponseType.Code))
             return
 
         if (request.getRedirectUri()?.isSecureRedirectUri() != true)
@@ -72,15 +72,12 @@ class OAuthAuthorizeCodeFlow(
         request.setResponseTypeHandled(ResponseType.Code)
     }
 
-    private fun AuthorizeRequest.hasSingleResponseTypeOfCode(): Boolean =
-            this.getResponseTypes().size == 1 && this.getResponseTypes().contains(ResponseType.Code)
-
     // end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
 
     // start: TokenEndpointHandler -------------------------------------------------------------------------------------
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOfAuthorizationCode())
+        if (!request.hasSingleGrantTypeOf(GrantType.AuthorizationCode))
             return false
 
         if (!request.getClient().getGrantTypes().contains(GrantType.AuthorizationCode))
@@ -120,7 +117,7 @@ class OAuthAuthorizeCodeFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOfAuthorizationCode())
+        if (!request.hasSingleGrantTypeOf(GrantType.AuthorizationCode))
             return false
 
         // retrieve authorization code from session storage
@@ -153,9 +150,6 @@ class OAuthAuthorizeCodeFlow(
 
         return true
     }
-
-    private fun AccessRequest.hasSingleGrantTypeOfAuthorizationCode(): Boolean =
-            this.getGrantTypes().size == 1 && this.getGrantTypes().contains(GrantType.AuthorizationCode)
 
     // end: TokenEndpointHandler ---------------------------------------------------------------------------------------
 }

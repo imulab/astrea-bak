@@ -31,7 +31,7 @@ class OAuthResourceOwnerFlow(
 ) : TokenEndpointHandler {
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOfPassword())
+        if (!request.hasSingleGrantTypeOf(GrantType.Password))
             return false
 
         // check grant type
@@ -63,7 +63,7 @@ class OAuthResourceOwnerFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOfPassword())
+        if (!request.hasSingleGrantTypeOf(GrantType.Password))
             return false
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {
@@ -85,7 +85,4 @@ class OAuthResourceOwnerFlow(
 
         return true
     }
-
-    private fun AccessRequest.hasSingleGrantTypeOfPassword(): Boolean =
-            this.getGrantTypes().size == 1 && this.getGrantTypes().contains(GrantType.Password)
 }

@@ -28,7 +28,7 @@ class OAuthClientCredentialsFlow(
 ) : TokenEndpointHandler {
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOfClientCredentials())
+        if (!request.hasSingleGrantTypeOf(GrantType.ClientCredentials))
             return false
 
         // check client validity
@@ -51,7 +51,7 @@ class OAuthClientCredentialsFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOfClientCredentials())
+        if (!request.hasSingleGrantTypeOf(GrantType.ClientCredentials))
             return false
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {
@@ -73,7 +73,4 @@ class OAuthClientCredentialsFlow(
 
         return true
     }
-
-    private fun AccessRequest.hasSingleGrantTypeOfClientCredentials(): Boolean =
-            this.getGrantTypes().size == 1 && this.getGrantTypes().contains(GrantType.ClientCredentials)
 }

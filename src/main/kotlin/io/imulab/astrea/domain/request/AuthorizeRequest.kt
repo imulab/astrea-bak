@@ -44,6 +44,12 @@ interface AuthorizeRequest : OAuthRequest {
      * [ResponseType]; otherwise false.
      */
     fun hasAllResponseTypesBeenHandled(): Boolean
+
+    /**
+     * Returns true if [getResponseTypes] contains a single response type equal to [responseType].
+     */
+    fun hasSingleResponseTypeOf(responseType: ResponseType): Boolean =
+            this.getResponseTypes().size == 1 && this.getResponseTypes().contains(responseType)
 }
 
 class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,

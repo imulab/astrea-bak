@@ -24,7 +24,7 @@ class OAuthImplicitFlow(
 ) : AuthorizeEndpointHandler {
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
-        if (!request.hasSingleResponseTypeOfToken())
+        if (!request.hasSingleResponseTypeOf(ResponseType.Token))
             return
 
         if (!request.getClient().getGrantTypes().contains(GrantType.Implicit))
@@ -53,7 +53,4 @@ class OAuthImplicitFlow(
 
         request.setResponseTypeHandled(ResponseType.Token)
     }
-
-    private fun AuthorizeRequest.hasSingleResponseTypeOfToken(): Boolean =
-            this.getResponseTypes().size == 1 && this.getResponseTypes().contains(ResponseType.Token)
 }
