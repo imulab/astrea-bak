@@ -9,3 +9,7 @@ fun UrlValues.singleValue(key: String): String =
             ""
         else
             this[key]!![0]
+
+fun UrlValues.delete(key: String) {
+    (this as? MutableMap)?.remove(key)
+}
