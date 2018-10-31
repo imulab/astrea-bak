@@ -12,6 +12,7 @@ import io.imulab.astrea.provider.impl.DefaultAuthorizeProvider
 import io.imulab.astrea.spi.http.HttpClient
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.UrlValues
+import io.imulab.astrea.spi.json.JsonEncoder
 import org.jose4j.jwk.*
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature
@@ -277,7 +278,8 @@ class NewAuthorizeRequestTest {
                 scopeStrategy = StringEqualityScopeStrategy,
                 clockSkewToleranceSecond = 30,
                 minStateEntropy = 8,
-                expectedAudience = "test"
+                expectedAudience = "test",
+                jsonEncoder = mock(JsonEncoder::class.java)
         )
     }
 }

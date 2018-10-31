@@ -5,4 +5,18 @@ package io.imulab.astrea.spi.http
  */
 interface HttpResponseWriter {
 
+    /**
+     * Set the response status on the HTTP response.
+     */
+    fun setStatus(status: Int)
+
+    /**
+     * Set the header on the HTTP response.
+     */
+    fun setHeader(name: String, value: String)
+
+    /**
+     * Write the given [data] to HTTP response as body.
+     */
+    fun writeBody(data: ByteArray)
 }

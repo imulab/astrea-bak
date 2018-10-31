@@ -10,14 +10,18 @@ import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.error.EmptyRequestException
 import io.imulab.astrea.error.HttpMethodMismatchException
+import io.imulab.astrea.error.toRfc6749Error
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.provider.AccessProvider
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.HttpResponseWriter
 import io.imulab.astrea.spi.http.singleValue
+import io.imulab.astrea.spi.json.JsonEncoder
 
 class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator,
-                            private val tokenEndpointHandler: TokenEndpointHandler) : AccessProvider {
+                            private val tokenEndpointHandler: TokenEndpointHandler,
+                            private val jsonEncoder: JsonEncoder,
+                            private val outputDebugInErrorResponse: Boolean = false) : AccessProvider {
 
     override fun newAccessRequest(reader: HttpRequestReader, session: Session): AccessRequest {
         when {
@@ -62,10 +66,23 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
     }
 
     override fun encodeAccessResponse(writer: HttpResponseWriter, request: AccessRequest, response: AccessResponse) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val json = jsonEncoder.encode(response.toMap())
+
+        writer.let {
+            it.setStatus(200)
+
+            it.setHeader("Content-Type", "application/json;charset=UTF-8")
+            it.setHeader("Cache-Control", "no-store")
+            it.setHeader("Pragma", "no-cache")
+
+            it.writeBody(json)
+        }
     }
 
     override fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest, error: Throwable) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val rfc6749Error = error.toRfc6749Error()
+        writer.setHeader("Content-Type", "application/json;charset=UTF-8")
+        writer.setStatus(rfc6749Error.getStatusCode())
+        writer.writeBody(jsonEncoder.encode(rfc6749Error.toMap(outputDebugInErrorResponse)))
     }
 }
