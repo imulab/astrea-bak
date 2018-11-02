@@ -147,17 +147,17 @@ class MemoryStorage :
 
     // start: OpenIdConnectRequestStorage ------------------------------------------------------------------------------
 
-    override fun createOidcSession(authorizeCode: String, request: OAuthRequest) {
-        this.authorizeCodeToOidcMap[authorizeCode] = request
+    override fun createOidcSession(authorizeCode: AuthorizeCode, request: OAuthRequest) {
+        this.authorizeCodeToOidcMap[authorizeCode.code] = request
     }
 
-    override fun getOidcSession(authorizeCode: String, request: OAuthRequest): OAuthRequest {
-        return this.authorizeCodeToOidcMap[authorizeCode]
+    override fun getOidcSession(authorizeCode: AuthorizeCode, request: OAuthRequest): OAuthRequest {
+        return this.authorizeCodeToOidcMap[authorizeCode.code]
                 ?: throw InvalidAuthorizeCodeException(TokenInvalidity.NotFound)
     }
 
-    override fun deleteOidcSession(authorizeCode: String) {
-        this.authorizeCodeToOidcMap.remove(authorizeCode)
+    override fun deleteOidcSession(authorizeCode: AuthorizeCode) {
+        this.authorizeCodeToOidcMap.remove(authorizeCode.code)
     }
 
     // end: OpenIdConnectRequestStorage --------------------------------------------------------------------------------

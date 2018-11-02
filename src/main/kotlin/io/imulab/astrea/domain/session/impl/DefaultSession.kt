@@ -39,11 +39,11 @@ open class DefaultSession(private val username: String = "",
                        var subject: String? = null,
                        val expiry: MutableMap<TokenType, LocalDateTime> = hashMapOf()) {
 
-        fun setUsername(username: String) = apply { this.username = username }
+        open fun setUsername(username: String) = apply { this.username = username }
 
-        fun setSubject(subject: String) = apply { this.subject = subject }
+        open fun setSubject(subject: String) = apply { this.subject = subject }
 
-        fun setExpiry(type: TokenType, expiry: LocalDateTime) = apply { this.expiry[type] = expiry }
+        open fun setExpiry(type: TokenType, expiry: LocalDateTime) = apply { this.expiry[type] = expiry }
 
         open fun build(): Session = DefaultSession(
                 username = username ?: "",
