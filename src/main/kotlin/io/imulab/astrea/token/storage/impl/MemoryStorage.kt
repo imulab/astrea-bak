@@ -10,10 +10,7 @@ import io.imulab.astrea.error.TokenInvalidity
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.RefreshToken
-import io.imulab.astrea.token.storage.AccessTokenStorage
-import io.imulab.astrea.token.storage.AuthorizeCodeStorage
-import io.imulab.astrea.token.storage.RefreshTokenStorage
-import io.imulab.astrea.token.storage.TokenRevocationStorage
+import io.imulab.astrea.token.storage.*
 import java.time.LocalDateTime
 
 /**
@@ -29,7 +26,8 @@ class MemoryStorage :
         AuthorizeCodeStorage,
         AccessTokenStorage,
         RefreshTokenStorage,
-        TokenRevocationStorage {
+        TokenRevocationStorage,
+        OpenIdConnectRequestStorage {
 
     // start: AuthorizeCodeStorage -------------------------------------------------------------------------------------
 
@@ -147,10 +145,28 @@ class MemoryStorage :
 
     // end: TokenRevocationStorage -------------------------------------------------------------------------------------
 
+    // start: OpenIdConnectRequestStorage ------------------------------------------------------------------------------
+
+    override fun createOidcSession(authorizeCode: String, request: OAuthRequest) {
+        this.authorizeCodeToOidcMap[authorizeCode] = request
+    }
+
+    override fun getOidcSession(authorizeCode: String, request: OAuthRequest): OAuthRequest {
+        return this.authorizeCodeToOidcMap[authorizeCode]
+                ?: throw InvalidAuthorizeCodeException(TokenInvalidity.NotFound)
+    }
+
+    override fun deleteOidcSession(authorizeCode: String) {
+        this.authorizeCodeToOidcMap.remove(authorizeCode)
+    }
+
+    // end: OpenIdConnectRequestStorage --------------------------------------------------------------------------------
+
     // start: test utilities -------------------------------------------------------------------------------------------
 
     fun clearAuthorizeCodes() {
         this.authorizeCodeMap.clear()
+        this.authorizeCodeToOidcMap.clear()
     }
 
     fun clearAccessTokens() {
@@ -207,6 +223,7 @@ class MemoryStorage :
     private val refreshTokenMap: MutableMap<String, RefreshTokenSession> = hashMapOf()
     private val accessTokenToRequestIdMap: MutableMap<String, AccessTokenSession> = hashMapOf()
     private val refreshTokenToRequestIdMap: MutableMap<String, RefreshTokenSession> = hashMapOf()
+    private val authorizeCodeToOidcMap: MutableMap<String, OAuthRequest> = hashMapOf()
 
     private class AuthorizeCodeSession(val code: AuthorizeCode, val request: OAuthRequest, var active: Boolean)
     private class AccessTokenSession(val token: AccessToken, val request: OAuthRequest, var active: Boolean)
