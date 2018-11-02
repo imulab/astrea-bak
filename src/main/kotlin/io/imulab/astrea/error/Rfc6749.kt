@@ -6,7 +6,8 @@ abstract class Rfc6749Exception(
         val hint: String = "",
         val debug: String = "",
         val statusCode: Int? = null
-) : RuntimeException("[${error.specValue}] description=$description hint=$hint debug=$debug status=${statusCode ?: error.statusCode}") {
+) : RuntimeException("[${error.specValue}] description=$description hint=$hint debug=$debug status=${statusCode
+        ?: error.statusCode}") {
 
     fun getStatusCode(): Int = statusCode ?: error.statusCode
 
@@ -20,7 +21,7 @@ abstract class Rfc6749Exception(
     }
 }
 
-class UnknownRfc6749Exception(wrapped: Throwable): Rfc6749Exception(
+class UnknownRfc6749Exception(wrapped: Throwable) : Rfc6749Exception(
         error = Rfc6749Error.Unknown,
         debug = wrapped.message!!
 )

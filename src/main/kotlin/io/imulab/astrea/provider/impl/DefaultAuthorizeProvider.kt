@@ -19,9 +19,7 @@ import io.imulab.astrea.spi.http.HttpResponseWriter
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.spi.json.JsonEncoder
 import org.apache.http.client.utils.URIBuilder
-import org.apache.http.client.utils.URLEncodedUtils
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
-import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.util.*
 

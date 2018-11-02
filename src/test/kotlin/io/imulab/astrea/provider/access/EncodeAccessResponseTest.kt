@@ -1,6 +1,8 @@
 package io.imulab.astrea.provider.access
 
-import com.beust.klaxon.*
+import com.beust.klaxon.Converter
+import com.beust.klaxon.JsonValue
+import com.beust.klaxon.Klaxon
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.auth.ClientAuthenticator
 import io.imulab.astrea.domain.GrantType
@@ -14,9 +16,10 @@ import io.imulab.astrea.provider.impl.DefaultAccessProvider
 import io.imulab.astrea.spi.http.HttpResponseWriter
 import io.imulab.astrea.spi.json.JsonEncoder
 import org.jose4j.jwt.JwtClaims
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
 import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 
