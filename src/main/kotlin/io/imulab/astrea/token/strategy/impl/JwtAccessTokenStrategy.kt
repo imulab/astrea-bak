@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
-                             private val issuer: String): AccessTokenStrategy {
+                             private val issuer: String) : AccessTokenStrategy {
 
     override fun computeAccessTokenSignature(token: String): String {
         val parts = token.split(".")

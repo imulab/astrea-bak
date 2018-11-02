@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
-                         private val issuer: String): IdTokenStrategy {
+                         private val issuer: String) : IdTokenStrategy {
 
     override fun generateIdToken(request: OAuthRequest): IdToken {
         val session = request.getSession()!! as? OidcSession
@@ -101,7 +101,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
             session.getIdTokenClaims().setAcr("0")
 
         // check hint subject == claim subject
-        request.getIdTokenHint().also {hint ->
+        request.getIdTokenHint().also { hint ->
             if (hint.isNotEmpty()) {
                 if (jwtRs256.decode(hint).jwtClaims.subject != session.getIdTokenClaims().subject)
                     throw IllegalArgumentException("mismatched subject from id_token_hint")
@@ -129,15 +129,13 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
     private fun OAuthRequest.getIdTokenHint(): String =
             this.getRequestForm().singleValue("id_token_hint")
 
-    private fun JwtClaims.getAuthTime(): NumericDate?
-            = this.getNumericDateClaimValue("auth_time")
+    private fun JwtClaims.getAuthTime(): NumericDate? = this.getNumericDateClaimValue("auth_time")
 
     private fun JwtClaims.setAuthTime(time: NumericDate) {
         this.setNumericDateClaim("auth_time", time)
     }
 
-    private fun JwtClaims.getRequestAtTime(): NumericDate?
-            = this.getNumericDateClaimValue("rat")
+    private fun JwtClaims.getRequestAtTime(): NumericDate? = this.getNumericDateClaimValue("rat")
 
     private fun JwtClaims.getAcr(): String =
             this.getStringClaimValue("acr") ?: ""

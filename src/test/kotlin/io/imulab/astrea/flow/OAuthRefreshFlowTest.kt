@@ -2,6 +2,8 @@ package io.imulab.astrea.flow
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.OAuthClient
+import io.imulab.astrea.crypt.HmacSha256
+import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.AccessRequest
@@ -16,8 +18,8 @@ import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import io.imulab.astrea.token.strategy.RefreshTokenStrategy
-import io.imulab.astrea.token.strategy.impl.HmacSha256Strategy
-import io.imulab.astrea.token.strategy.impl.JwtRs256Strategy
+import io.imulab.astrea.token.strategy.impl.HmacRefreshTokenStrategy
+import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator
 import org.jose4j.jwk.Use
@@ -140,9 +142,12 @@ class OAuthRefreshFlowTest {
 
         val hmacKey: SecretKey by lazy { KeyGenerator.getInstance("AES").generateKey() }
 
-        val accessTokenStrategy: AccessTokenStrategy = JwtRs256Strategy(issuer = "test", jwk = jwk)
+        val accessTokenStrategy: AccessTokenStrategy = JwtAccessTokenStrategy(
+                issuer = "test",
+                jwtRs256 = JwtRs256(jwk = jwk)
+        )
 
-        val refreshTokenStrategy: RefreshTokenStrategy = HmacSha256Strategy(hmacKey)
+        val refreshTokenStrategy: RefreshTokenStrategy = HmacRefreshTokenStrategy(hmac = HmacSha256(secretKey = hmacKey))
 
         val memoryStore: MemoryStorage by lazy { MemoryStorage() }
 

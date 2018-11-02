@@ -9,7 +9,7 @@ import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import java.time.LocalDateTime
 
-class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256): AuthorizeCodeStrategy {
+class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256) : AuthorizeCodeStrategy {
 
     override fun computeAuthorizeCodeSignature(code: String): String {
         val parts = code.split(".")

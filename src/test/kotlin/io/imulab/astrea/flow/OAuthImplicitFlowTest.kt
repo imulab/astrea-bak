@@ -1,6 +1,7 @@
 package io.imulab.astrea.flow
 
 import io.imulab.astrea.client.DefaultOAuthClient
+import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.StringEqualityScopeStrategy
@@ -15,7 +16,7 @@ import io.imulab.astrea.handler.flow.OAuthImplicitFlow
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
-import io.imulab.astrea.token.strategy.impl.JwtRs256Strategy
+import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator
 import org.jose4j.jwk.Use
@@ -139,9 +140,9 @@ class OAuthImplicitFlowTest {
             }
         }
 
-        val accessTokenStrategy: AccessTokenStrategy = JwtRs256Strategy(
+        val accessTokenStrategy: AccessTokenStrategy = JwtAccessTokenStrategy(
                 issuer = "test",
-                jwk = this.jwk
+                jwtRs256 = JwtRs256(jwk = this.jwk)
         )
 
         val memoryStorage by lazy { MemoryStorage() }

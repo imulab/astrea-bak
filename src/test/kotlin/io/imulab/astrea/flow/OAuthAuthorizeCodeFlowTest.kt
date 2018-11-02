@@ -2,6 +2,8 @@ package io.imulab.astrea.flow
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.OAuthClient
+import io.imulab.astrea.crypt.HmacSha256
+import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
@@ -19,8 +21,9 @@ import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.RefreshTokenStrategy
-import io.imulab.astrea.token.strategy.impl.HmacSha256Strategy
-import io.imulab.astrea.token.strategy.impl.JwtRs256Strategy
+import io.imulab.astrea.token.strategy.impl.HmacAuthorizeCodeStrategy
+import io.imulab.astrea.token.strategy.impl.HmacRefreshTokenStrategy
+import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator
 import org.jose4j.jwk.Use
@@ -152,14 +155,14 @@ class OAuthAuthorizeCodeFlowTest {
             KeyGenerator.getInstance("AES").generateKey()
         }
 
-        val authorizeCodeStrategy: AuthorizeCodeStrategy = HmacSha256Strategy(secretKey = hmacKey)
+        val authorizeCodeStrategy: AuthorizeCodeStrategy = HmacAuthorizeCodeStrategy(hmac = HmacSha256(secretKey = hmacKey))
 
-        val accessTokenStrategy: AccessTokenStrategy = JwtRs256Strategy(
+        val accessTokenStrategy: AccessTokenStrategy = JwtAccessTokenStrategy(
                 issuer = "astrea",
-                jwk = this.jwk
+                jwtRs256 = JwtRs256(jwk = this.jwk)
         )
 
-        val refreshTokenStrategy: RefreshTokenStrategy = HmacSha256Strategy(secretKey = hmacKey)
+        val refreshTokenStrategy: RefreshTokenStrategy = HmacRefreshTokenStrategy(hmac = HmacSha256(secretKey = hmacKey))
 
         val scopeStrategy: ScopeStrategy = StringEqualityScopeStrategy
 

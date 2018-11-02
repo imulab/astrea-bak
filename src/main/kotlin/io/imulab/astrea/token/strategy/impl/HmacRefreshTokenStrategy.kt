@@ -7,7 +7,7 @@ import io.imulab.astrea.error.TokenInvalidity
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.strategy.RefreshTokenStrategy
 
-class HmacRefreshTokenStrategy(private val hmac: HmacSha256): RefreshTokenStrategy {
+class HmacRefreshTokenStrategy(private val hmac: HmacSha256) : RefreshTokenStrategy {
 
     override fun computeRefreshTokenSignature(token: String): String {
         val parts = token.split(".")
