@@ -1,11 +1,13 @@
 package io.imulab.astrea.token.strategy.impl
 
 import io.imulab.astrea.crypt.HmacSha256
+import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.error.InvalidAuthorizeCodeException
 import io.imulab.astrea.error.TokenInvalidity
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
+import java.time.LocalDateTime
 
 class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256): AuthorizeCodeStrategy {
 
@@ -27,6 +29,9 @@ class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256): AuthorizeCodeStra
     }
 
     override fun validateAuthorizeCode(request: OAuthRequest, code: String) {
+        if (request.getSession()?.getExpiry(TokenType.AuthorizeCode)?.isBefore(LocalDateTime.now()) == true)
+            throw InvalidAuthorizeCodeException(TokenInvalidity.Expired)
+
         val parts = code.split(".")
         if (parts.size != 2)
             throw InvalidAuthorizeCodeException(TokenInvalidity.BadFormat)
