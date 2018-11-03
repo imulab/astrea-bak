@@ -36,6 +36,10 @@ class OAuthImplicitFlow(
         if (rejectedScope != null)
             throw ScopeRejectedException(rejectedScope)
 
+        issueImplicitAccessToken(request, response)
+    }
+
+    fun issueImplicitAccessToken(request: AuthorizeRequest, response: AuthorizeResponse) {
         val accessTokenExpiry = LocalDateTime.now().plus(accessTokenLifespan)
         request.getSession()!!.setExpiry(TokenType.AccessToken, accessTokenExpiry)
 
