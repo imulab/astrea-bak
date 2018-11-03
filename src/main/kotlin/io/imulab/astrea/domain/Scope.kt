@@ -1,5 +1,7 @@
 package io.imulab.astrea.domain
 
+import io.imulab.astrea.error.ScopeRejectedException
+
 /**
  * Interface that tells if one scope accepts another scope.
  */
@@ -18,3 +20,9 @@ typealias Scope = String
 
 fun Scope.accepts(another: Scope, strategy: ScopeStrategy = StringEqualityScopeStrategy): Boolean =
         strategy.accepts(one = this, another = another)
+
+fun List<Scope>.mustAcceptAll(scopes: Collection<Scope>, strategy: ScopeStrategy = StringEqualityScopeStrategy) {
+    val rejected = scopes.find { test -> this.none{ registered -> strategy.accepts(registered, test) } }
+    if (rejected != null)
+        throw ScopeRejectedException(rejected)
+}

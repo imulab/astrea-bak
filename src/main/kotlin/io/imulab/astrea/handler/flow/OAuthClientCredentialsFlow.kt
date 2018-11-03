@@ -1,13 +1,9 @@
 package io.imulab.astrea.handler.flow
 
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.ScopeStrategy
-import io.imulab.astrea.domain.TokenType
-import io.imulab.astrea.domain.exactly
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.PublicClientConductingPrivateOpException
-import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
@@ -37,11 +33,7 @@ class OAuthClientCredentialsFlow(
         request.getClient().mustGrantType(GrantType.ClientCredentials)
 
         // check scope
-        val rejectedScope = request.getRequestScopes().find { requested ->
-            request.getClient().getScopes().none { registered -> scopeStrategy.accepts(registered, requested) }
-        }
-        if (rejectedScope != null)
-            throw ScopeRejectedException(rejectedScope)
+        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
 
         // set expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))

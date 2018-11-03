@@ -3,11 +3,11 @@ package io.imulab.astrea.handler.flow
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.ScopeStrategy
+import io.imulab.astrea.domain.mustAcceptAll
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
-import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
@@ -16,7 +16,6 @@ import io.imulab.astrea.token.storage.AuthorizeCodeStorage
 import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
-import org.ietf.jgss.Oid
 import java.security.MessageDigest
 import java.util.*
 
@@ -55,12 +54,7 @@ class OpenIdConnectHybridFlow(
                 throw IllegalArgumentException("nonce must be at least $minimumNonceEntropy in length.")
         }
 
-        request.getRequestScopes().find { requested ->
-            request.getClient().getScopes().none { registered -> scopeStrategy.accepts(registered, requested) }
-        }.let {
-            if (it != null)
-                throw ScopeRejectedException(it)
-        }
+        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
 
         openIdConnectRequestValidator.validateRequest(request)
 
