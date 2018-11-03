@@ -39,7 +39,7 @@ class OAuthAuthorizeCodeFlow(
     // start: AuthorizeEndpointHandler ---------------------------------------------------------------------------------
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
-        if (!request.hasSingleResponseTypeOf(ResponseType.Code))
+        if (!request.getResponseTypes().exactly(ResponseType.Code))
             return
 
         if (request.getRedirectUri()?.isSecureRedirectUri() != true)

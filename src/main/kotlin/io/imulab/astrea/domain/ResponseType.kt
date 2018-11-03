@@ -15,3 +15,6 @@ enum class ResponseType(val specValue: String) {
         }
     }
 }
+
+fun Collection<ResponseType>.exactly(expected: ResponseType): Boolean =
+        this.size == 1 && this.contains(expected)

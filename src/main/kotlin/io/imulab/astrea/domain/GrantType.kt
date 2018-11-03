@@ -17,5 +17,5 @@ enum class GrantType(val specValue: String) {
     }
 }
 
-fun List<GrantType>.exactly(expected: GrantType): Boolean =
+fun Collection<GrantType>.exactly(expected: GrantType): Boolean =
         this.size == 1 && this.contains(expected)

@@ -129,7 +129,7 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
 
         val redirectUri = URIBuilder(request.getRedirectUri()!!).also { builder ->
             if (request.getResponseTypes().isNotEmpty()
-                    && !(request.hasSingleResponseTypeOf(ResponseType.Code))
+                    && !(request.getResponseTypes().exactly(ResponseType.Code))
                     && rfc6749Error.error != Rfc6749Error.UnsupportedResponseType
             ) {
                 builder.fragment = rfc6749Error
