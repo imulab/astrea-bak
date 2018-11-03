@@ -22,7 +22,15 @@ import java.util.*
 class OpenIdConnectAuthorizeCodeFlow(
         private val openIdConnectRequestStorage: OpenIdConnectRequestStorage,
         private val openIdConnectRequestValidator: OpenIdConnectRequestValidator,
-        private val openIdTokenStrategy: IdTokenStrategy
+        private val openIdTokenStrategy: IdTokenStrategy,
+        private val openIdConnectSafeStorageParameters: List<String> = listOf(
+                "grant_type",
+                "max_age",
+                "prompt",
+                "acr_values",
+                "id_token_hint",
+                "nonce"
+        )
 ): AuthorizeEndpointHandler, TokenEndpointHandler {
 
     private val sha256: MessageDigest by lazy { MessageDigest.getInstance("SHA-256") }
@@ -41,14 +49,7 @@ class OpenIdConnectAuthorizeCodeFlow(
 
         openIdConnectRequestStorage.createOidcSession(
                 AuthorizeCode.fromRaw(response.getCode()),
-                request.sanitize(listOf(
-                        "grant_type",
-                        "max_age",
-                        "prompt",
-                        "acr_values",
-                        "id_token_hint",
-                        "nonce"
-                )))
+                request.sanitize(openIdConnectSafeStorageParameters))
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
