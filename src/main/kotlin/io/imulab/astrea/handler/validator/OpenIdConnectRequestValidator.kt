@@ -68,7 +68,7 @@ class OpenIdConnectRequestValidator(
             val prompts: List<Prompt> = request.getRequestForm()
                     .singleValue("prompt")
                     .split(" ")
-                    .map{ Prompt.fromSpecValue(it) }
+                    .map { Prompt.fromSpecValue(it) }
                     .toList()
 
             val authTime: NumericDate? = session.getIdTokenClaims()

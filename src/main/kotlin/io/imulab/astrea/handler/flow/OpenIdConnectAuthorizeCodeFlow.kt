@@ -7,7 +7,6 @@ import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
-import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -31,7 +30,7 @@ class OpenIdConnectAuthorizeCodeFlow(
                 "id_token_hint",
                 "nonce"
         )
-): AuthorizeEndpointHandler, TokenEndpointHandler {
+) : AuthorizeEndpointHandler, TokenEndpointHandler {
 
     private val sha256: MessageDigest by lazy { MessageDigest.getInstance("SHA-256") }
     private val base64Encoder: Base64.Encoder by lazy { Base64.getUrlEncoder().withoutPadding() }
@@ -76,8 +75,7 @@ class OpenIdConnectAuthorizeCodeFlow(
         if (!authorizeRequest.getGrantedScopes().contains("openid"))
             throw ScopeNotGrantedException("openid")
 
-        if (!request.getClient().getGrantTypes().contains(GrantType.AuthorizationCode))
-            throw ClientGrantTypeException(request.getClient(), GrantType.AuthorizationCode)
+        request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
         val oidcSession = request.getSession() as? OidcSession
                 ?: throw IllegalStateException("expected oidc session")
@@ -87,7 +85,7 @@ class OpenIdConnectAuthorizeCodeFlow(
 
         oidcSession.getIdTokenClaims().setStringClaim("at_hash",
                 sha256.digest(response.getAccessToken().toByteArray()).let {
-                    base64Encoder.encodeToString(it.copyOfRange(0, it.size/2))
+                    base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
                 })
 
         response.setExtra("id_token", openIdTokenStrategy.generateIdToken(request).token)

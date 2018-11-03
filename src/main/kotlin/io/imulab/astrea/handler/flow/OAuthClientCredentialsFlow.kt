@@ -5,7 +5,6 @@ import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
-import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.PublicClientConductingPrivateOpException
 import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -34,8 +33,7 @@ class OAuthClientCredentialsFlow(
         // check client validity
         if (request.getClient().isPublic())
             throw PublicClientConductingPrivateOpException("client credentials flow")
-        else if (!request.getClient().getGrantTypes().contains(GrantType.ClientCredentials))
-            throw ClientGrantTypeException(request.getClient(), GrantType.ClientCredentials)
+        request.getClient().mustGrantType(GrantType.ClientCredentials)
 
         // check scope
         val rejectedScope = request.getRequestScopes().find { requested ->

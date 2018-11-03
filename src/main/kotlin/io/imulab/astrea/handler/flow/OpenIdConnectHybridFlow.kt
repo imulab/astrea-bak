@@ -6,7 +6,6 @@ import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
-import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -22,7 +21,6 @@ import java.util.*
 class OpenIdConnectHybridFlow(
         private val openIdConnectAuthorizeCodeFlow: OpenIdConnectAuthorizeCodeFlow,
         private val oAuthImplicitFlow: OAuthImplicitFlow,
-        private val oAuthAuthorizeCodeFlow: OAuthAuthorizeCodeFlow,
         private val authorizeCodeStrategy: AuthorizeCodeStrategy,
         private val authorizeCodeStorage: AuthorizeCodeStorage,
         private val authorizeCodeSafeStorageParameters: List<String> = listOf("code", "redirect_uri"),
@@ -39,7 +37,7 @@ class OpenIdConnectHybridFlow(
                 "id_token_hint",
                 "nonce"
         )
-): AuthorizeEndpointHandler, TokenEndpointHandler by openIdConnectAuthorizeCodeFlow {
+) : AuthorizeEndpointHandler, TokenEndpointHandler by openIdConnectAuthorizeCodeFlow {
 
     private val sha256: MessageDigest by lazy { MessageDigest.getInstance("SHA-256") }
     private val base64Encoder: Base64.Encoder by lazy { Base64.getUrlEncoder().withoutPadding() }
@@ -68,8 +66,7 @@ class OpenIdConnectHybridFlow(
                 ?: throw IllegalStateException("program error: expect oidc session.")
 
         if (request.getResponseTypes().contains(ResponseType.Code)) {
-            if (!request.getClient().getGrantTypes().contains(GrantType.AuthorizationCode))
-                throw ClientGrantTypeException(request.getClient(), GrantType.AuthorizationCode)
+            request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
             val authorizeCode = authorizeCodeStrategy.generateNewAuthorizeCode(request).also {
                 authorizeCodeStorage.createAuthorizeCodeSession(it, request.sanitize(authorizeCodeSafeStorageParameters))
@@ -80,7 +77,7 @@ class OpenIdConnectHybridFlow(
 
             oidcSession.getIdTokenClaims().setStringClaim("c_hash",
                     sha256.digest(response.getCode().toByteArray()).let {
-                        base64Encoder.encodeToString(it.copyOfRange(0, it.size/2))
+                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
                     })
 
             if (request.getGrantedScopes().contains("openid"))
@@ -88,15 +85,14 @@ class OpenIdConnectHybridFlow(
         }
 
         if (request.getResponseTypes().contains(ResponseType.Token)) {
-            if (!request.getClient().getGrantTypes().contains(GrantType.Implicit))
-                throw ClientGrantTypeException(request.getClient(), GrantType.Implicit)
+            request.getClient().mustGrantType(GrantType.Implicit)
 
             oAuthImplicitFlow.issueImplicitAccessToken(request, response)
             request.setResponseTypeHandled(ResponseType.Token)
 
             oidcSession.getIdTokenClaims().setStringClaim("at_hash",
                     sha256.digest(response.getFragments().singleValue("access_token").toByteArray()).let {
-                        base64Encoder.encodeToString(it.copyOfRange(0, it.size/2))
+                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
                     })
         }
 

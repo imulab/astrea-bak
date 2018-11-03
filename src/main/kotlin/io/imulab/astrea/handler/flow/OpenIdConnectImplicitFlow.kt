@@ -6,7 +6,6 @@ import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
-import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
@@ -21,7 +20,7 @@ class OpenIdConnectImplicitFlow(
         private val openIdConnectTokenStrategy: IdTokenStrategy,
         private val openIdConnectRequestValidator: OpenIdConnectRequestValidator,
         private val minimumNonceEntropy: Int = 8
-): AuthorizeEndpointHandler {
+) : AuthorizeEndpointHandler {
 
     private val sha256: MessageDigest by lazy { MessageDigest.getInstance("SHA-256") }
     private val base64Encoder: Base64.Encoder by lazy { Base64.getUrlEncoder().withoutPadding() }
@@ -30,8 +29,7 @@ class OpenIdConnectImplicitFlow(
         if (!request.shouldHandle())
             return
 
-        if (!request.getClient().getGrantTypes().contains(GrantType.Implicit))
-            throw ClientGrantTypeException(request.getClient(), GrantType.Implicit)
+        request.getClient().mustGrantType(GrantType.Implicit)
 
         request.getRequestForm().singleValue("nonce").also {
             if (it.isEmpty())
@@ -57,7 +55,7 @@ class OpenIdConnectImplicitFlow(
 
             oidcSession.getIdTokenClaims().setStringClaim("at_hash",
                     sha256.digest(response.getFragments().singleValue("access_token").toByteArray()).let {
-                        base64Encoder.encodeToString(it.copyOfRange(0, it.size/2))
+                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
                     })
         } else {
             response.addFragment("state", request.getState())

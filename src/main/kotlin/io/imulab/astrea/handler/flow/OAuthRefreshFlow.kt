@@ -4,7 +4,6 @@ import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
-import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -28,8 +27,7 @@ class OAuthRefreshFlow(
         if (!request.hasSingleGrantTypeOf(GrantType.RefreshToken))
             return false
 
-        if (!request.getClient().getGrantTypes().contains(GrantType.RefreshToken))
-            throw ClientGrantTypeException(request.getClient(), GrantType.RefreshToken)
+        request.getClient().mustGrantType(GrantType.RefreshToken)
 
         val refreshTokenRaw = request.getRequestForm().singleValue("refresh_token").also {
             refreshTokenStrategy.validateRefreshToken(request, it)

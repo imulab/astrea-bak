@@ -5,7 +5,6 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
-import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.MissingSessionException
 import io.imulab.astrea.error.RedirectUriMismatchException
@@ -80,8 +79,7 @@ class OAuthAuthorizeCodeFlow(
         if (!request.hasSingleGrantTypeOf(GrantType.AuthorizationCode))
             return false
 
-        if (!request.getClient().getGrantTypes().contains(GrantType.AuthorizationCode))
-            throw ClientGrantTypeException(request.getClient(), GrantType.AuthorizationCode)
+        request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
         if (request.getSession() == null)
             throw MissingSessionException()
