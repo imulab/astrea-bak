@@ -4,6 +4,7 @@ import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.session.OidcSession
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 import java.security.MessageDigest
@@ -20,12 +21,11 @@ class OpenIdConnectRefreshFlow(
         if (!request.shouldHandle())
             return false
 
-        val oidcSession = request.getSession() as? OidcSession
-                ?: throw IllegalStateException("program error: expect oidc session.")
-
-        // reset
-        oidcSession.getIdTokenClaims().expirationTime = null
-        oidcSession.getIdTokenClaims().setStringClaim("nonce", "")
+        request.getSession().assertType<OidcSession>().also {
+            // reset
+            it.getIdTokenClaims().expirationTime = null
+            it.getIdTokenClaims().setStringClaim("nonce", "")
+        }
 
         return true
     }
@@ -34,16 +34,15 @@ class OpenIdConnectRefreshFlow(
         if (!request.shouldHandle())
             return false
 
-        val oidcSession = request.getSession() as? OidcSession
-                ?: throw IllegalStateException("program error: expect oidc session.")
+        request.getSession().assertType<OidcSession>().also {
+            if (it.getIdTokenClaims().subject.isEmpty())
+                throw IllegalArgumentException("subject is empty.")
 
-        if (oidcSession.getIdTokenClaims().subject.isEmpty())
-            throw IllegalArgumentException("subject is empty.")
-
-        oidcSession.getIdTokenClaims().setStringClaim("at_hash",
-                sha256.digest(response.getAccessToken().toByteArray()).let {
-                    base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
-                })
+            it.getIdTokenClaims().setStringClaim("at_hash",
+                    sha256.digest(response.getAccessToken().toByteArray()).let {
+                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
+                    })
+        }
 
         response.setExtra("id_token", openIdConnectTokenStrategy.generateIdToken(request).token)
 

@@ -6,6 +6,7 @@ import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
@@ -47,8 +48,7 @@ class OpenIdConnectImplicitFlow(
 
         openIdConnectRequestValidator.validateRequest(request)
 
-        val oidcSession = request.getSession() as? OidcSession
-                ?: throw IllegalStateException("program error: expect oidc session.")
+        val oidcSession = request.getSession().assertType<OidcSession>()
 
         if (request.getResponseTypes().contains(ResponseType.Token)) {
             oauthImplicitFlow.issueImplicitAccessToken(request, response)

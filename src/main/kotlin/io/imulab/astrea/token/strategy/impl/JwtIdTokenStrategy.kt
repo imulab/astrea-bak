@@ -6,6 +6,7 @@ import io.imulab.astrea.domain.Prompt
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.IdToken
@@ -19,8 +20,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
                          private val issuer: String) : IdTokenStrategy {
 
     override fun generateIdToken(request: OAuthRequest): IdToken {
-        val session = request.getSession()!! as? OidcSession
-                ?: throw IllegalStateException("program error: session is not oidc session.")
+        val session = request.getSession().assertType<OidcSession>()
 
         val expiry = request.getSession()!!.getExpiry(TokenType.IdToken)
                 ?: throw IllegalStateException("program error: id token expiry not set.")
@@ -81,6 +81,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
                         it.mustRequestTime()
                         it.mustAuthTimeIsAfterRequestTime()
                     }
+                    else -> {}
                 }
             }
 

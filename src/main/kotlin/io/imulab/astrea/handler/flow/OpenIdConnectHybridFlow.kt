@@ -6,6 +6,7 @@ import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.error.ScopeRejectedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -15,6 +16,7 @@ import io.imulab.astrea.token.storage.AuthorizeCodeStorage
 import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
+import org.ietf.jgss.Oid
 import java.security.MessageDigest
 import java.util.*
 
@@ -62,8 +64,7 @@ class OpenIdConnectHybridFlow(
 
         openIdConnectRequestValidator.validateRequest(request)
 
-        val oidcSession = request.getSession() as? OidcSession
-                ?: throw IllegalStateException("program error: expect oidc session.")
+        val oidcSession = request.getSession().assertType<OidcSession>()
 
         if (request.getResponseTypes().contains(ResponseType.Code)) {
             request.getClient().mustGrantType(GrantType.AuthorizationCode)

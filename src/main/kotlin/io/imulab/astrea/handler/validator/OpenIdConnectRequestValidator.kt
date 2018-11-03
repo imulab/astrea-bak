@@ -5,6 +5,7 @@ import io.imulab.astrea.domain.Prompt
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.spi.http.singleValue
 import org.jose4j.jwt.NumericDate
 
@@ -62,8 +63,7 @@ class OpenIdConnectRequestValidator(
 
         class ValidOidcRequest(val request: OAuthRequest) {
 
-            val session: OidcSession = request.getSession() as? OidcSession
-                    ?: throw IllegalStateException("program error: session is not oidc session.")
+            val session = request.getSession().assertType<OidcSession>()
 
             val prompts: List<Prompt> = request.getRequestForm()
                     .singleValue("prompt")

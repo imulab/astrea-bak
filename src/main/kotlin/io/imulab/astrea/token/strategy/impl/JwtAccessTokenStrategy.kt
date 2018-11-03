@@ -4,6 +4,7 @@ import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.JwtSession
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.error.InvalidAccessTokenException
 import io.imulab.astrea.error.TokenInvalidity
 import io.imulab.astrea.token.AccessToken
@@ -23,8 +24,7 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
     }
 
     override fun generateNewAccessToken(request: OAuthRequest): AccessToken {
-        val session = request.getSession() as? JwtSession
-                ?: throw IllegalStateException("session is not jwt typed.")
+        val session = request.getSession().assertType<JwtSession>()
 
         if (session.getJwtClaims().claimsMap.isEmpty())
             throw IllegalArgumentException("claim must not be empty.")

@@ -38,6 +38,14 @@ interface Session {
     fun clone(): Session
 }
 
+@Suppress("unchecked_cast")
+inline fun <reified T: Session> Session?.assertType(): T {
+    if (this == null)
+        throw IllegalStateException("Session is null.")
+    else if (this !is T)
+        throw IllegalStateException("Session is unexpected type.")
+    return this
+}
 
 
 
