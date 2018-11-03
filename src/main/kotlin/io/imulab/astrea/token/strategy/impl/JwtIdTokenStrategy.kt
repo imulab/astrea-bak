@@ -6,7 +6,7 @@ import io.imulab.astrea.domain.Prompt
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
-import io.imulab.astrea.handler.validator.OidcRequestValidator
+import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.IdToken
 import io.imulab.astrea.token.strategy.IdTokenStrategy
@@ -56,7 +56,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
     }
 
     private fun whenGrantTypeIsNotRefreshToken(request: OAuthRequest) {
-        OidcRequestValidator.Companion.ValidOidcRequest(request).also {
+        OpenIdConnectRequestValidator.Companion.ValidOidcRequest(request).also {
             it.optionalAuthTimeIsBeforeNow(authTimeLeeway)
 
             if (it.maxAge != null) {

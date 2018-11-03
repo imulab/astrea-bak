@@ -8,7 +8,7 @@ import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.spi.http.singleValue
 import org.jose4j.jwt.NumericDate
 
-class OidcRequestValidator(
+class OpenIdConnectRequestValidator(
         private val allowedPrompts: List<Prompt> = listOf(
                 Prompt.Login,
                 Prompt.None,
