@@ -76,7 +76,7 @@ class OAuthAuthorizeCodeFlow(
     // start: TokenEndpointHandler -------------------------------------------------------------------------------------
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.AuthorizationCode))
+        if (!request.getGrantTypes().exactly(GrantType.AuthorizationCode))
             return false
 
         request.getClient().mustGrantType(GrantType.AuthorizationCode)
@@ -115,7 +115,7 @@ class OAuthAuthorizeCodeFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.AuthorizationCode))
+        if (!request.getGrantTypes().exactly(GrantType.AuthorizationCode))
             return false
 
         // retrieve authorization code from session storage

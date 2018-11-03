@@ -3,6 +3,7 @@ package io.imulab.astrea.handler.flow
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.exactly
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.ScopeRejectedException
@@ -30,7 +31,7 @@ class OAuthResourceOwnerFlow(
 ) : TokenEndpointHandler {
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.Password))
+        if (!request.getGrantTypes().exactly(GrantType.Password))
             return false
 
         // check grant type
@@ -61,7 +62,7 @@ class OAuthResourceOwnerFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.Password))
+        if (!request.getGrantTypes().exactly(GrantType.Password))
             return false
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {

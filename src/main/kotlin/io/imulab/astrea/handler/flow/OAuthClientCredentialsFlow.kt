@@ -3,6 +3,7 @@ package io.imulab.astrea.handler.flow
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.exactly
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.PublicClientConductingPrivateOpException
@@ -27,7 +28,7 @@ class OAuthClientCredentialsFlow(
 ) : TokenEndpointHandler {
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.ClientCredentials))
+        if (!request.getGrantTypes().exactly(GrantType.ClientCredentials))
             return false
 
         // check client validity
@@ -49,7 +50,7 @@ class OAuthClientCredentialsFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.ClientCredentials))
+        if (!request.getGrantTypes().exactly(GrantType.ClientCredentials))
             return false
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {

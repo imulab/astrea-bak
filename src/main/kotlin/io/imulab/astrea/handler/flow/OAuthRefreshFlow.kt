@@ -2,6 +2,7 @@ package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.exactly
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.ClientIdentityMismatchException
@@ -24,7 +25,7 @@ class OAuthRefreshFlow(
 ) : TokenEndpointHandler {
 
     override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.RefreshToken))
+        if (!request.getGrantTypes().exactly(GrantType.RefreshToken))
             return false
 
         request.getClient().mustGrantType(GrantType.RefreshToken)
@@ -56,7 +57,7 @@ class OAuthRefreshFlow(
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.hasSingleGrantTypeOf(GrantType.RefreshToken))
+        if (!request.getGrantTypes().exactly(GrantType.RefreshToken))
             return false
 
         val oldRefreshToken = request.getRequestForm().singleValue("refresh_token").let { rawToken ->

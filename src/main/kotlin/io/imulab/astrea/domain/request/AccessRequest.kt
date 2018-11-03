@@ -12,11 +12,6 @@ interface AccessRequest : OAuthRequest {
      */
     fun getGrantTypes(): List<GrantType>
 
-    /**
-     * Returns true if [getGrantTypes] contains a single grant type equal to [grantType].
-     */
-    fun hasSingleGrantTypeOf(grantType: GrantType) =
-            this.getGrantTypes().size == 1 && this.getGrantTypes().contains(grantType)
 }
 
 class DefaultAccessRequest(private val baseRequest: OAuthRequest,
