@@ -5,6 +5,8 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
+import io.imulab.astrea.domain.session.Session
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.MissingSessionException
 import io.imulab.astrea.error.RedirectUriMismatchException
@@ -45,14 +47,7 @@ class OAuthAuthorizeCodeFlow(
         if (request.getRedirectUri()?.isSecureRedirectUri() != true)
             throw IllegalArgumentException("insecure redirect uri.")
 
-        request.getRequestScopes().find { requestedScope ->
-            request.getClient().getScopes().none { registeredScope ->
-                scopeStrategy.accepts(registeredScope, requestedScope)
-            }
-        }.also { illegalScope ->
-            if (illegalScope != null)
-                throw IllegalArgumentException("scope $illegalScope cannot be accepted.")
-        }
+        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
 
         val authCode = authorizeCodeStrategy.generateNewAuthorizeCode(request)
         authorizeCodeStorage.createAuthorizeCodeSession(authCode, request.also {

@@ -1,9 +1,6 @@
 package io.imulab.astrea.handler.flow
 
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.ResponseType
-import io.imulab.astrea.domain.ScopeStrategy
-import io.imulab.astrea.domain.mustAcceptAll
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
@@ -61,7 +58,7 @@ class OpenIdConnectImplicitFlow(
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
-        if (this.getResponseTypes().size == 1 && this.getResponseTypes().contains(ResponseType.IdToken))
+        if (this.getResponseTypes().exactly(ResponseType.IdToken))
             return true
 
         if (this.getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.IdToken)) &&

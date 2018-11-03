@@ -60,3 +60,11 @@ interface OAuthClient {
         return true
     }
 }
+
+inline fun <reified T: OAuthClient> OAuthClient?.assertType(): T {
+    if (this == null)
+        throw IllegalStateException("Client is null.")
+    else if (this !is T)
+        throw IllegalStateException("Client is of unexpected type.")
+    return this
+}

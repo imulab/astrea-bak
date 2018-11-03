@@ -1,6 +1,7 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.GrantType
+import io.imulab.astrea.domain.exactly
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.session.OidcSession
@@ -50,8 +51,7 @@ class OpenIdConnectRefreshFlow(
     }
 
     private fun AccessRequest.shouldHandle(): Boolean {
-        return this.getGrantTypes().size == 1 &&
-                this.getGrantTypes().contains(GrantType.RefreshToken) &&
+        return this.getGrantTypes().exactly(GrantType.RefreshToken) &&
                 this.getGrantedScopes().contains("openid") &&
                 this.getClient().mustGrantType(GrantType.RefreshToken, false)
     }

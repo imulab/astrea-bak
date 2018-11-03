@@ -2,6 +2,7 @@ package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ResponseType
+import io.imulab.astrea.domain.exactly
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
@@ -65,7 +66,7 @@ class OpenIdConnectAuthorizeCodeFlow(
     override fun handleAccessRequest(request: AccessRequest): Boolean = false
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.shouldHandle())
+        if (!request.getGrantTypes().exactly(GrantType.AuthorizationCode))
             return false
 
         val authorizeRequest = openIdConnectRequestStorage.getOidcSession(
@@ -93,9 +94,5 @@ class OpenIdConnectAuthorizeCodeFlow(
         return true
     }
 
-    private fun AccessRequest.shouldHandle(): Boolean {
-        return this.getGrantTypes().size == 1 && this.getGrantTypes().contains(GrantType.AuthorizationCode)
-    }
-
-// end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
+    // end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
 }

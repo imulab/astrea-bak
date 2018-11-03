@@ -2,6 +2,7 @@ package io.imulab.astrea.provider.impl
 
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OpenIdConnectClient
+import io.imulab.astrea.client.assertType
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
@@ -175,9 +176,7 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         }
 
         // client
-        if (builder.client !is OpenIdConnectClient)
-            throw IllegalStateException("Non-OIDC client specifies OIDC context.")
-        val client = builder.client!! as OpenIdConnectClient
+        val client = builder.client.assertType<OpenIdConnectClient>()
         if (client.getJsonWebKeys() == null && client.getJsonKeyKeysUri().isBlank())
             throw IllegalStateException("OIDC client did not register JWK.")
 
