@@ -3,9 +3,7 @@ package io.imulab.astrea.token.strategy.impl
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.crypt.hash.Hasher
 import io.imulab.astrea.crypt.hash.ShaHasher
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.Prompt
-import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
@@ -91,7 +89,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
 
             if (it.request.getRequestForm().singleValue("acr_value").isNotEmpty() &&
                     it.session.getIdTokenClaims().getStringClaimValue("acr").isEmpty())
-                it.session.getIdTokenClaims().setStringClaim("acr", "0")
+                it.session.getIdTokenClaims().setAuthenticationContextClassReference("0")
 
             request.getRequestForm().singleValue("id_token_hint").also { hint ->
                 if (hint.isNotEmpty()) {
@@ -107,14 +105,6 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
 
     private fun OAuthRequest.getGrantType(): GrantType =
             GrantType.fromSpecValue(this.getRequestForm().singleValue("grant_type"))
-
-    private fun JwtClaims.setAuthTime(time: NumericDate) {
-        this.setNumericDateClaim("auth_time", time)
-    }
-
-    private fun JwtClaims.setNonce(nonce: String) {
-        this.setStringClaim("nonce", nonce)
-    }
 
     private companion object {
         const val authTimeLeeway: Long = 5

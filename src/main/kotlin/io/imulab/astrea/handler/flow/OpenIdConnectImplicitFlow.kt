@@ -40,7 +40,7 @@ class OpenIdConnectImplicitFlow(
         if (request.getResponseTypes().contains(ResponseType.Token)) {
             oauthImplicitFlow.issueImplicitAccessToken(request, response)
 
-            oidcSession.getIdTokenClaims().setStringClaim("at_hash",
+            oidcSession.getIdTokenClaims().setAccessTokenHash(
                     openIdConnectTokenStrategy.leftMostHash(response.getFragments().singleValue("access_token")))
         } else {
             response.addFragment("state", request.getState())

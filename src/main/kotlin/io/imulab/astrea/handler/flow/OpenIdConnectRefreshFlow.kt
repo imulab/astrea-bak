@@ -6,6 +6,8 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.domain.setAccessTokenHash
+import io.imulab.astrea.domain.setNonce
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 
@@ -20,7 +22,7 @@ class OpenIdConnectRefreshFlow(
         request.getSession().assertType<OidcSession>().also {
             // reset
             it.getIdTokenClaims().expirationTime = null
-            it.getIdTokenClaims().setStringClaim("nonce", "")
+            it.getIdTokenClaims().setNonce("")
         }
 
         return true
@@ -34,8 +36,7 @@ class OpenIdConnectRefreshFlow(
             if (it.getIdTokenClaims().subject.isEmpty())
                 throw IllegalArgumentException("subject is empty.")
 
-            it.getIdTokenClaims().setStringClaim("at_hash",
-                    openIdConnectTokenStrategy.leftMostHash(response.getAccessToken()))
+            it.getIdTokenClaims().setAccessTokenHash(openIdConnectTokenStrategy.leftMostHash(response.getAccessToken()))
         }
 
         response.setExtra("id_token", openIdConnectTokenStrategy.generateIdToken(request).token)

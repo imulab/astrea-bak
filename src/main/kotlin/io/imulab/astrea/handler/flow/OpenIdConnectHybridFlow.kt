@@ -1,9 +1,6 @@
 package io.imulab.astrea.handler.flow
 
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.ResponseType
-import io.imulab.astrea.domain.ScopeStrategy
-import io.imulab.astrea.domain.mustAcceptAll
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
@@ -66,8 +63,7 @@ class OpenIdConnectHybridFlow(
             response.addFragment("code", authorizeCode.code)
             request.setResponseTypeHandled(ResponseType.Code)
 
-            oidcSession.getIdTokenClaims().setStringClaim("c_hash",
-                    openIdConnectTokenStrategy.leftMostHash(response.getCode()))
+            oidcSession.getIdTokenClaims().setCodeHash(openIdConnectTokenStrategy.leftMostHash(response.getCode()))
 
             if (request.getGrantedScopes().contains("openid"))
                 openIdConnectRequestStorage.createOidcSession(authorizeCode, request.sanitize(openIdConnectSafeStorageParameters))
@@ -79,7 +75,7 @@ class OpenIdConnectHybridFlow(
             oAuthImplicitFlow.issueImplicitAccessToken(request, response)
             request.setResponseTypeHandled(ResponseType.Token)
 
-            oidcSession.getIdTokenClaims().setStringClaim("at_hash",
+            oidcSession.getIdTokenClaims().setAccessTokenHash(
                     openIdConnectTokenStrategy.leftMostHash(response.getFragments().singleValue("access_token")))
         }
 

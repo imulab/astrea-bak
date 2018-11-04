@@ -9,6 +9,7 @@ import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.domain.setAccessTokenHash
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -78,8 +79,7 @@ class OpenIdConnectAuthorizeCodeFlow(
             if (oidcSession.getIdTokenClaims().subject.isEmpty())
                 throw IllegalArgumentException("subject is empty.")
 
-            oidcSession.getIdTokenClaims().setStringClaim("at_hash",
-                    openIdTokenStrategy.leftMostHash(response.getAccessToken()))
+            oidcSession.getIdTokenClaims().setAccessTokenHash(openIdTokenStrategy.leftMostHash(response.getAccessToken()))
         }
 
         response.setExtra("id_token", openIdTokenStrategy.generateIdToken(request).token)
