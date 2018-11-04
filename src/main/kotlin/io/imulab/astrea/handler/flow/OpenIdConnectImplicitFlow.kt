@@ -1,12 +1,11 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.domain.extension.getNonce
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
-import io.imulab.astrea.domain.extension.setAccessTokenHash
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.spi.http.singleValue
@@ -42,13 +41,14 @@ class OpenIdConnectImplicitFlow(
         if (request.getResponseTypes().contains(ResponseType.Token)) {
             oauthImplicitFlow.issueImplicitAccessToken(request, response)
 
-            oidcSession.getIdTokenClaims().setAccessTokenHash(
-                    openIdConnectTokenStrategy.leftMostHash(response.getFragments().singleValue("access_token")))
+            response.getAccessTokenFromFragment()
+                    .let { openIdConnectTokenStrategy.leftMostHash(it) }
+                    .let { oidcSession.getIdTokenClaims().setAccessTokenHash(it) }
         } else {
-            response.addFragment("state", request.getState())
+            response.setStateAsFragment(request.getState())
         }
 
-        response.addFragment("id_token", openIdConnectTokenStrategy.generateIdToken(request).token)
+        response.setIdTokenAsFragment(openIdConnectTokenStrategy.generateIdToken(request).token)
         request.setResponseTypeHandled(ResponseType.IdToken)
     }
 

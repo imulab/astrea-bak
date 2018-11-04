@@ -7,6 +7,7 @@ import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.domain.extension.setAccessTokenHash
+import io.imulab.astrea.domain.extension.setIdToken
 import io.imulab.astrea.domain.extension.setNonce
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.strategy.IdTokenStrategy
@@ -32,14 +33,18 @@ class OpenIdConnectRefreshFlow(
         if (!request.shouldHandle())
             return false
 
-        request.getSession().assertType<OidcSession>().also {
+        val oidcSession = request.getSession().assertType<OidcSession>().also {
             if (it.getIdTokenClaims().subject.isEmpty())
                 throw IllegalArgumentException("subject is empty.")
-
-            it.getIdTokenClaims().setAccessTokenHash(openIdConnectTokenStrategy.leftMostHash(response.getAccessToken()))
         }
 
-        response.setExtra("id_token", openIdConnectTokenStrategy.generateIdToken(request).token)
+        response.getAccessToken()
+                .let { openIdConnectTokenStrategy.leftMostHash(it) }
+                .let { oidcSession.getIdTokenClaims().setAccessTokenHash(it) }
+
+        openIdConnectTokenStrategy.generateIdToken(request).let {
+            response.setIdToken(it.token)
+        }
 
         return true
     }

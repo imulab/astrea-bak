@@ -11,6 +11,7 @@ import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.domain.extension.setAccessTokenHash
+import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -52,9 +53,7 @@ class OpenIdConnectAuthorizeCodeFlow(
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
-        return this.getResponseTypes().size == 1 &&
-                this.getResponseTypes().contains(ResponseType.Code) &&
-                this.getGrantedScopes().contains("openid")
+        return this.getResponseTypes().exactly(ResponseType.Code) && this.getGrantedScopes().contains("openid")
     }
 
     // end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
@@ -80,10 +79,12 @@ class OpenIdConnectAuthorizeCodeFlow(
             if (oidcSession.getIdTokenClaims().subject.isEmpty())
                 throw IllegalArgumentException("subject is empty.")
 
-            oidcSession.getIdTokenClaims().setAccessTokenHash(openIdTokenStrategy.leftMostHash(response.getAccessToken()))
+            response.getAccessToken()
+                    .let { openIdTokenStrategy.leftMostHash(it) }
+                    .let { oidcSession.getIdTokenClaims().setAccessTokenHash(it) }
         }
 
-        response.setExtra("id_token", openIdTokenStrategy.generateIdToken(request).token)
+        response.setRefreshToken(openIdTokenStrategy.generateIdToken(request).token)
 
         return true
     }

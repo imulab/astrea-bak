@@ -1,6 +1,7 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
@@ -37,12 +38,12 @@ class OAuthImplicitFlow(
             accessTokenStorage.createAccessTokenSession(it, request)
         }
 
-        response.also {
-            it.addFragment("access_token", accessToken.token)
-            it.addFragment("expires_in", LocalDateTime.now().until(accessTokenExpiry, ChronoUnit.SECONDS).toString())
-            it.addFragment("token_type", TokenType.Bearer.specValue)
-            it.addFragment("state", request.getState())
-            it.addFragment("scope", request.getGrantedScopes().joinToString(" "))
+        response.run {
+            setAccessTokenAsFragment(accessToken.token)
+            setExpiresInAsFragment(LocalDateTime.now().until(accessTokenExpiry, ChronoUnit.SECONDS))
+            setTokenTypeAsFragment(TokenType.Bearer)
+            setStateAsFragment(request.getState())
+            setScopesAsFragment(request.getGrantedScopes())
         }
 
         request.setResponseTypeHandled(ResponseType.Token)

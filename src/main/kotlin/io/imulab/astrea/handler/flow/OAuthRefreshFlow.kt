@@ -4,6 +4,7 @@ import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.exactly
 import io.imulab.astrea.domain.extension.getRefreshToken
+import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.ClientIdentityMismatchException
@@ -75,11 +76,13 @@ class OAuthRefreshFlow(
         tokenRevocationStorage.createAccessTokenSession(newAccessToken, requestToStore)
         tokenRevocationStorage.createRefreshTokenSession(newRefreshToken, requestToStore)
 
-        response.setAccessToken(newAccessToken.token)
-        response.setTokenType(TokenType.Bearer)
-        response.setExpiry(request.getSession()!!.getExpiry(TokenType.AccessToken)!!)
-        response.setScopes(request.getGrantedScopes())
-        response.setExtra("refresh_token", newRefreshToken.token)
+        response.run {
+            setAccessToken(newAccessToken.token)
+            setTokenType(TokenType.Bearer)
+            setExpiry(request.getSession()!!.getExpiry(TokenType.AccessToken)!!)
+            setScopes(request.getGrantedScopes())
+            setRefreshToken(newRefreshToken.token)
+        }
 
         return true
     }

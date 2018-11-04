@@ -1,6 +1,7 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
@@ -8,8 +9,6 @@ import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.MissingSessionException
 import io.imulab.astrea.error.RedirectUriMismatchException
-import io.imulab.astrea.domain.extension.getCode
-import io.imulab.astrea.domain.extension.getRedirectUri
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.RefreshToken
@@ -55,10 +54,10 @@ class OAuthAuthorizeCodeFlow(
             )
         }.sanitize(safeStorageParameters))
 
-        response.also {
-            it.addQuery("code", authCode.code)
-            it.addQuery("state", request.getState())
-            it.addQuery("scope", request.getGrantedScopes().joinToString(" "))
+        response.run {
+            setCodeAsQuery(authCode.code)
+            setStateAsQuery(request.getState())
+            setScopesAsQuery(request.getGrantedScopes())
         }
 
         request.setResponseTypeHandled(ResponseType.Code)
@@ -130,13 +129,13 @@ class OAuthAuthorizeCodeFlow(
         if (refreshToken != null)
             refreshTokenStorage.createRefreshTokenSession(refreshToken, request.sanitize(emptyList()))
 
-        response.also {
-            it.setAccessToken(accessToken.token)
-            it.setTokenType(TokenType.Bearer)
-            it.setExpiry(request.getSession()!!.getExpiry(TokenType.AccessToken)!!)
-            it.setScopes(request.getGrantedScopes())
+        response.run {
+            setAccessToken(accessToken.token)
+            setTokenType(TokenType.Bearer)
+            setExpiry(request.getSession()!!.getExpiry(TokenType.AccessToken)!!)
+            setScopes(request.getGrantedScopes())
             if (refreshToken != null)
-                it.setExtra("refresh_token", refreshToken.token)
+                setRefreshToken(refreshToken.token)
         }
 
         return true

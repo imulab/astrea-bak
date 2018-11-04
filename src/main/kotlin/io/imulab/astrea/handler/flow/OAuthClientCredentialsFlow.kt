@@ -1,6 +1,7 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.PublicClientConductingPrivateOpException
@@ -55,12 +56,14 @@ class OAuthClientCredentialsFlow(
                 refreshTokenStorage.createRefreshTokenSession(it, request)
             }
 
-        response.setAccessToken(accessToken.token)
-        response.setTokenType(TokenType.Bearer)
-        response.setExpiry(request.getSession()!!.getExpiry(TokenType.AccessToken)!!)
-        response.setScopes(request.getGrantedScopes())
-        if (refreshToken != null)
-            response.setExtra("refresh_token", refreshToken.token)
+        response.run {
+            setAccessToken(accessToken.token)
+            setTokenType(TokenType.Bearer)
+            setExpiry(request.getSession()!!.getExpiry(TokenType.AccessToken)!!)
+            setScopes(request.getGrantedScopes())
+            if (refreshToken != null)
+                setRefreshToken(refreshToken.token)
+        }
 
         return true
     }

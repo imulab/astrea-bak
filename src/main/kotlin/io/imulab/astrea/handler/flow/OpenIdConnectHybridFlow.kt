@@ -1,13 +1,11 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.domain.extension.getNonce
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
-import io.imulab.astrea.domain.extension.setAccessTokenHash
-import io.imulab.astrea.domain.extension.setCodeHash
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
@@ -62,13 +60,18 @@ class OpenIdConnectHybridFlow(
                 authorizeCodeStorage.createAuthorizeCodeSession(it, request.sanitize(authorizeCodeSafeStorageParameters))
             }
 
-            response.addFragment("code", authorizeCode.code)
+            response.setCodeAsFragment(authorizeCode.code)
             request.setResponseTypeHandled(ResponseType.Code)
 
-            oidcSession.getIdTokenClaims().setCodeHash(openIdConnectTokenStrategy.leftMostHash(response.getCode()))
+            response.getCode()
+                    .let { openIdConnectTokenStrategy.leftMostHash(it) }
+                    .let { oidcSession.getIdTokenClaims().setCodeHash(it) }
 
             if (request.getGrantedScopes().contains("openid"))
-                openIdConnectRequestStorage.createOidcSession(authorizeCode, request.sanitize(openIdConnectSafeStorageParameters))
+                openIdConnectRequestStorage.createOidcSession(
+                        authorizeCode,
+                        request.sanitize(openIdConnectSafeStorageParameters)
+                )
         }
 
         if (request.getResponseTypes().contains(ResponseType.Token)) {
@@ -77,16 +80,17 @@ class OpenIdConnectHybridFlow(
             oAuthImplicitFlow.issueImplicitAccessToken(request, response)
             request.setResponseTypeHandled(ResponseType.Token)
 
-            oidcSession.getIdTokenClaims().setAccessTokenHash(
-                    openIdConnectTokenStrategy.leftMostHash(response.getFragments().singleValue("access_token")))
+            response.getAccessTokenFromFragment()
+                    .let { openIdConnectTokenStrategy.leftMostHash(it) }
+                    .let { oidcSession.getIdTokenClaims().setAccessTokenHash(it) }
         }
 
-        if (response.getFragments().singleValue("state").isEmpty())
-            response.addFragment("state", request.getState())
+        if (response.getStateFromFragment().isEmpty())
+            response.setStateAsFragment(request.getState())
 
         if (request.getGrantedScopes().contains("openid") &&
                 request.getResponseTypes().contains(ResponseType.IdToken))
-            response.addFragment("id_token", openIdConnectTokenStrategy.generateIdToken(request).token)
+            response.setIdTokenAsFragment(openIdConnectTokenStrategy.generateIdToken(request).token)
 
         request.setResponseTypeHandled(ResponseType.IdToken)
     }
