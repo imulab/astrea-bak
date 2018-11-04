@@ -46,13 +46,10 @@ class OAuthAuthorizeCodeFlow(
 
         request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
 
-        val authCode = authorizeCodeStrategy.generateNewAuthorizeCode(request)
-        authorizeCodeStorage.createAuthorizeCodeSession(authCode, request.also {
-            it.getSession()?.setExpiry(
-                    TokenType.AuthorizeCode,
-                    LocalDateTime.now().plus(authorizeCodeLifespan)
-            )
-        }.sanitize(safeStorageParameters))
+        val authCode = authorizeCodeStrategy.generateNewAuthorizeCode(request).also {
+            request.getSession()!!.setExpiry(TokenType.AuthorizeCode, LocalDateTime.now().plus(authorizeCodeLifespan))
+            authorizeCodeStorage.createAuthorizeCodeSession(it, request.sanitize(safeStorageParameters))
+        }
 
         response.run {
             setCodeAsQuery(authCode.code)
@@ -79,31 +76,31 @@ class OAuthAuthorizeCodeFlow(
         if (request.getSession() == null)
             throw MissingSessionException()
 
-        // retrieve authorization code from session storage
-        val authorizeCode = authorizeCodeStrategy.fromRaw(request.getCode())
-        val authorizeRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
-
-        // validate code
-        // ?? use 'request' or 'authorizeRequest'
-        authorizeCodeStrategy.validateAuthorizeCode(authorizeRequest, authorizeCode.code)
+        // retrieve authorization code from session storage, and validate code
+        val restoredRequest = authorizeCodeStrategy.fromRaw(request.getCode()).let { authorizeCode ->
+            authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!).also {
+                // Note: original impl used presented request instead of stored request, make sure we are right
+                authorizeCodeStrategy.validateAuthorizeCode(it, authorizeCode.code)
+            }
+        }
 
         // Override request scopes to ensure no rewrite
-        request.setRequestScopes(authorizeRequest.getRequestScopes())
+        request.setRequestScopes(restoredRequest.getRequestScopes())
 
         // Compare and match the identity of the client making the request with the one restored from session.
-        if (authorizeRequest.getClient().getId() != request.getClient().getId())
-            throw ClientIdentityMismatchException(authorizeRequest.getClient(), request.getClient())
+        if (restoredRequest.getClient().getId() != request.getClient().getId())
+            throw ClientIdentityMismatchException(restoredRequest.getClient(), request.getClient())
 
         // Compare and match the redirect URI to prevent any malicious redirection.
-        val restoredRedirectUri = authorizeRequest.getRedirectUri()
+        val restoredRedirectUri = restoredRequest.getRedirectUri()
         val presentedRedirectUri = request.getRedirectUri()
         if (restoredRedirectUri.isNotBlank() && restoredRedirectUri != presentedRedirectUri)
             throw RedirectUriMismatchException(restoredRedirectUri, presentedRedirectUri)
 
-        request.let {
-            it.setSession(authorizeRequest.getSession()!!)
-            it.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
-            it.setId(authorizeRequest.getId())
+        request.run {
+            setSession(restoredRequest.getSession()!!)
+            getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
+            setId(restoredRequest.getId())
         }
     }
 
@@ -113,15 +110,15 @@ class OAuthAuthorizeCodeFlow(
 
         // retrieve authorization code from session storage
         val authorizeCode = authorizeCodeStrategy.fromRaw(request.getCode())
-        val authorizeRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
+        val restoredRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
 
         // transfer grants of scopes
-        authorizeRequest.getGrantedScopes().forEach(request::grantScope)
+        restoredRequest.getGrantedScopes().forEach(request::grantScope)
 
         // generate tokens
         val accessToken = accessTokenStrategy.generateNewAccessToken(request)
         var refreshToken: RefreshToken? = null
-        if (authorizeRequest.getGrantedScopes().containsAny(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
+        if (restoredRequest.getGrantedScopes().containsAny(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
             refreshToken = refreshTokenStrategy.generateNewRefreshToken(request)
 
         // deal with sessions

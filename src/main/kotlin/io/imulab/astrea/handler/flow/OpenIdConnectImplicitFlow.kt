@@ -25,9 +25,9 @@ class OpenIdConnectImplicitFlow(
         request.getClient().mustGrantType(GrantType.Implicit)
 
         with(request.getNonce()) {
-            if (this.isEmpty())
+            if (isEmpty())
                 throw IllegalArgumentException("nonce required.")
-            else if (this.length < minimumNonceEntropy)
+            else if (length < minimumNonceEntropy)
                 throw IllegalArgumentException("nonce must be at least $minimumNonceEntropy in length.")
         }
 
@@ -48,20 +48,17 @@ class OpenIdConnectImplicitFlow(
         }
 
         response.setIdTokenAsFragment(openIdConnectTokenStrategy.generateIdToken(request).token)
+
         request.setResponseTypeHandled(ResponseType.IdToken)
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
-        if (this.getResponseTypes().exactly(ResponseType.IdToken))
-            return true
-
-        if (this.getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.IdToken)) &&
-                this.getGrantedScopes().contains(SCOPE_OPENID))
-            return true
-
-        if (!this.getResponseTypes().contains(ResponseType.Code))
-            return true
-
-        return false
+        return when {
+            getResponseTypes().exactly(ResponseType.IdToken) -> true
+            getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.IdToken)) &&
+                    getGrantedScopes().contains(SCOPE_OPENID) -> true
+            !getResponseTypes().contains(ResponseType.Code) -> true
+            else -> false
+        }
     }
 }

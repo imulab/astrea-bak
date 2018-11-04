@@ -30,5 +30,5 @@ fun List<Scope>.mustAcceptAll(scopes: Collection<Scope>, strategy: ScopeStrategy
 fun List<Scope>.containsAny(vararg scopes: Scope): Boolean =
         scopes.any { this.contains(it) }
 
-fun List<Scope>.containsNone(vararg scopes: Scope): Boolean  =
+fun List<Scope>.containsNone(vararg scopes: Scope): Boolean =
         !this.containsAny(*scopes)

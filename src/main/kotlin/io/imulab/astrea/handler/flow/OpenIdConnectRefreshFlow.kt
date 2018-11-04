@@ -46,8 +46,8 @@ class OpenIdConnectRefreshFlow(
                 .let { openIdConnectTokenStrategy.leftMostHash(it) }
                 .let { oidcSession.getIdTokenClaims().setAccessTokenHash(it) }
 
-        openIdConnectTokenStrategy.generateIdToken(request).let {
-            response.setIdToken(it.token)
+        openIdConnectTokenStrategy.generateIdToken(request).run {
+            response.setIdToken(token)
         }
     }
 }

@@ -23,15 +23,17 @@ class OAuthImplicitFlow(
         if (!request.getResponseTypes().exactly(ResponseType.Token))
             return
 
-        request.getClient().mustGrantType(GrantType.Implicit)
-
-        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+        request.getClient().run {
+            mustGrantType(GrantType.Implicit)
+            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+        }
 
         issueImplicitAccessToken(request, response)
     }
 
     fun issueImplicitAccessToken(request: AuthorizeRequest, response: AuthorizeResponse) {
         val accessTokenExpiry = LocalDateTime.now().plus(accessTokenLifespan)
+
         request.getSession()!!.setExpiry(TokenType.AccessToken, accessTokenExpiry)
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {

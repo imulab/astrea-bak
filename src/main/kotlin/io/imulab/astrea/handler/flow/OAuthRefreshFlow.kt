@@ -37,32 +37,30 @@ class OAuthRefreshFlow(
             return@let RefreshToken(token = it, signature = refreshTokenStrategy.computeRefreshTokenSignature(it))
         }
 
-        val originalRequest = tokenRevocationStorage.getRefreshTokenSession(refreshToken, request.getSession()!!)
-        if (originalRequest.getGrantedScopes().containsNone(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
-            throw ScopeNotGrantedException(SCOPE_OFFLINE)
+        val originalRequest = tokenRevocationStorage.getRefreshTokenSession(refreshToken, request.getSession()!!).also {
+            if (it.getGrantedScopes().containsNone(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
+                throw ScopeNotGrantedException(SCOPE_OFFLINE)
 
-        if (request.getClient().getId() != originalRequest.getClient().getId())
-            throw ClientIdentityMismatchException(originalRequest.getClient(), request.getClient())
-
-        request.let {
-            it.setSession(originalRequest.getSession()!!.clone())
-            it.setRequestScopes(originalRequest.getRequestScopes())
-            originalRequest.getGrantedScopes().forEach(it::grantScope)
+            if (request.getClient().getId() != it.getClient().getId())
+                throw ClientIdentityMismatchException(it.getClient(), request.getClient())
         }
 
-        request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
+        request.run {
+            setSession(originalRequest.getSession()!!.clone())
+            setRequestScopes(originalRequest.getRequestScopes())
+            originalRequest.getGrantedScopes().forEach(this::grantScope)
+            getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
+        }
     }
 
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
         if (!supports(request))
             return
 
-        val oldRefreshToken = request.getRefreshToken().let { rawToken ->
-            RefreshToken(token = rawToken, signature = refreshTokenStrategy.computeRefreshTokenSignature(rawToken))
-        }
-        val oldRequest = tokenRevocationStorage.getRefreshTokenSession(oldRefreshToken, request.getSession()!!).also { oldReq ->
-            tokenRevocationStorage.revokeAccessToken(oldReq.getId())
-            tokenRevocationStorage.revokeRefreshToken(oldReq.getId())
+        val oldRefreshToken = refreshTokenStrategy.fromRaw(request.getRefreshToken())
+        val oldRequest = tokenRevocationStorage.getRefreshTokenSession(oldRefreshToken, request.getSession()!!).also {
+            tokenRevocationStorage.revokeAccessToken(it.getId())
+            tokenRevocationStorage.revokeRefreshToken(it.getId())
         }
 
         val newAccessToken = accessTokenStrategy.generateNewAccessToken(request)

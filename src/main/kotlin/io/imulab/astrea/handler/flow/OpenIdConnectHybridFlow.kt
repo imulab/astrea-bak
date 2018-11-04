@@ -40,9 +40,9 @@ class OpenIdConnectHybridFlow(
             return
 
         with(request.getNonce()) {
-            if (this.isEmpty())
+            if (isEmpty())
                 throw IllegalArgumentException("nonce required.")
-            else if (this.length < minimumNonceEntropy)
+            else if (length < minimumNonceEntropy)
                 throw IllegalArgumentException("nonce must be at least $minimumNonceEntropy in length.")
         }
 
@@ -59,29 +59,30 @@ class OpenIdConnectHybridFlow(
                 authorizeCodeStorage.createAuthorizeCodeSession(it, request.sanitize(authorizeCodeSafeStorageParameters))
             }
 
-            response.setCodeAsFragment(authorizeCode.code)
-            request.setResponseTypeHandled(ResponseType.Code)
+            response.run {
+                setCodeAsFragment(authorizeCode.code)
+                getCode().let { openIdConnectTokenStrategy.leftMostHash(it) }
+                        .let { oidcSession.getIdTokenClaims().setCodeHash(it) }
+            }
 
-            response.getCode()
-                    .let { openIdConnectTokenStrategy.leftMostHash(it) }
-                    .let { oidcSession.getIdTokenClaims().setCodeHash(it) }
-
-            if (request.getGrantedScopes().contains(SCOPE_OPENID))
-                openIdConnectRequestStorage.createOidcSession(
-                        authorizeCode,
-                        request.sanitize(openIdConnectSafeStorageParameters)
-                )
+            request.run {
+                if (getGrantedScopes().contains(SCOPE_OPENID))
+                    openIdConnectRequestStorage.createOidcSession(
+                            authorizeCode, sanitize(openIdConnectSafeStorageParameters))
+                setResponseTypeHandled(ResponseType.Code)
+            }
         }
 
         if (request.getResponseTypes().contains(ResponseType.Token)) {
             request.getClient().mustGrantType(GrantType.Implicit)
 
             oAuthImplicitFlow.issueImplicitAccessToken(request, response)
-            request.setResponseTypeHandled(ResponseType.Token)
 
             response.getAccessTokenFromFragment()
                     .let { openIdConnectTokenStrategy.leftMostHash(it) }
                     .let { oidcSession.getIdTokenClaims().setAccessTokenHash(it) }
+
+            request.setResponseTypeHandled(ResponseType.Token)
         }
 
         if (response.getStateFromFragment().isEmpty())

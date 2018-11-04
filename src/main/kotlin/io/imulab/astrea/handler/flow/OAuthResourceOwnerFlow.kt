@@ -35,19 +35,17 @@ class OAuthResourceOwnerFlow(
         if (!supports(request))
             return
 
-        // check grant type
-        request.getClient().mustGrantType(GrantType.Password)
-
-        // check scope
-        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+        request.getClient().run {
+            mustGrantType(GrantType.Password)
+            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+        }
 
         // authenticate user
         val username = request.getUsername()
         val password = request.getPassword()
         if (username.isBlank() || password.isBlank())
             throw IllegalArgumentException("username or password not provided.")
-        else
-            resourceOwnerAuthenticator.authenticate(username, password)
+        resourceOwnerAuthenticator.authenticate(username, password)
 
         // clear password so we don't accidentally save it
         request.removePassword()

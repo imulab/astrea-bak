@@ -75,13 +75,13 @@ class OpenIdConnectAuthorizeCodeFlow(
 
         request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
-        request.getSession().assertType<OidcSession>().also { oidcSession ->
-            if (oidcSession.getIdTokenClaims().subject.isEmpty())
+        request.getSession().assertType<OidcSession>().run {
+            if (getIdTokenClaims().subject.isEmpty())
                 throw IllegalArgumentException("subject is empty.")
 
             response.getAccessToken()
                     .let { openIdTokenStrategy.leftMostHash(it) }
-                    .let { oidcSession.getIdTokenClaims().setAccessTokenHash(it) }
+                    .let { getIdTokenClaims().setAccessTokenHash(it) }
         }
 
         response.setRefreshToken(openIdTokenStrategy.generateIdToken(request).token)
