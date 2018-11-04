@@ -39,7 +39,7 @@ interface Session {
 }
 
 @Suppress("unchecked_cast")
-inline fun <reified T: Session> Session?.assertType(): T {
+inline fun <reified T : Session> Session?.assertType(): T {
     if (this == null)
         throw IllegalStateException("Session is null.")
     else if (this !is T)

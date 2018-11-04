@@ -3,12 +3,14 @@ package io.imulab.astrea.token.strategy.impl
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.crypt.hash.Hasher
 import io.imulab.astrea.crypt.hash.ShaHasher
-import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.GrantType
+import io.imulab.astrea.domain.Prompt
+import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.domain.session.*
+import io.imulab.astrea.domain.session.OidcSession
+import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
-import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.IdToken
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 import org.jose4j.jwt.NumericDate
@@ -82,7 +84,8 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
                         it.mustRequestTime()
                         it.mustAuthTimeIsAfterRequestTime()
                     }
-                    else -> {}
+                    else -> {
+                    }
                 }
             }
 

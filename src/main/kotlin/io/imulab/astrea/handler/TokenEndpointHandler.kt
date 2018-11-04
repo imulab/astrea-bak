@@ -17,30 +17,34 @@ interface TokenEndpointHandler {
     }
 
     /**
+     * Probe method to test if the [TokenEndpointHandler] supports processing [request].
+     */
+    fun supports(request: AccessRequest): Boolean
+
+    /**
      * Handles a OAuth Token Endpoint access request. Implementations should return false immediately if it cannot
      * handle this type of access request.
-     *
-     * Returns true if handled.
      */
-    fun handleAccessRequest(request: AccessRequest): Boolean
+    fun handleAccessRequest(request: AccessRequest)
 
     /**
      * Populates the return information on the access request. Returns true if populated.
      */
-    fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean
+    fun populateAccessResponse(request: AccessRequest, response: AccessResponse)
 
     private class DelegatingTokenEndpointHandler(private val delegates: List<TokenEndpointHandler>) : TokenEndpointHandler {
 
-        override fun handleAccessRequest(request: AccessRequest): Boolean {
-            val hasHandler = delegates.firstOrNull { it.handleAccessRequest(request) } != null
-            if (!hasHandler)
-                throw RuntimeException("TODO: no handler for token endpoint request.")
-            return hasHandler
+        override fun supports(request: AccessRequest): Boolean = true
+
+        override fun handleAccessRequest(request: AccessRequest) {
+            val handlers = delegates.filter { it.supports(request) }.takeIf { it.isNotEmpty() }
+                    ?: throw RuntimeException("TODO: no handler for token endpoint request.")
+            handlers.forEach { it.handleAccessRequest(request) }
         }
 
-        override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
+        // TODO?
+        override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
             delegates.forEach { it.populateAccessResponse(request, response) }
-            return true
         }
     }
 }

@@ -67,9 +67,12 @@ class OAuthAuthorizeCodeFlow(
 
     // start: TokenEndpointHandler -------------------------------------------------------------------------------------
 
-    override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.AuthorizationCode))
-            return false
+    override fun supports(request: AccessRequest): Boolean =
+            request.getGrantTypes().exactly(GrantType.AuthorizationCode)
+
+    override fun handleAccessRequest(request: AccessRequest) {
+        if (!supports(request))
+            return
 
         request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
@@ -102,13 +105,11 @@ class OAuthAuthorizeCodeFlow(
             it.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
             it.setId(authorizeRequest.getId())
         }
-
-        return true
     }
 
-    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.AuthorizationCode))
-            return false
+    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
+        if (!supports(request))
+            return
 
         // retrieve authorization code from session storage
         val authorizeCode = authorizeCodeStrategy.fromRaw(request.getCode())
@@ -137,8 +138,6 @@ class OAuthAuthorizeCodeFlow(
             if (refreshToken != null)
                 setRefreshToken(refreshToken.token)
         }
-
-        return true
     }
 
     // end: TokenEndpointHandler ---------------------------------------------------------------------------------------

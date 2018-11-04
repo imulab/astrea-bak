@@ -122,14 +122,17 @@ class OAuthAuthorizeCodeFlowTest {
             it.session = DefaultSession()
             it.client = TestContext.client
         }.build() as AccessRequest
-        assertTrue(flow.handleAccessRequest(accessRequest))
+
+        flow.handleAccessRequest(accessRequest)
 
         return accessRequest
     }
 
     private fun testPopulateAccessResponse(flow: OAuthAuthorizeCodeFlow, accessRequest: AccessRequest) {
         val accessResponse = DefaultAccessResponse()
-        assertTrue(flow.populateAccessResponse(accessRequest, accessResponse))
+        assertDoesNotThrow {
+            flow.populateAccessResponse(accessRequest, accessResponse)
+        }
 
         assertTrue(accessResponse.getAccessToken().isNotBlank())
         assertEquals(TokenType.Bearer, accessResponse.getTokenType())

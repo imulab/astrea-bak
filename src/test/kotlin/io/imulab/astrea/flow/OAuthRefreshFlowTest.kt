@@ -67,8 +67,11 @@ class OAuthRefreshFlowTest {
 
         val response = DefaultAccessResponse()
 
-        assertTrue(flow.handleAccessRequest(request))
-        assertTrue(flow.populateAccessResponse(request, response))
+        assertTrue(flow.supports(request))
+        assertDoesNotThrow {
+            flow.handleAccessRequest(request)
+            flow.populateAccessResponse(request, response)
+        }
 
         assertTrue(response.getAccessToken().isNotEmpty())
         assertNotEquals(TestContext.preBakedAccessToken.token, response.getAccessToken())

@@ -10,7 +10,6 @@ import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.TokenRevocationStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
@@ -26,9 +25,12 @@ class OAuthRefreshFlow(
         private val tokenRevocationStorage: TokenRevocationStorage
 ) : TokenEndpointHandler {
 
-    override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.RefreshToken))
-            return false
+    override fun supports(request: AccessRequest): Boolean =
+            request.getGrantTypes().exactly(GrantType.RefreshToken)
+
+    override fun handleAccessRequest(request: AccessRequest) {
+        if (!supports(request))
+            return
 
         request.getClient().mustGrantType(GrantType.RefreshToken)
 
@@ -51,13 +53,11 @@ class OAuthRefreshFlow(
         }
 
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
-
-        return true
     }
 
-    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.RefreshToken))
-            return false
+    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
+        if (!supports(request))
+            return
 
         val oldRefreshToken = request.getRefreshToken().let { rawToken ->
             RefreshToken(token = rawToken, signature = refreshTokenStrategy.computeRefreshTokenSignature(rawToken))
@@ -83,7 +83,5 @@ class OAuthRefreshFlow(
             setScopes(request.getGrantedScopes())
             setRefreshToken(newRefreshToken.token)
         }
-
-        return true
     }
 }

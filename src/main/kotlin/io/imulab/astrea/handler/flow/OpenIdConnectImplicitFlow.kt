@@ -8,7 +8,6 @@ import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
-import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 
 class OpenIdConnectImplicitFlow(

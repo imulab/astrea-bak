@@ -1,7 +1,6 @@
 package io.imulab.astrea.token.strategy
 
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.RefreshToken
 
 interface RefreshTokenStrategy {

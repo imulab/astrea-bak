@@ -8,8 +8,6 @@ import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.spi.http.delete
-import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.spi.user.ResourceOwnerAuthenticator
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
@@ -30,9 +28,12 @@ class OAuthResourceOwnerFlow(
         private val refreshTokenStorage: RefreshTokenStorage
 ) : TokenEndpointHandler {
 
-    override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.Password))
-            return false
+    override fun supports(request: AccessRequest): Boolean =
+            request.getGrantTypes().exactly(GrantType.Password)
+
+    override fun handleAccessRequest(request: AccessRequest) {
+        if (!supports(request))
+            return
 
         // check grant type
         request.getClient().mustGrantType(GrantType.Password)
@@ -53,13 +54,11 @@ class OAuthResourceOwnerFlow(
 
         // set access token expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
-
-        return true
     }
 
-    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.Password))
-            return false
+    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
+        if (!supports(request))
+            return
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {
             accessTokenStorage.createAccessTokenSession(it, request.sanitize(emptyList()))
@@ -79,7 +78,5 @@ class OAuthResourceOwnerFlow(
             if (refreshToken != null)
                 setRefreshToken(refreshToken.token)
         }
-
-        return true
     }
 }

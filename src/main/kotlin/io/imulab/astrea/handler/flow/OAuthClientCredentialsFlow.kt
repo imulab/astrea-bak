@@ -24,9 +24,12 @@ class OAuthClientCredentialsFlow(
         private val refreshTokenStorage: RefreshTokenStorage
 ) : TokenEndpointHandler {
 
-    override fun handleAccessRequest(request: AccessRequest): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.ClientCredentials))
-            return false
+    override fun supports(request: AccessRequest): Boolean =
+            request.getGrantTypes().exactly(GrantType.ClientCredentials)
+
+    override fun handleAccessRequest(request: AccessRequest) {
+        if (!supports(request))
+            return
 
         // check client validity
         if (request.getClient().isPublic())
@@ -38,13 +41,11 @@ class OAuthClientCredentialsFlow(
 
         // set expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
-
-        return true
     }
 
-    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.ClientCredentials))
-            return false
+    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
+        if (!supports(request))
+            return
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {
             accessTokenStorage.createAccessTokenSession(it, request.sanitize(emptyList()))
@@ -64,7 +65,5 @@ class OAuthClientCredentialsFlow(
             if (refreshToken != null)
                 setRefreshToken(refreshToken.token)
         }
-
-        return true
     }
 }

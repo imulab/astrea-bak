@@ -22,7 +22,7 @@ fun Scope.accepts(another: Scope, strategy: ScopeStrategy = StringEqualityScopeS
         strategy.accepts(one = this, another = another)
 
 fun List<Scope>.mustAcceptAll(scopes: Collection<Scope>, strategy: ScopeStrategy = StringEqualityScopeStrategy) {
-    val rejected = scopes.find { test -> this.none{ registered -> strategy.accepts(registered, test) } }
+    val rejected = scopes.find { test -> this.none { registered -> strategy.accepts(registered, test) } }
     if (rejected != null)
         throw ScopeRejectedException(rejected)
 }

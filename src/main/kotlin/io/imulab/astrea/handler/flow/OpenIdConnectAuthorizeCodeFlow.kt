@@ -4,19 +4,18 @@ import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.exactly
 import io.imulab.astrea.domain.extension.getCode
+import io.imulab.astrea.domain.extension.setAccessTokenHash
+import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
-import io.imulab.astrea.domain.extension.setAccessTokenHash
-import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
-import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
@@ -58,13 +57,16 @@ class OpenIdConnectAuthorizeCodeFlow(
 
     // end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
 
-    // start: AuthorizeEndpointHandler ---------------------------------------------------------------------------------
+    // start: TokenEndpointHandler -------------------------------------------------------------------------------------
 
-    override fun handleAccessRequest(request: AccessRequest): Boolean = false
+    override fun supports(request: AccessRequest): Boolean =
+            request.getGrantTypes().exactly(GrantType.AuthorizationCode)
 
-    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse): Boolean {
-        if (!request.getGrantTypes().exactly(GrantType.AuthorizationCode))
-            return false
+    override fun handleAccessRequest(request: AccessRequest) {}
+
+    override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
+        if (!supports(request))
+            return
 
         val authorizeRequest = openIdConnectRequestStorage.getOidcSession(
                 authorizeCodeStrategy.fromRaw(request.getCode()),
@@ -85,9 +87,7 @@ class OpenIdConnectAuthorizeCodeFlow(
         }
 
         response.setRefreshToken(openIdTokenStrategy.generateIdToken(request).token)
-
-        return true
     }
 
-    // end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
+    // end: TokenEndpointHandler ---------------------------------------------------------------------------------------
 }

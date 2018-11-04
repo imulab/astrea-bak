@@ -26,6 +26,6 @@ interface IdTokenStrategy {
      */
     fun leftMostHash(value: String, encoder: Base64.Encoder = Base64.getUrlEncoder().withoutPadding()): String {
         val hashed = getHasher().hash(value.toByteArray())
-        return encoder.encodeToString(hashed.copyOfRange(0, hashed.size/2))
+        return encoder.encodeToString(hashed.copyOfRange(0, hashed.size / 2))
     }
 }

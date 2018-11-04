@@ -7,7 +7,6 @@ import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
-import io.imulab.astrea.spi.http.singleValue
 import org.jose4j.jwt.NumericDate
 
 class OpenIdConnectRequestValidator(
