@@ -14,12 +14,9 @@ import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.spi.http.singleValue
-import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
-import java.security.MessageDigest
-import java.util.*
 
 class OpenIdConnectAuthorizeCodeFlow(
         private val authorizeCodeStrategy: AuthorizeCodeStrategy,
@@ -35,9 +32,6 @@ class OpenIdConnectAuthorizeCodeFlow(
                 "nonce"
         )
 ) : AuthorizeEndpointHandler, TokenEndpointHandler {
-
-    private val sha256: MessageDigest by lazy { MessageDigest.getInstance("SHA-256") }
-    private val base64Encoder: Base64.Encoder by lazy { Base64.getUrlEncoder().withoutPadding() }
 
     // start: AuthorizeEndpointHandler ---------------------------------------------------------------------------------
 
@@ -80,14 +74,12 @@ class OpenIdConnectAuthorizeCodeFlow(
 
         request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
-        request.getSession().assertType<OidcSession>().also {
-            if (it.getIdTokenClaims().subject.isEmpty())
+        request.getSession().assertType<OidcSession>().also { oidcSession ->
+            if (oidcSession.getIdTokenClaims().subject.isEmpty())
                 throw IllegalArgumentException("subject is empty.")
 
-            it.getIdTokenClaims().setStringClaim("at_hash",
-                    sha256.digest(response.getAccessToken().toByteArray()).let {
-                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
-                    })
+            oidcSession.getIdTokenClaims().setStringClaim("at_hash",
+                    openIdTokenStrategy.leftMostHash(response.getAccessToken()))
         }
 
         response.setExtra("id_token", openIdTokenStrategy.generateIdToken(request).token)

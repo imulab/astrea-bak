@@ -9,8 +9,6 @@ import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.strategy.IdTokenStrategy
-import java.security.MessageDigest
-import java.util.*
 
 class OpenIdConnectImplicitFlow(
         private val oauthImplicitFlow: OAuthImplicitFlow,
@@ -19,9 +17,6 @@ class OpenIdConnectImplicitFlow(
         private val openIdConnectRequestValidator: OpenIdConnectRequestValidator,
         private val minimumNonceEntropy: Int = 8
 ) : AuthorizeEndpointHandler {
-
-    private val sha256: MessageDigest by lazy { MessageDigest.getInstance("SHA-256") }
-    private val base64Encoder: Base64.Encoder by lazy { Base64.getUrlEncoder().withoutPadding() }
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
         if (!request.shouldHandle())
@@ -46,9 +41,7 @@ class OpenIdConnectImplicitFlow(
             oauthImplicitFlow.issueImplicitAccessToken(request, response)
 
             oidcSession.getIdTokenClaims().setStringClaim("at_hash",
-                    sha256.digest(response.getFragments().singleValue("access_token").toByteArray()).let {
-                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
-                    })
+                    openIdConnectTokenStrategy.leftMostHash(response.getFragments().singleValue("access_token")))
         } else {
             response.addFragment("state", request.getState())
         }

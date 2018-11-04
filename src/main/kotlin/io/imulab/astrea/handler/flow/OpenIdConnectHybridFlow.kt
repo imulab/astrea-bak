@@ -16,7 +16,6 @@ import io.imulab.astrea.token.storage.AuthorizeCodeStorage
 import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
-import java.security.MessageDigest
 import java.util.*
 
 class OpenIdConnectHybridFlow(
@@ -39,9 +38,6 @@ class OpenIdConnectHybridFlow(
                 "nonce"
         )
 ) : AuthorizeEndpointHandler, TokenEndpointHandler by openIdConnectAuthorizeCodeFlow {
-
-    private val sha256: MessageDigest by lazy { MessageDigest.getInstance("SHA-256") }
-    private val base64Encoder: Base64.Encoder by lazy { Base64.getUrlEncoder().withoutPadding() }
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
         if (!request.shouldHandle())
@@ -71,9 +67,7 @@ class OpenIdConnectHybridFlow(
             request.setResponseTypeHandled(ResponseType.Code)
 
             oidcSession.getIdTokenClaims().setStringClaim("c_hash",
-                    sha256.digest(response.getCode().toByteArray()).let {
-                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
-                    })
+                    openIdConnectTokenStrategy.leftMostHash(response.getCode()))
 
             if (request.getGrantedScopes().contains("openid"))
                 openIdConnectRequestStorage.createOidcSession(authorizeCode, request.sanitize(openIdConnectSafeStorageParameters))
@@ -86,9 +80,7 @@ class OpenIdConnectHybridFlow(
             request.setResponseTypeHandled(ResponseType.Token)
 
             oidcSession.getIdTokenClaims().setStringClaim("at_hash",
-                    sha256.digest(response.getFragments().singleValue("access_token").toByteArray()).let {
-                        base64Encoder.encodeToString(it.copyOfRange(0, it.size / 2))
-                    })
+                    openIdConnectTokenStrategy.leftMostHash(response.getFragments().singleValue("access_token")))
         }
 
         if (response.getFragments().singleValue("state").isEmpty())
