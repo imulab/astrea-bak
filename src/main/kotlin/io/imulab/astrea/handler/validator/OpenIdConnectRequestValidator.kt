@@ -2,6 +2,7 @@ package io.imulab.astrea.handler.validator
 
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.Prompt
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
@@ -49,11 +50,10 @@ class OpenIdConnectRequestValidator(
                 it.mustAuthTimePlusMaxAgeIsAfterRequestTime()
             }
 
-            request.getRequestForm().singleValue("id_token_hint").also { hint ->
-                if (hint.isNotEmpty()) {
-                    if (jwtRs256.decode(hint).jwtClaims.subject != it.session.getIdTokenClaims().subject)
-                        throw IllegalArgumentException("mismatched subject from id_token_hint")
-                }
+            request.getIdTokenHint().run {
+                if (isNotEmpty() &&
+                        jwtRs256.decode(this).jwtClaims.subject != it.session.getIdTokenClaims().subject)
+                    throw IllegalArgumentException("mismatched subject from id_token_hint")
             }
         }
     }
@@ -65,21 +65,13 @@ class OpenIdConnectRequestValidator(
 
             val session = request.getSession().assertType<OidcSession>()
 
-            val prompts: List<Prompt> = request.getRequestForm()
-                    .singleValue("prompt")
-                    .split(" ")
-                    .map { Prompt.fromSpecValue(it) }
-                    .toList()
+            val prompts: List<Prompt> = request.getPrompts()
 
-            val authTime: NumericDate? = session.getIdTokenClaims()
-                    .getNumericDateClaimValue("auth_time")
+            val authTime: NumericDate? = session.getIdTokenClaims().getAuthTime()
 
-            val reqTime: NumericDate? = session.getIdTokenClaims()
-                    .getNumericDateClaimValue("rat")
+            val reqTime: NumericDate? = session.getIdTokenClaims().getRequestAtTime()
 
-            val maxAge: Long? = request.getRequestForm()
-                    .singleValue("max_age")
-                    .toLongOrNull()
+            val maxAge: Long? = request.getMaxAgeOrNull()
 
             fun mustOnlyAllowedPrompts(allowed: List<Prompt>) {
                 if (!allowed.containsAll(prompts))

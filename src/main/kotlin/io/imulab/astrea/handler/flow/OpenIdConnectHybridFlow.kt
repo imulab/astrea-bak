@@ -1,10 +1,13 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.getNonce
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.domain.extension.setAccessTokenHash
+import io.imulab.astrea.domain.extension.setCodeHash
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
@@ -13,7 +16,6 @@ import io.imulab.astrea.token.storage.AuthorizeCodeStorage
 import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
-import java.util.*
 
 class OpenIdConnectHybridFlow(
         private val openIdConnectAuthorizeCodeFlow: OpenIdConnectAuthorizeCodeFlow,
@@ -40,10 +42,10 @@ class OpenIdConnectHybridFlow(
         if (!request.shouldHandle())
             return
 
-        request.getRequestForm().singleValue("nonce").also {
-            if (it.isEmpty())
+        with(request.getNonce()) {
+            if (this.isEmpty())
                 throw IllegalArgumentException("nonce required.")
-            else if (it.length < minimumNonceEntropy)
+            else if (this.length < minimumNonceEntropy)
                 throw IllegalArgumentException("nonce must be at least $minimumNonceEntropy in length.")
         }
 

@@ -3,6 +3,7 @@ package io.imulab.astrea.handler.flow
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.exactly
+import io.imulab.astrea.domain.extension.getRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.ClientIdentityMismatchException
@@ -30,13 +31,10 @@ class OAuthRefreshFlow(
 
         request.getClient().mustGrantType(GrantType.RefreshToken)
 
-        val refreshTokenRaw = request.getRequestForm().singleValue("refresh_token").also {
+        val refreshToken = request.getRefreshToken().let {
             refreshTokenStrategy.validateRefreshToken(request, it)
+            return@let RefreshToken(token = it, signature = refreshTokenStrategy.computeRefreshTokenSignature(it))
         }
-        val refreshToken = RefreshToken(
-                token = refreshTokenRaw,
-                signature = refreshTokenStrategy.computeRefreshTokenSignature(refreshTokenRaw)
-        )
 
         val originalRequest = tokenRevocationStorage.getRefreshTokenSession(refreshToken, request.getSession()!!)
         if (originalRequest.getGrantedScopes().none { it == "offline" || it == "offline_access" })
@@ -60,7 +58,7 @@ class OAuthRefreshFlow(
         if (!request.getGrantTypes().exactly(GrantType.RefreshToken))
             return false
 
-        val oldRefreshToken = request.getRequestForm().singleValue("refresh_token").let { rawToken ->
+        val oldRefreshToken = request.getRefreshToken().let { rawToken ->
             RefreshToken(token = rawToken, signature = refreshTokenStrategy.computeRefreshTokenSignature(rawToken))
         }
         val oldRequest = tokenRevocationStorage.getRefreshTokenSession(oldRefreshToken, request.getSession()!!).also { oldReq ->

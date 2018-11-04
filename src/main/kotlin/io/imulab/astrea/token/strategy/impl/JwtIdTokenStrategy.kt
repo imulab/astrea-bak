@@ -4,14 +4,13 @@ import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.crypt.hash.Hasher
 import io.imulab.astrea.crypt.hash.ShaHasher
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.domain.session.OidcSession
-import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.domain.session.*
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.IdToken
 import io.imulab.astrea.token.strategy.IdTokenStrategy
-import org.jose4j.jwt.JwtClaims
 import org.jose4j.jwt.NumericDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -30,7 +29,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
         if (session.getIdTokenClaims().subject.isBlank())
             throw IllegalArgumentException("id token subject is not set.")
 
-        if (request.getGrantType() != GrantType.RefreshToken)
+        if (!request.getGrantTypes().contains(GrantType.RefreshToken))
             whenGrantTypeIsNotRefreshToken(request)
 
         val jwt = jwtRs256.generate(session.getIdTokenClaims().also {
@@ -87,24 +86,18 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
                 }
             }
 
-            if (it.request.getRequestForm().singleValue("acr_value").isNotEmpty() &&
-                    it.session.getIdTokenClaims().getStringClaimValue("acr").isEmpty())
-                it.session.getIdTokenClaims().setAuthenticationContextClassReference("0")
+            it.request.getAuthenticationContextClassReferenceValue().run {
+                if (isNotEmpty() && it.session.getIdTokenClaims().getAuthenticationContextClassReference().isEmpty())
+                    it.session.getIdTokenClaims().setAuthenticationContextClassReference("0")
+            }
 
-            request.getRequestForm().singleValue("id_token_hint").also { hint ->
-                if (hint.isNotEmpty()) {
-                    if (jwtRs256.decode(hint).jwtClaims.subject != it.session.getIdTokenClaims().subject)
-                        throw IllegalArgumentException("mismatched subject from id_token_hint")
-                }
+            request.getIdTokenHint().run {
+                if (isNotEmpty() &&
+                        jwtRs256.decode(this).jwtClaims.subject != it.session.getIdTokenClaims().subject)
+                    throw IllegalArgumentException("mismatched subject from id_token_hint")
             }
         }
     }
-
-    private fun OAuthRequest.getNonce(): String =
-            this.getRequestForm().singleValue("nonce")
-
-    private fun OAuthRequest.getGrantType(): GrantType =
-            GrantType.fromSpecValue(this.getRequestForm().singleValue("grant_type"))
 
     private companion object {
         const val authTimeLeeway: Long = 5

@@ -5,15 +5,13 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
-import io.imulab.astrea.domain.session.Session
-import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.MissingSessionException
 import io.imulab.astrea.error.RedirectUriMismatchException
+import io.imulab.astrea.domain.extension.getCode
+import io.imulab.astrea.domain.extension.getRedirectUri
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.spi.http.singleValue
-import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.storage.AuthorizeCodeStorage
@@ -80,7 +78,7 @@ class OAuthAuthorizeCodeFlow(
             throw MissingSessionException()
 
         // retrieve authorization code from session storage
-        val authorizeCode = authorizeCodeStrategy.fromRaw(request.getRequestForm().singleValue("code"))
+        val authorizeCode = authorizeCodeStrategy.fromRaw(request.getCode())
         val authorizeRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
 
         // validate code
@@ -95,8 +93,8 @@ class OAuthAuthorizeCodeFlow(
             throw ClientIdentityMismatchException(authorizeRequest.getClient(), request.getClient())
 
         // Compare and match the redirect URI to prevent any malicious redirection.
-        val restoredRedirectUri = authorizeRequest.getRequestForm().singleValue("redirect_uri")
-        val presentedRedirectUri = request.getRequestForm().singleValue("redirect_uri")
+        val restoredRedirectUri = authorizeRequest.getRedirectUri()
+        val presentedRedirectUri = request.getRedirectUri()
         if (restoredRedirectUri.isNotBlank() && restoredRedirectUri != presentedRedirectUri)
             throw RedirectUriMismatchException(restoredRedirectUri, presentedRedirectUri)
 
@@ -114,7 +112,7 @@ class OAuthAuthorizeCodeFlow(
             return false
 
         // retrieve authorization code from session storage
-        val authorizeCode = authorizeCodeStrategy.fromRaw(request.getRequestForm().singleValue("code"))
+        val authorizeCode = authorizeCodeStrategy.fromRaw(request.getCode())
         val authorizeRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
 
         // transfer grants of scopes

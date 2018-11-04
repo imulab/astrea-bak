@@ -3,13 +3,14 @@ package io.imulab.astrea.handler.flow
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.exactly
+import io.imulab.astrea.domain.extension.getCode
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
-import io.imulab.astrea.domain.setAccessTokenHash
+import io.imulab.astrea.domain.extension.setAccessTokenHash
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -67,7 +68,7 @@ class OpenIdConnectAuthorizeCodeFlow(
             return false
 
         val authorizeRequest = openIdConnectRequestStorage.getOidcSession(
-                authorizeCodeStrategy.fromRaw(request.getRequestForm().singleValue("code")),
+                authorizeCodeStrategy.fromRaw(request.getCode()),
                 request)
 
         if (!authorizeRequest.getGrantedScopes().contains("openid"))

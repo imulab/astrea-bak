@@ -1,6 +1,9 @@
 package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.getPassword
+import io.imulab.astrea.domain.extension.getUsername
+import io.imulab.astrea.domain.extension.removePassword
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -37,15 +40,15 @@ class OAuthResourceOwnerFlow(
         request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
 
         // authenticate user
-        val username = request.getRequestForm().singleValue("username")
-        val password = request.getRequestForm().singleValue("password")
+        val username = request.getUsername()
+        val password = request.getPassword()
         if (username.isBlank() || password.isBlank())
             throw IllegalArgumentException("username or password not provided.")
         else
             resourceOwnerAuthenticator.authenticate(username, password)
 
         // clear password so we don't accidentally save it
-        request.getRequestForm().delete("password")
+        request.removePassword()
 
         // set access token expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
