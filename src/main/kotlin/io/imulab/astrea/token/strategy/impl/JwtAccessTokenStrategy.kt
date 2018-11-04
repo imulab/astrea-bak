@@ -15,12 +15,16 @@ import java.time.temporal.ChronoUnit
 class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
                              private val issuer: String) : AccessTokenStrategy {
 
-    override fun computeAccessTokenSignature(token: String): String {
-        val parts = token.split(".")
-        if (parts.size != 3)
-            throw InvalidAccessTokenException(TokenInvalidity.BadFormat)
+    override fun fromRaw(raw: String): AccessToken {
+        val parts = requireThreeParts(raw)
+        return AccessToken(
+                token = raw,
+                signature = parts[2]
+        )
+    }
 
-        return parts[2]
+    override fun computeAccessTokenSignature(token: String): String {
+        return requireThreeParts(token)[2]
     }
 
     override fun generateNewAccessToken(request: OAuthRequest): AccessToken {
@@ -59,5 +63,12 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
         }
         if (t != null)
             throw InvalidAccessTokenException(TokenInvalidity.BadSignature, t.message)  // TODO update to correct cause
+    }
+
+    private fun requireThreeParts(raw: String): List<String> {
+        val parts = raw.split(".")
+        if (parts.size != 3)
+            throw InvalidAccessTokenException(TokenInvalidity.BadFormat)
+        return parts
     }
 }

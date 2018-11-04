@@ -11,6 +11,16 @@ import java.time.LocalDateTime
 
 class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256) : AuthorizeCodeStrategy {
 
+    override fun fromRaw(raw: String): AuthorizeCode {
+        val parts = raw.split(".")
+        if (parts.size != 2)
+            throw InvalidAuthorizeCodeException(TokenInvalidity.BadFormat)
+        return AuthorizeCode(
+                code = raw,
+                signature = parts[1]
+        )
+    }
+
     override fun computeAuthorizeCodeSignature(code: String): String {
         val parts = code.split(".")
         return when (parts.size) {

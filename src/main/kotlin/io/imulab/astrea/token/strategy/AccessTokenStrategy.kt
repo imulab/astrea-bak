@@ -9,6 +9,11 @@ import io.imulab.astrea.token.AccessToken
 interface AccessTokenStrategy {
 
     /**
+     * Parses the [raw] representation of access token and return as an [AccessToken] object.
+     */
+    fun fromRaw(raw: String): AccessToken
+
+    /**
      * Returns the signature of the access token.
      */
     fun computeAccessTokenSignature(token: String): String

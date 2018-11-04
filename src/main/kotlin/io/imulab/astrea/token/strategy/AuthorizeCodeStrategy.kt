@@ -1,12 +1,18 @@
 package io.imulab.astrea.token.strategy
 
 import io.imulab.astrea.domain.request.OAuthRequest
+import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.AuthorizeCode
 
 /**
  * Algorithms to generate and validate authorize code
  */
 interface AuthorizeCodeStrategy {
+
+    /**
+     * Parses the [raw] representation of authorize code and return as an [AuthorizeCode] object.
+     */
+    fun fromRaw(raw: String): AuthorizeCode
 
     /**
      * Returns the signature of the authorization code. Typically used to

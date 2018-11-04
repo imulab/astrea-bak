@@ -9,6 +9,16 @@ import io.imulab.astrea.token.strategy.RefreshTokenStrategy
 
 class HmacRefreshTokenStrategy(private val hmac: HmacSha256) : RefreshTokenStrategy {
 
+    override fun fromRaw(raw: String): RefreshToken {
+        val parts = raw.split(".")
+        if (parts.size != 2)
+            throw InvalidRefreshTokenException(TokenInvalidity.BadFormat)
+        return RefreshToken(
+                token = raw,
+                signature = parts[1]
+        )
+    }
+
     override fun computeRefreshTokenSignature(token: String): String {
         val parts = token.split(".")
         return when (parts.size) {

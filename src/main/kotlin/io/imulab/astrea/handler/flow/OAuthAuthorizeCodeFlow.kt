@@ -80,7 +80,7 @@ class OAuthAuthorizeCodeFlow(
             throw MissingSessionException()
 
         // retrieve authorization code from session storage
-        val authorizeCode = AuthorizeCode.fromRaw(request.getRequestForm().singleValue("code"))
+        val authorizeCode = authorizeCodeStrategy.fromRaw(request.getRequestForm().singleValue("code"))
         val authorizeRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
 
         // validate code
@@ -114,7 +114,7 @@ class OAuthAuthorizeCodeFlow(
             return false
 
         // retrieve authorization code from session storage
-        val authorizeCode = AuthorizeCode.fromRaw(request.getRequestForm().singleValue("code"))
+        val authorizeCode = authorizeCodeStrategy.fromRaw(request.getRequestForm().singleValue("code"))
         val authorizeRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
 
         // transfer grants of scopes

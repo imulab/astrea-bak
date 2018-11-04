@@ -16,11 +16,13 @@ import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
+import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 import java.security.MessageDigest
 import java.util.*
 
 class OpenIdConnectAuthorizeCodeFlow(
+        private val authorizeCodeStrategy: AuthorizeCodeStrategy,
         private val openIdConnectRequestStorage: OpenIdConnectRequestStorage,
         private val openIdConnectRequestValidator: OpenIdConnectRequestValidator,
         private val openIdTokenStrategy: IdTokenStrategy,
@@ -49,7 +51,7 @@ class OpenIdConnectAuthorizeCodeFlow(
         openIdConnectRequestValidator.validateRequest(request)
 
         openIdConnectRequestStorage.createOidcSession(
-                AuthorizeCode.fromRaw(response.getCode()),
+                authorizeCodeStrategy.fromRaw(response.getCode()),
                 request.sanitize(openIdConnectSafeStorageParameters))
     }
 
@@ -70,9 +72,8 @@ class OpenIdConnectAuthorizeCodeFlow(
             return false
 
         val authorizeRequest = openIdConnectRequestStorage.getOidcSession(
-                AuthorizeCode.fromRaw(request.getRequestForm().singleValue("code")),
-                request
-        )
+                authorizeCodeStrategy.fromRaw(request.getRequestForm().singleValue("code")),
+                request)
 
         if (!authorizeRequest.getGrantedScopes().contains("openid"))
             throw ScopeNotGrantedException("openid")
