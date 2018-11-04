@@ -1,5 +1,6 @@
 package io.imulab.astrea.domain.response.impl
 
+import io.imulab.astrea.domain.PARAM_CODE
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.spi.http.HttpHeaders
 import io.imulab.astrea.spi.http.UrlValues
@@ -20,7 +21,7 @@ class DefaultAuthorizeResponse(private val headers: MutableMap<String, MutableLi
     override fun getQueries(): UrlValues = this.queries.mapValues { it.value.toList() }
 
     override fun addQuery(key: String, value: String) {
-        if (key == "code")
+        if (key == PARAM_CODE)
             this.code = value
         queries.computeIfAbsent(key) { mutableListOf() }
         queries[key]!!.add(value)
@@ -29,7 +30,7 @@ class DefaultAuthorizeResponse(private val headers: MutableMap<String, MutableLi
     override fun getFragments(): UrlValues = this.fragments.mapValues { it.value.toList() }
 
     override fun addFragment(key: String, value: String) {
-        if (key == "code")
+        if (key == PARAM_CODE)
             this.code = value
         fragments.computeIfAbsent(key) { mutableListOf() }
         fragments[key]!!.add(value)

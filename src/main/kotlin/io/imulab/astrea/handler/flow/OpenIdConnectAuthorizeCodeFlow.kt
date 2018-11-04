@@ -1,8 +1,6 @@
 package io.imulab.astrea.handler.flow
 
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.ResponseType
-import io.imulab.astrea.domain.exactly
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.getCode
 import io.imulab.astrea.domain.extension.setAccessTokenHash
 import io.imulab.astrea.domain.extension.setRefreshToken
@@ -26,12 +24,12 @@ class OpenIdConnectAuthorizeCodeFlow(
         private val openIdConnectRequestValidator: OpenIdConnectRequestValidator,
         private val openIdTokenStrategy: IdTokenStrategy,
         private val openIdConnectSafeStorageParameters: List<String> = listOf(
-                "grant_type",
-                "max_age",
-                "prompt",
-                "acr_values",
-                "id_token_hint",
-                "nonce"
+                PARAM_GRANT_TYPE,
+                PARAM_MAX_AGE,
+                PARAM_PROMPT,
+                PARAM_ACR_VALUE,
+                PARAM_ID_TOKEN_HINT,
+                PARAM_NONCE
         )
 ) : AuthorizeEndpointHandler, TokenEndpointHandler {
 
@@ -52,7 +50,7 @@ class OpenIdConnectAuthorizeCodeFlow(
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
-        return this.getResponseTypes().exactly(ResponseType.Code) && this.getGrantedScopes().contains("openid")
+        return this.getResponseTypes().exactly(ResponseType.Code) && this.getGrantedScopes().contains(SCOPE_OPENID)
     }
 
     // end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
@@ -72,8 +70,8 @@ class OpenIdConnectAuthorizeCodeFlow(
                 authorizeCodeStrategy.fromRaw(request.getCode()),
                 request)
 
-        if (!authorizeRequest.getGrantedScopes().contains("openid"))
-            throw ScopeNotGrantedException("openid")
+        if (!authorizeRequest.getGrantedScopes().contains(SCOPE_OPENID))
+            throw ScopeNotGrantedException(SCOPE_OPENID)
 
         request.getClient().mustGrantType(GrantType.AuthorizationCode)
 

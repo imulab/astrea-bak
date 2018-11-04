@@ -4,6 +4,7 @@ import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.domain.AuthMethod
+import io.imulab.astrea.domain.PARAM_CLIENT_ID
 import io.imulab.astrea.error.ClientAuthenticationException
 import io.imulab.astrea.spi.http.HttpRequestReader
 
@@ -23,7 +24,7 @@ import io.imulab.astrea.spi.http.HttpRequestReader
 class ClientNoneAuthenticator(private val clientManager: ClientManager) : ClientAuthenticator {
 
     override fun supports(reader: HttpRequestReader): Boolean {
-        val clientId = reader.formValue("client_id")
+        val clientId = reader.formValue(PARAM_CLIENT_ID)
         if (clientId.isEmpty())
             return false
 
@@ -36,7 +37,7 @@ class ClientNoneAuthenticator(private val clientManager: ClientManager) : Client
     }
 
     override fun authenticate(reader: HttpRequestReader): OAuthClient {
-        val client = clientManager.getClient(reader.formValue("client_id"))
+        val client = clientManager.getClient(reader.formValue(PARAM_CLIENT_ID))
         if ((client is OpenIdConnectClient) && (client.getTokenEndpointAuthMethod() != AuthMethod.None))
             throw ClientAuthenticationException("Client is not capable of performing Open ID Connect none authentication.")
 

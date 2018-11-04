@@ -5,6 +5,8 @@ import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.PasswordEncoder
 import io.imulab.astrea.domain.AuthMethod
+import io.imulab.astrea.domain.PARAM_CLIENT_ID
+import io.imulab.astrea.domain.PARAM_CLIENT_SECRET
 import io.imulab.astrea.error.ClientAuthenticationException
 import io.imulab.astrea.spi.http.HttpRequestReader
 
@@ -17,13 +19,13 @@ class ClientSecretPostAuthenticator(private val clientManager: ClientManager,
 
     override fun supports(reader: HttpRequestReader): Boolean {
         return reader.method() == "POST" &&
-                reader.formValue("client_id").isNotEmpty() &&
-                reader.formValue("client_secret").isNotEmpty()
+                reader.formValue(PARAM_CLIENT_ID).isNotEmpty() &&
+                reader.formValue(PARAM_CLIENT_SECRET).isNotEmpty()
     }
 
     override fun authenticate(reader: HttpRequestReader): OAuthClient {
-        val username = reader.formValue("client_id")
-        val password = reader.formValue("client_secret")
+        val username = reader.formValue(PARAM_CLIENT_ID)
+        val password = reader.formValue(PARAM_CLIENT_SECRET)
 
         val client = clientManager.getClient(username)
         if ((client is OpenIdConnectClient) && (client.getTokenEndpointAuthMethod() != AuthMethod.ClientSecretPost))

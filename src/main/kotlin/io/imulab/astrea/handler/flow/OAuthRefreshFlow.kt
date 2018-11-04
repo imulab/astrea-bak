@@ -1,8 +1,6 @@
 package io.imulab.astrea.handler.flow
 
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.TokenType
-import io.imulab.astrea.domain.exactly
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.getRefreshToken
 import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
@@ -40,8 +38,8 @@ class OAuthRefreshFlow(
         }
 
         val originalRequest = tokenRevocationStorage.getRefreshTokenSession(refreshToken, request.getSession()!!)
-        if (originalRequest.getGrantedScopes().none { it == "offline" || it == "offline_access" })
-            throw ScopeNotGrantedException("offline")
+        if (originalRequest.getGrantedScopes().containsNone(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
+            throw ScopeNotGrantedException(SCOPE_OFFLINE)
 
         if (request.getClient().getId() != originalRequest.getClient().getId())
             throw ClientIdentityMismatchException(originalRequest.getClient(), request.getClient())

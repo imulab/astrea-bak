@@ -52,7 +52,7 @@ class OAuthClientCredentialsFlow(
         }
 
         var refreshToken: RefreshToken? = null
-        if (listOf("offline", "offline_access").any { request.getGrantedScopes().contains(it) })
+        if (request.getGrantedScopes().containsAny(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
             refreshToken = refreshTokenStrategy.generateNewRefreshToken(request).also {
                 refreshTokenStorage.createRefreshTokenSession(it, request)
             }

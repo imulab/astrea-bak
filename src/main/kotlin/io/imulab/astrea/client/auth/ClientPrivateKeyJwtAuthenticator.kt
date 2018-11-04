@@ -4,7 +4,7 @@ import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
-import io.imulab.astrea.domain.AuthMethod
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.error.ClientAuthenticationException
 import io.imulab.astrea.spi.http.HttpRequestReader
 import org.jose4j.jwt.consumer.InvalidJwtException
@@ -26,11 +26,11 @@ class ClientPrivateKeyJwtAuthenticator(private val clientManager: ClientManager,
                                        private val tokenEndpointUrl: String) : ClientAuthenticator {
 
     override fun supports(reader: HttpRequestReader): Boolean {
-        return reader.formValue("client_assertion_type") == jwtBearerClientAssertionType
+        return reader.formValue(PARAM_CLIENT_ASSERTION_TYPE) == JWT_BEARER_CLIENT_ASSERTION_TYPE
     }
 
     override fun authenticate(reader: HttpRequestReader): OAuthClient {
-        val clientAssertion = reader.formValue("client_assertion")
+        val clientAssertion = reader.formValue(PARAM_CLIENT_ASSERTION)
         if (clientAssertion.isEmpty())
             throw ClientAuthenticationException("client assertion is empty.")
 
@@ -64,7 +64,7 @@ class ClientPrivateKeyJwtAuthenticator(private val clientManager: ClientManager,
      * found, we will run a no-verification pass on the assertion and extract the 'iss' value.
      */
     private fun resolveClientId(reader: HttpRequestReader, clientAssertion: String): String {
-        val clientId = reader.formValue("client_id")
+        val clientId = reader.formValue(PARAM_CLIENT_ID)
         if (clientId.isNotBlank())
             return clientId
 
@@ -75,9 +75,5 @@ class ClientPrivateKeyJwtAuthenticator(private val clientManager: ClientManager,
                 .build()
                 .processToClaims(clientAssertion)
         return jwtClaims.issuer
-    }
-
-    companion object {
-        const val jwtBearerClientAssertionType = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
     }
 }

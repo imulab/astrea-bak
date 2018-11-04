@@ -2,6 +2,7 @@ package io.imulab.astrea.client.auth
 
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
+import io.imulab.astrea.domain.PARAM_CLIENT_ID
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.singleValue
 
@@ -14,5 +15,5 @@ class NoOpClientAuthenticator(private val clientManager: ClientManager) : Client
     override fun supports(reader: HttpRequestReader): Boolean = true
 
     override fun authenticate(reader: HttpRequestReader): OAuthClient =
-            clientManager.getClient(reader.getForm().singleValue("client_id"))
+            clientManager.getClient(reader.getForm().singleValue(PARAM_CLIENT_ID))
 }

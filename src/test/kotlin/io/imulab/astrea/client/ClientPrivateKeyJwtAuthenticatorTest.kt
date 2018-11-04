@@ -3,6 +3,7 @@ package io.imulab.astrea.client
 import io.imulab.astrea.client.auth.ClientPrivateKeyJwtAuthenticator
 import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.AuthMethod
+import io.imulab.astrea.domain.JWT_BEARER_CLIENT_ASSERTION_TYPE
 import io.imulab.astrea.error.ClientAuthenticationException
 import io.imulab.astrea.spi.http.HttpRequestReader
 import org.jose4j.jwk.JsonWebKeySet
@@ -25,7 +26,7 @@ class ClientPrivateKeyJwtAuthenticatorTest {
         val request = Mockito.mock(HttpRequestReader::class.java).also {
             Mockito.`when`(it.formValue("client_id")).thenReturn("foo")
             Mockito.`when`(it.formValue("client_assertion_type"))
-                    .thenReturn(ClientPrivateKeyJwtAuthenticator.jwtBearerClientAssertionType)
+                    .thenReturn(JWT_BEARER_CLIENT_ASSERTION_TYPE)
             Mockito.`when`(it.formValue("client_assertion")).thenReturn(
                     JsonWebSignature().also {
                         it.payload = JwtClaims().also {
@@ -53,7 +54,7 @@ class ClientPrivateKeyJwtAuthenticatorTest {
         val request = Mockito.mock(HttpRequestReader::class.java).also {
             Mockito.`when`(it.formValue("client_id")).thenReturn("")
             Mockito.`when`(it.formValue("client_assertion_type"))
-                    .thenReturn(ClientPrivateKeyJwtAuthenticator.jwtBearerClientAssertionType)
+                    .thenReturn(JWT_BEARER_CLIENT_ASSERTION_TYPE)
             Mockito.`when`(it.formValue("client_assertion")).thenReturn(
                     JsonWebSignature().also {
                         it.payload = JwtClaims().also {
@@ -81,7 +82,7 @@ class ClientPrivateKeyJwtAuthenticatorTest {
         val request = Mockito.mock(HttpRequestReader::class.java).also {
             Mockito.`when`(it.formValue("client_id")).thenReturn("")
             Mockito.`when`(it.formValue("client_assertion_type"))
-                    .thenReturn(ClientPrivateKeyJwtAuthenticator.jwtBearerClientAssertionType)
+                    .thenReturn(JWT_BEARER_CLIENT_ASSERTION_TYPE)
             Mockito.`when`(it.formValue("client_assertion")).thenReturn(
                     JsonWebSignature().also {
                         it.payload = JwtClaims().also {

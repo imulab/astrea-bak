@@ -3,6 +3,7 @@ package io.imulab.astrea.token.strategy.impl
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.crypt.hash.Hasher
 import io.imulab.astrea.crypt.hash.ShaHasher
+import io.imulab.astrea.domain.DOT
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.Prompt
 import io.imulab.astrea.domain.TokenType
@@ -54,7 +55,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
 
         return IdToken(
                 token = jwt,
-                signature = jwt.split(".")[2]
+                signature = jwt.split(DOT)[2]
         )
     }
 

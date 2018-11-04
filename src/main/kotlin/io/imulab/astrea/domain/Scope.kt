@@ -26,3 +26,9 @@ fun List<Scope>.mustAcceptAll(scopes: Collection<Scope>, strategy: ScopeStrategy
     if (rejected != null)
         throw ScopeRejectedException(rejected)
 }
+
+fun List<Scope>.containsAny(vararg scopes: Scope): Boolean =
+        scopes.any { this.contains(it) }
+
+fun List<Scope>.containsNone(vararg scopes: Scope): Boolean  =
+        !this.containsAny(*scopes)

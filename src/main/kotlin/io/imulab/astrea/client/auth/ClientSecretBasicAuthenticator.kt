@@ -5,6 +5,7 @@ import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.PasswordEncoder
 import io.imulab.astrea.domain.AuthMethod
+import io.imulab.astrea.domain.COLON
 import io.imulab.astrea.error.ClientAuthenticationException
 import io.imulab.astrea.spi.http.HttpRequestReader
 import java.util.*
@@ -29,7 +30,7 @@ class ClientSecretBasicAuthenticator(private val clientManager: ClientManager,
         var username: String?
         var password: String?
         try {
-            val parts = String(base64Decoder.decode(encoded)).split(":")
+            val parts = String(base64Decoder.decode(encoded)).split(COLON)
             if (parts.size != 2)
                 throw ClientAuthenticationException("Authorization header does not follow HTTP Basic authentication format.")
             username = parts[0]

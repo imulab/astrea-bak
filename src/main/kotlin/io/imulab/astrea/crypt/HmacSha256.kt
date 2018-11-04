@@ -1,5 +1,6 @@
 package io.imulab.astrea.crypt
 
+import io.imulab.astrea.domain.DOT
 import org.jose4j.jca.ProviderContext
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.HmacUsingShaAlgorithm
@@ -35,7 +36,7 @@ class HmacSha256(
         }
         val signature = signBytes(bytes)
 
-        return base64Encoder.encodeToString(bytes) + "." + base64Encoder.encodeToString(signature)
+        return base64Encoder.encodeToString(bytes) + DOT + base64Encoder.encodeToString(signature)
     }
 
     /**

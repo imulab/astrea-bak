@@ -44,14 +44,14 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         builder.setForm(form)
 
         // client
-        val client = clientStore.getClient(form.singleValue("client_id"))
+        val client = clientStore.getClient(form.singleValue(PARAM_CLIENT_ID))
         builder.setClient(client)
 
         // oidc
         tryParseOidcParameters(builder)
 
         // redirect_uri
-        reader.formValueUnescaped("redirect_uri")
+        reader.formValueUnescaped(PARAM_REDIRECT_URI)
                 .determineRedirectUri(client.getRedirectUris())
                 .also {
                     it.checkValidRedirectUri()
@@ -59,10 +59,10 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
                 }
 
         // scope
-        reader.formValue("scope").also {
+        reader.formValue(PARAM_SCOPE).also {
             if (it.isBlank())
                 throw IllegalArgumentException("scope is mandatory.")
-        }.split(" ")
+        }.split(SPACE)
                 .filter { it.isNotEmpty() }
                 .filter { claimed ->
                     client.getScopes().any { registered ->
@@ -72,17 +72,17 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
                 .forEach { verified -> builder.addScopes(verified) }
 
         // response_type
-        reader.formValue("response_type").also {
+        reader.formValue(PARAM_RESPONSE_TYPE).also {
             if (it.isBlank())
                 throw IllegalArgumentException("response_type is mandatory.")
-        }.split(" ")
+        }.split(SPACE)
                 .filter { it.isNotEmpty() }
                 .map { ResponseType.fromSpecValue(it, ignoreCase = false) }
                 .filter { claimed -> client.getResponseTypes().contains(claimed) }
                 .forEach { verified -> builder.addResponseTypes(verified) }
 
         // state
-        reader.formValue("state").also {
+        reader.formValue(PARAM_STATE).also {
             when {
                 it.isBlank() -> throw IllegalArgumentException("state is mandatory.")
                 it.length < minStateEntropy -> throw IllegalArgumentException("state length must be no less than $minStateEntropy.")
@@ -153,14 +153,14 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         assert(builder.client != null)
 
         val form = builder.form
-        val scopes = form.singleValue("scope").split(" ")
+        val scopes = form.singleValue(PARAM_SCOPE).split(SPACE)
 
-        if (!scopes.contains("openid"))
+        if (!scopes.contains(SCOPE_OPENID))
             return
 
         // request, request_uri
-        var assertion = form.singleValue("request")
-        val location = form.singleValue("request_uri")
+        var assertion = form.singleValue(PARAM_REQUEST)
+        val location = form.singleValue(PARAM_REQUEST_URI)
         if (assertion.isBlank() && location.isBlank())
             return
         else if (location.isNotBlank()) {
@@ -192,13 +192,13 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
                 .setRequireExpirationTime()
                 .build()
         jwtConsumer.processToClaims(assertion).claimsMap.forEach { k, v ->
-            if (k == "scope") {
+            if (k == PARAM_SCOPE) {
                 when (v) {
                     is Collection<*> -> v.map { it.toString() }.filter { it.isNotBlank() }.forEach { builder.addScopes(it) }
-                    is String -> v.split(" ").filter { it.isNotEmpty() }.forEach { builder.addScopes(it) }
+                    is String -> v.split(SPACE).filter { it.isNotEmpty() }.forEach { builder.addScopes(it) }
                     else -> throw IllegalArgumentException("scope in request object can only be list or string")
                 }
-                builder.setForm("scope", builder.scopes.joinToString(separator = " "))
+                builder.setForm(PARAM_SCOPE, builder.scopes.joinToString(separator = SPACE))
             } else {
                 builder.setForm(k, v.toString())
             }

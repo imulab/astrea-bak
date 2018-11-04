@@ -56,7 +56,7 @@ class OpenIdConnectImplicitFlow(
             return true
 
         if (this.getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.IdToken)) &&
-                this.getGrantedScopes().contains("openid"))
+                this.getGrantedScopes().contains(SCOPE_OPENID))
             return true
 
         if (!this.getResponseTypes().contains(ResponseType.Code))

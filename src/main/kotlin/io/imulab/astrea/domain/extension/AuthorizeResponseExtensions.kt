@@ -1,54 +1,53 @@
 package io.imulab.astrea.domain.extension
 
-import io.imulab.astrea.domain.Scope
-import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.spi.http.singleValue
 
 fun AuthorizeResponse.setAccessTokenAsFragment(token: String) {
-    this.addFragment("access_token", token)
+    this.addFragment(PARAM_ACCESS_TOKEN, token)
 }
 
 fun AuthorizeResponse.getAccessTokenFromFragment(): String {
-    return this.getFragments().singleValue("access_token")
+    return this.getFragments().singleValue(PARAM_ACCESS_TOKEN)
 }
 
 fun AuthorizeResponse.setExpiresInAsFragment(seconds: Long) {
-    this.addFragment("expires_in", seconds.toString())
+    this.addFragment(PARAM_EXPIRES_IN, seconds.toString())
 }
 
 fun AuthorizeResponse.setTokenTypeAsFragment(tokenType: TokenType) {
-    this.addFragment("token_type", tokenType.specValue)
+    this.addFragment(PARAM_TOKEN_TYPE, tokenType.specValue)
 }
 
 fun AuthorizeResponse.setStateAsFragment(state: String) {
-    this.addFragment("state", state)
+    this.addFragment(PARAM_STATE, state)
 }
 
 fun AuthorizeResponse.getStateFromFragment(): String {
-    return this.getFragments().singleValue("state")
+    return this.getFragments().singleValue(PARAM_STATE)
 }
 
 fun AuthorizeResponse.setScopesAsFragment(scopes: List<Scope>) {
-    this.addFragment("scope", scopes.joinToString(" "))
+    this.addFragment(PARAM_SCOPE, scopes.joinToString(SPACE))
 }
 
 fun AuthorizeResponse.setCodeAsFragment(code: String) {
-    this.addFragment("code", code)
+    this.addFragment(PARAM_CODE, code)
 }
 
 fun AuthorizeResponse.setIdTokenAsFragment(token: String) {
-    this.addFragment("id_token", token)
+    this.addFragment(PARAM_ID_TOKEN, token)
 }
 
 fun AuthorizeResponse.setCodeAsQuery(code: String) {
-    this.addQuery("code", code)
+    this.addQuery(PARAM_CODE, code)
 }
 
 fun AuthorizeResponse.setStateAsQuery(state: String) {
-    this.addQuery("state", state)
+    this.addQuery(PARAM_STATE, state)
 }
 
 fun AuthorizeResponse.setScopesAsQuery(scopes: List<Scope>) {
-    this.addQuery("scope", scopes.joinToString(" "))
+    this.addQuery(PARAM_SCOPE, scopes.joinToString(SPACE))
 }

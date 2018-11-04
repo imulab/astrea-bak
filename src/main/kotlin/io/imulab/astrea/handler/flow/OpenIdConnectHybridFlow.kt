@@ -1,10 +1,7 @@
 package io.imulab.astrea.handler.flow
 
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.ResponseType
-import io.imulab.astrea.domain.ScopeStrategy
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
-import io.imulab.astrea.domain.mustAcceptAll
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
@@ -29,12 +26,12 @@ class OpenIdConnectHybridFlow(
         private val scopeStrategy: ScopeStrategy,
         private val minimumNonceEntropy: Int = 8,
         private val openIdConnectSafeStorageParameters: List<String> = listOf(
-                "grant_type",
-                "max_age",
-                "prompt",
-                "acr_values",
-                "id_token_hint",
-                "nonce"
+                PARAM_GRANT_TYPE,
+                PARAM_MAX_AGE,
+                PARAM_PROMPT,
+                PARAM_ACR_VALUE,
+                PARAM_ID_TOKEN_HINT,
+                PARAM_NONCE
         )
 ) : AuthorizeEndpointHandler, TokenEndpointHandler by openIdConnectAuthorizeCodeFlow {
 
@@ -69,7 +66,7 @@ class OpenIdConnectHybridFlow(
                     .let { openIdConnectTokenStrategy.leftMostHash(it) }
                     .let { oidcSession.getIdTokenClaims().setCodeHash(it) }
 
-            if (request.getGrantedScopes().contains("openid"))
+            if (request.getGrantedScopes().contains(SCOPE_OPENID))
                 openIdConnectRequestStorage.createOidcSession(
                         authorizeCode,
                         request.sanitize(openIdConnectSafeStorageParameters)
@@ -90,7 +87,7 @@ class OpenIdConnectHybridFlow(
         if (response.getStateFromFragment().isEmpty())
             response.setStateAsFragment(request.getState())
 
-        if (request.getGrantedScopes().contains("openid") &&
+        if (request.getGrantedScopes().contains(SCOPE_OPENID) &&
                 request.getResponseTypes().contains(ResponseType.IdToken))
             response.setIdTokenAsFragment(openIdConnectTokenStrategy.generateIdToken(request).token)
 

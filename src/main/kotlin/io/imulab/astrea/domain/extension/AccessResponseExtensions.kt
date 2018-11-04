@@ -1,11 +1,13 @@
 package io.imulab.astrea.domain.extension
 
+import io.imulab.astrea.domain.PARAM_ID_TOKEN
+import io.imulab.astrea.domain.PARAM_REFRESH_TOKEN
 import io.imulab.astrea.domain.response.AccessResponse
 
 fun AccessResponse.setRefreshToken(token: String) {
-    this.setExtra("refresh_token", token)
+    this.setExtra(PARAM_REFRESH_TOKEN, token)
 }
 
 fun AccessResponse.setIdToken(token: String) {
-    this.setExtra("id_token", token)
+    this.setExtra(PARAM_ID_TOKEN, token)
 }

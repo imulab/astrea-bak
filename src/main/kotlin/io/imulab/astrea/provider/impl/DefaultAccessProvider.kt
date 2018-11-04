@@ -1,8 +1,7 @@
 package io.imulab.astrea.provider.impl
 
 import io.imulab.astrea.client.auth.ClientAuthenticator
-import io.imulab.astrea.domain.GrantType
-import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
@@ -34,15 +33,15 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
             it.setForm(reader.getForm())
             it.addScopes(*(reader
                     .getForm()
-                    .singleValue("scope")
-                    .split(" ")
+                    .singleValue(PARAM_SCOPE)
+                    .split(SPACE)
                     .filter { it.isNotEmpty() }
                     .toTypedArray()
                     ))
             it.addGrantType(*(reader
                     .getForm()
-                    .singleValue("grant_type")
-                    .split(" ")
+                    .singleValue(PARAM_GRANT_TYPE)
+                    .split(SPACE)
                     .filter { it.isNotEmpty() }
                     .map { GrantType.fromSpecValue(it) }
                     .toTypedArray()

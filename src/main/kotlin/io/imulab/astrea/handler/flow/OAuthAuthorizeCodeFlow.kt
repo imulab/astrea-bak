@@ -27,7 +27,7 @@ class OAuthAuthorizeCodeFlow(
         private val authorizeCodeStrategy: AuthorizeCodeStrategy,
         private val authorizeCodeLifespan: TemporalAmount = Duration.ofMinutes(10),
         private val authorizeCodeStorage: AuthorizeCodeStorage,
-        private val safeStorageParameters: List<String> = listOf("code", "redirect_uri"),
+        private val safeStorageParameters: List<String> = listOf(PARAM_CODE, PARAM_REDIRECT_URI),
         private val accessTokenLifespan: TemporalAmount = Duration.ofMinutes(30),
         private val accessTokenStrategy: AccessTokenStrategy,
         private val accessTokenStorage: AccessTokenStorage,
@@ -121,7 +121,7 @@ class OAuthAuthorizeCodeFlow(
         // generate tokens
         val accessToken = accessTokenStrategy.generateNewAccessToken(request)
         var refreshToken: RefreshToken? = null
-        if (listOf("offline", "offline_access").any(authorizeRequest.getGrantedScopes()::contains))
+        if (authorizeRequest.getGrantedScopes().containsAny(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
             refreshToken = refreshTokenStrategy.generateNewRefreshToken(request)
 
         // deal with sessions

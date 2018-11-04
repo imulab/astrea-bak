@@ -1,6 +1,8 @@
 package io.imulab.astrea.client.auth
 
 import io.imulab.astrea.client.OAuthClient
+import io.imulab.astrea.domain.JWT_BEARER_CLIENT_ASSERTION_TYPE
+import io.imulab.astrea.domain.PARAM_CLIENT_ASSERTION_TYPE
 import io.imulab.astrea.spi.http.HttpRequestReader
 
 /**
@@ -16,7 +18,7 @@ import io.imulab.astrea.spi.http.HttpRequestReader
 class ClientSecretJwtAuthenticator : ClientAuthenticator {
 
     override fun supports(reader: HttpRequestReader): Boolean {
-        return reader.formValue("client_assertion_type") == jwtBearerClientAssertionType
+        return reader.formValue(PARAM_CLIENT_ASSERTION_TYPE) == JWT_BEARER_CLIENT_ASSERTION_TYPE
     }
 
     override fun authenticate(reader: HttpRequestReader): OAuthClient {
@@ -25,9 +27,5 @@ class ClientSecretJwtAuthenticator : ClientAuthenticator {
             secret as a shared HMAC SHA-256 key to sign the JWT. However, storing plain text secret or storing
             encrypted secret along with an encryption key is not safe and is therefore not support by this SDK.
         """.trimIndent())
-    }
-
-    companion object {
-        const val jwtBearerClientAssertionType = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
     }
 }
