@@ -40,6 +40,10 @@ fun AuthorizeResponse.setIdTokenAsFragment(token: String) {
     this.addFragment(PARAM_ID_TOKEN, token)
 }
 
+fun AuthorizeResponse.getIdTokenFromFragment(): String {
+    return this.getFragments().singleValue(PARAM_ID_TOKEN)
+}
+
 fun AuthorizeResponse.setCodeAsQuery(code: String) {
     this.addQuery(PARAM_CODE, code)
 }

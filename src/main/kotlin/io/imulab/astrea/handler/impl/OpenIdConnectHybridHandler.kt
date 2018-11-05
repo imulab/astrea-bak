@@ -40,7 +40,7 @@ class OpenIdConnectHybridHandler(
             return
 
         with(request.getNonce()) {
-            if (isEmpty())
+            if (isNullOrEmpty())
                 throw IllegalArgumentException("nonce required.")
             else if (length < minimumNonceEntropy)
                 throw IllegalArgumentException("nonce must be at least $minimumNonceEntropy in length.")

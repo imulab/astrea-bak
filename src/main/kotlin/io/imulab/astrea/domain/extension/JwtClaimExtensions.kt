@@ -4,12 +4,18 @@ import io.imulab.astrea.domain.*
 import org.jose4j.jwt.JwtClaims
 import org.jose4j.jwt.NumericDate
 
+fun JwtClaims.optionalStringClaim(name: String, default: String = ""): String {
+    return if (this.hasClaim(name))
+        this.getStringClaimValue(name)
+    else default
+}
+
 fun JwtClaims.setAccessTokenHash(hash: String) {
     this.setStringClaim(PARAM_ACCESS_TOKEN_HASH, hash)
 }
 
 fun JwtClaims.getAccessTokenHash(): String {
-    return this.getStringClaimValue(PARAM_ACCESS_TOKEN_HASH)
+    return this.optionalStringClaim(PARAM_ACCESS_TOKEN_HASH)
 }
 
 fun JwtClaims.setAuthenticationContextClassReference(value: String) {
@@ -17,7 +23,7 @@ fun JwtClaims.setAuthenticationContextClassReference(value: String) {
 }
 
 fun JwtClaims.getAuthenticationContextClassReference(): String {
-    return this.getStringClaimValue(PARAM_ACR)
+    return this.optionalStringClaim(PARAM_ACR)
 }
 
 fun JwtClaims.setCodeHash(hash: String) {
@@ -25,7 +31,7 @@ fun JwtClaims.setCodeHash(hash: String) {
 }
 
 fun JwtClaims.getCodeHash(): String {
-    return this.getStringClaimValue(PARAM_CODE_HASH)
+    return this.optionalStringClaim(PARAM_CODE_HASH)
 }
 
 fun JwtClaims.setAuthTime(time: NumericDate) {
