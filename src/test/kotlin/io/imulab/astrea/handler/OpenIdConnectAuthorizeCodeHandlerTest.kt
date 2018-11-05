@@ -6,14 +6,12 @@ import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.domain.extension.setAuthTime
-import io.imulab.astrea.domain.extension.setCodeAsQuery
-import io.imulab.astrea.domain.extension.setRequestAtTime
-import io.imulab.astrea.domain.request.AuthorizeRequest
-import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
-import io.imulab.astrea.domain.request.OAuthRequest
+import io.imulab.astrea.domain.extension.*
+import io.imulab.astrea.domain.request.*
 import io.imulab.astrea.domain.response.AuthorizeResponse
+import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
+import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.impl.DefaultOidcSession
 import io.imulab.astrea.handler.impl.OpenIdConnectAuthorizeCodeHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
@@ -30,8 +28,8 @@ import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
 import org.jose4j.jwt.NumericDate
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.function.Executable
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -63,6 +61,48 @@ class OpenIdConnectAuthorizeCodeHandlerTest {
         }
 
         additionalAssert?.accept(request, response)
+    }
+
+    @Test
+    fun testSupport() {
+        val r1 = Mockito.mock(AccessRequest::class.java)
+        Mockito.`when`(r1.getGrantTypes()).thenReturn(listOf(GrantType.AuthorizationCode))
+
+        val r2 = Mockito.mock(AccessRequest::class.java)
+        Mockito.`when`(r2.getGrantTypes()).thenReturn(listOf(GrantType.AuthorizationCode, GrantType.Password))
+
+        assertTrue(TestContext.handler.supports(r1))
+        assertFalse(TestContext.handler.supports(r2))
+    }
+
+    @Test
+    fun testPopulateAccessRequest() {
+        // got lazy: just borrow test parameters from #testHandleAuthorizeRequest
+        // the second parameter of the first test is the one that represents a correct request.
+        val authCode = newAuthorizeCode()
+        (authorizeRequestParams()[0].get()[1] as OAuthRequest).run {
+            TestContext.memoryStorage.createOidcSession(AuthorizeCode(code = authCode, signature = "unimportant"), this)
+        }
+
+        val request = DefaultAccessRequest.Builder().also {
+            it.setForm(PARAM_CODE, authCode)
+            it.setForm(PARAM_GRANT_TYPE, GrantType.AuthorizationCode.specValue) // because id token strategy looks up in form.
+            it.addGrantType(GrantType.AuthorizationCode)
+
+            it.client = TestContext.defaultClient
+            it.session = DefaultOidcSession.Builder().also {s ->
+                s.getClaims().run { subject = "imulab" }
+            }.build()
+        }.build() as AccessRequest
+
+        val response = DefaultAccessResponse().also {
+            it.setAccessToken(jwtWithClaims { subject = "for-test-only" })
+        }
+
+        TestContext.handler.populateAccessResponse(request, response)
+
+        assertTrue((request.getSession()!! as OidcSession).getIdTokenClaims().getAccessTokenHash().isNotEmpty())
+        assertTrue(response.getIdToken().isNotEmpty())
     }
 
     @AfterEach

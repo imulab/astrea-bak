@@ -37,6 +37,7 @@ fun OAuthRequest.getPrompts(): List<Prompt> {
     return this.getRequestForm()
             .singleValue(PARAM_PROMPT)
             .split(SPACE)
+            .filter { it.isNotEmpty() }
             .map { Prompt.fromSpecValue(it) }
             .toList()
 }
@@ -57,6 +58,7 @@ fun OAuthRequest.getGrantTypes(): List<GrantType> {
     return this.getRequestForm()
             .singleValue(PARAM_GRANT_TYPE)
             .split(SPACE)
+            .filter { it.isNotEmpty() }
             .map { GrantType.fromSpecValue(it) }
             .toList()
 }

@@ -3,6 +3,7 @@ package io.imulab.astrea.handler.impl
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.getCode
 import io.imulab.astrea.domain.extension.setAccessTokenHash
+import io.imulab.astrea.domain.extension.setIdToken
 import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
@@ -84,7 +85,7 @@ class OpenIdConnectAuthorizeCodeHandler(
                     .let { getIdTokenClaims().setAccessTokenHash(it) }
         }
 
-        response.setRefreshToken(openIdTokenStrategy.generateIdToken(request).token)
+        response.setIdToken(openIdTokenStrategy.generateIdToken(request).token)
     }
 
     // end: TokenEndpointHandler ---------------------------------------------------------------------------------------

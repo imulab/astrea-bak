@@ -8,6 +8,10 @@ fun JwtClaims.setAccessTokenHash(hash: String) {
     this.setStringClaim(PARAM_ACCESS_TOKEN_HASH, hash)
 }
 
+fun JwtClaims.getAccessTokenHash(): String {
+    return this.getStringClaimValue(PARAM_ACCESS_TOKEN_HASH)
+}
+
 fun JwtClaims.setAuthenticationContextClassReference(value: String) {
     this.setStringClaim(PARAM_ACR, value)
 }
@@ -18,6 +22,10 @@ fun JwtClaims.getAuthenticationContextClassReference(): String {
 
 fun JwtClaims.setCodeHash(hash: String) {
     this.setStringClaim(PARAM_CODE_HASH, hash)
+}
+
+fun JwtClaims.getCodeHash(): String {
+    return this.getStringClaimValue(PARAM_CODE_HASH)
 }
 
 fun JwtClaims.setAuthTime(time: NumericDate) {

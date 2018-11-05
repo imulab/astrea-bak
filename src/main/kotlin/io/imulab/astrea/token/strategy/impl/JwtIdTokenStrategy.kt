@@ -6,7 +6,6 @@ import io.imulab.astrea.crypt.hash.ShaHasher
 import io.imulab.astrea.domain.DOT
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.Prompt
-import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
@@ -15,19 +14,18 @@ import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.token.IdToken
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 import org.jose4j.jwt.NumericDate
-import java.time.LocalDateTime
+import java.time.Duration
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAmount
 
 class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
-                         private val issuer: String) : IdTokenStrategy {
+                         private val issuer: String,
+                         private val idTokenLifespan: TemporalAmount = Duration.ofHours(1)) : IdTokenStrategy {
 
     override fun getHasher(): Hasher = ShaHasher.usingSha256()
 
     override fun generateIdToken(request: OAuthRequest): IdToken {
         val session = request.getSession().assertType<OidcSession>()
-
-        val expiry = request.getSession()!!.getExpiry(TokenType.IdToken)
-                ?: throw IllegalStateException("program error: id token expiry not set.")
 
         if (session.getIdTokenClaims().subject.isBlank())
             throw IllegalArgumentException("id token subject is not set.")
@@ -36,19 +34,18 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
             whenGrantTypeIsNotRefreshToken(request)
 
         val jwt = jwtRs256.generate(session.getIdTokenClaims().also {
-            it.setExpirationTimeMinutesInTheFuture(LocalDateTime.now().until(expiry, ChronoUnit.MINUTES).toFloat())
+            // we can only get ChronoUnit.SECONDS here since Duration only supports SECONDS and NANO
+            it.setExpirationTimeMinutesInTheFuture(idTokenLifespan.get(ChronoUnit.SECONDS).div(60).toFloat())
 
             it.setAuthTime(NumericDate.now())
 
-            if (it.issuer.isEmpty())
+            if (it.issuer.isNullOrEmpty())
                 it.issuer = issuer
 
             if (request.getNonce().isNotEmpty())
                 it.setNonce(request.getNonce())
 
-            it.setAudience(*(
-                    it.audience.also { aud -> aud.add(request.getClient().getId()) }.toSet().toTypedArray()
-                    ))
+            it.setAudience(*(it.audience.toHashSet().also { s -> s.add(request.getClient().getId()) }.toTypedArray()))
 
             it.issuedAt = NumericDate.now()
         }, session.getIdTokenHeaders())
