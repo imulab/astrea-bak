@@ -2,7 +2,6 @@ package io.imulab.astrea.handler
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.DefaultOidcClient
-import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.*
@@ -12,7 +11,6 @@ import io.imulab.astrea.domain.extension.setAuthTime
 import io.imulab.astrea.domain.extension.setRequestAtTime
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
-import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultOidcSession
@@ -20,7 +18,6 @@ import io.imulab.astrea.handler.impl.OAuthImplicitHandler
 import io.imulab.astrea.handler.impl.OpenIdConnectImplicitHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.token.storage.impl.MemoryStorage
-import io.imulab.astrea.token.strategy.impl.HmacAuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
 import io.imulab.astrea.token.strategy.impl.JwtIdTokenStrategy
 import org.jose4j.jwk.JsonWebKeySet
@@ -37,10 +34,7 @@ import org.junit.jupiter.api.function.Executable
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.Mockito
 import java.util.function.BiConsumer
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 
 class OpenIdConnectImplicitHandlerTest {
 
@@ -167,14 +161,9 @@ class OpenIdConnectImplicitHandlerTest {
                     it.keyIdHeaderValue = TestContext.jwk.keyId
                     it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
                 }.compactSerialization
-
-        private fun newAuthorizeCode(): String =
-                TestContext.authorizeCodeStrategy.generateNewAuthorizeCode(Mockito.mock(OAuthRequest::class.java)).code
     }
 
     private object TestContext {
-        val secretKey: SecretKey by lazy { KeyGenerator.getInstance("AES").generateKey() }
-
         val jwk: RsaJsonWebKey by lazy {
             RsaJwkGenerator.generateJwk(2048).also {
                 it.use = Use.SIGNATURE
@@ -197,11 +186,7 @@ class OpenIdConnectImplicitHandlerTest {
                 reqObjSignAlg = SigningAlgorithm.RS256
         )
 
-        val hmacSha256 = HmacSha256(secretKey = secretKey)
-
         val jwtRs256 = JwtRs256(jwk = jwk)
-
-        val authorizeCodeStrategy = HmacAuthorizeCodeStrategy(hmac = hmacSha256)
 
         val memoryStorage by lazy { MemoryStorage() }
 

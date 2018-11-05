@@ -48,8 +48,7 @@ class OpenIdConnectAuthorizeCodeHandlerTest {
             request: AuthorizeRequest,
             response: AuthorizeResponse,
             expectException: Class<Throwable>?,
-            additionalAssert: BiConsumer<AuthorizeRequest, AuthorizeResponse>?)
-    {
+            additionalAssert: BiConsumer<AuthorizeRequest, AuthorizeResponse>?) {
         val executable = Executable {
             TestContext.handler.handleAuthorizeRequest(request, response)
         }
@@ -90,7 +89,7 @@ class OpenIdConnectAuthorizeCodeHandlerTest {
             it.addGrantType(GrantType.AuthorizationCode)
 
             it.client = TestContext.defaultClient
-            it.session = DefaultOidcSession.Builder().also {s ->
+            it.session = DefaultOidcSession.Builder().also { s ->
                 s.getClaims().run { subject = "imulab" }
             }.build()
         }.build() as AccessRequest
