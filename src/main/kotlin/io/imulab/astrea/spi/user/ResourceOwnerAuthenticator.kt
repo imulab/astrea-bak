@@ -1,7 +1,7 @@
 package io.imulab.astrea.spi.user
 
 /**
- * Service provider interface for authenticating an resource owner, used mainly by resource owner password flow.
+ * Service provider interface for authenticating an resource owner, used mainly by resource owner password handler.
  */
 interface ResourceOwnerAuthenticator {
 

@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
@@ -22,7 +22,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAmount
 
-class OAuthAuthorizeCodeFlow(
+class OAuthAuthorizeCodeHandler(
         private val scopeStrategy: ScopeStrategy,
         private val authorizeCodeStrategy: AuthorizeCodeStrategy,
         private val authorizeCodeLifespan: TemporalAmount = Duration.ofMinutes(10),

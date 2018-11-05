@@ -25,7 +25,7 @@ import io.imulab.astrea.spi.http.HttpResponseWriter
  * existing http library to [HttpRequestReader] and [HttpResponseWriter].
  *
  * Note that although this interface provides functions related to the `/oauth/authorize` endpoint. It is not strictly
- * related to issuing an authorization code. For example, in an implicit flow, a registered client may exchange its
+ * related to issuing an authorization code. For example, in an implicit handler, a registered client may exchange its
  * credentials directly for an access token at the `/oauth/authorize` endpoint. These scenarios are abstracted by this
  * interface as well. Therefore, implementations to this interface shall look to cover parts of different OAuth defined
  * flows which interact with the `/oauth/authorize` endpoint. This is typically provided via implementations to the

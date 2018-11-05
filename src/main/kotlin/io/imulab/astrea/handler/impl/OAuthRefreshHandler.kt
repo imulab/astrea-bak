@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.getRefreshToken
@@ -16,7 +16,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAmount
 
-class OAuthRefreshFlow(
+class OAuthRefreshHandler(
         private val accessTokenLifespan: TemporalAmount = Duration.ofMinutes(30),
         private val accessTokenStrategy: AccessTokenStrategy,
         private val refreshTokenStrategy: RefreshTokenStrategy,

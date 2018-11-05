@@ -1,4 +1,4 @@
-package io.imulab.astrea.flow
+package io.imulab.astrea.handler
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.crypt.JwtRs256
@@ -10,7 +10,7 @@ import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.ClientGrantTypeException
-import io.imulab.astrea.handler.flow.OAuthClientCredentialsFlow
+import io.imulab.astrea.handler.impl.OAuthClientCredentialsHandler
 import io.imulab.astrea.token.storage.RefreshTokenStorage
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 
-class OAuthClientCredentialFlowTest {
+class OAuthClientCredentialsHandlerTest {
 
     @AfterEach
     fun clean() {
@@ -34,7 +34,7 @@ class OAuthClientCredentialFlowTest {
 
     @Test
     fun `client credential shall pass`() {
-        val flow = OAuthClientCredentialsFlow(
+        val flow = OAuthClientCredentialsHandler(
                 scopeStrategy = TestContext.scopeStrategy,
                 accessTokenStrategy = TestContext.accessTokenStrategy,
                 accessTokenStorage = TestContext.memoryStore,
@@ -73,7 +73,7 @@ class OAuthClientCredentialFlowTest {
 
     @Test
     fun `client without client credential grant type shall fail`() {
-        val flow = OAuthClientCredentialsFlow(
+        val flow = OAuthClientCredentialsHandler(
                 scopeStrategy = TestContext.scopeStrategy,
                 accessTokenStrategy = TestContext.accessTokenStrategy,
                 accessTokenStorage = TestContext.memoryStore,

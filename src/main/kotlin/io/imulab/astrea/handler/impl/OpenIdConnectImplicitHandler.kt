@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
@@ -10,8 +10,8 @@ import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 
-class OpenIdConnectImplicitFlow(
-        private val oauthImplicitFlow: OAuthImplicitFlow,
+class OpenIdConnectImplicitHandler(
+        private val oauthImplicitHandler: OAuthImplicitHandler,
         private val scopeStrategy: ScopeStrategy,
         private val openIdConnectTokenStrategy: IdTokenStrategy,
         private val openIdConnectRequestValidator: OpenIdConnectRequestValidator,
@@ -38,7 +38,7 @@ class OpenIdConnectImplicitFlow(
         val oidcSession = request.getSession().assertType<OidcSession>()
 
         if (request.getResponseTypes().contains(ResponseType.Token)) {
-            oauthImplicitFlow.issueImplicitAccessToken(request, response)
+            oauthImplicitHandler.issueImplicitAccessToken(request, response)
 
             response.getAccessTokenFromFragment()
                     .let { openIdConnectTokenStrategy.leftMostHash(it) }

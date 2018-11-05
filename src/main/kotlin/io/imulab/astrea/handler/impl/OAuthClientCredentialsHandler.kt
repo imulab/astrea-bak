@@ -1,14 +1,11 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.domain.extension.getPassword
-import io.imulab.astrea.domain.extension.getUsername
-import io.imulab.astrea.domain.extension.removePassword
 import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
+import io.imulab.astrea.error.PublicClientConductingPrivateOpException
 import io.imulab.astrea.handler.TokenEndpointHandler
-import io.imulab.astrea.spi.user.ResourceOwnerAuthenticator
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.storage.RefreshTokenStorage
@@ -18,39 +15,31 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAmount
 
-class OAuthResourceOwnerFlow(
+class OAuthClientCredentialsHandler(
         private val scopeStrategy: ScopeStrategy,
-        private val resourceOwnerAuthenticator: ResourceOwnerAuthenticator,
+        private val accessTokenLifespan: TemporalAmount = Duration.ofMinutes(30),
         private val accessTokenStrategy: AccessTokenStrategy,
         private val accessTokenStorage: AccessTokenStorage,
-        private val accessTokenLifespan: TemporalAmount = Duration.ofMinutes(30),
         private val refreshTokenStrategy: RefreshTokenStrategy,
         private val refreshTokenStorage: RefreshTokenStorage
 ) : TokenEndpointHandler {
 
     override fun supports(request: AccessRequest): Boolean =
-            request.getGrantTypes().exactly(GrantType.Password)
+            request.getGrantTypes().exactly(GrantType.ClientCredentials)
 
     override fun handleAccessRequest(request: AccessRequest) {
         if (!supports(request))
             return
 
-        request.getClient().run {
-            mustGrantType(GrantType.Password)
-            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
-        }
+        // check client validity
+        if (request.getClient().isPublic())
+            throw PublicClientConductingPrivateOpException("client credentials handler")
+        request.getClient().mustGrantType(GrantType.ClientCredentials)
 
-        // authenticate user
-        val username = request.getUsername()
-        val password = request.getPassword()
-        if (username.isBlank() || password.isBlank())
-            throw IllegalArgumentException("username or password not provided.")
-        resourceOwnerAuthenticator.authenticate(username, password)
+        // check scope
+        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
 
-        // clear password so we don't accidentally save it
-        request.removePassword()
-
-        // set access token expiry
+        // set expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
     }
 

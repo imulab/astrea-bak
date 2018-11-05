@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAmount
 
-class OAuthImplicitFlow(
+class OAuthImplicitHandler(
         private val scopeStrategy: ScopeStrategy,
         private val accessTokenLifespan: TemporalAmount = Duration.ofMinutes(30),
         private val accessTokenStrategy: AccessTokenStrategy,

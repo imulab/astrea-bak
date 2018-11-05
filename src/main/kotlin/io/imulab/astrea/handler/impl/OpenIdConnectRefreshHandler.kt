@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.SCOPE_OPENID
@@ -13,7 +13,7 @@ import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 
-class OpenIdConnectRefreshFlow(
+class OpenIdConnectRefreshHandler(
         private val openIdConnectTokenStrategy: IdTokenStrategy
 ) : TokenEndpointHandler {
 

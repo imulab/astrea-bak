@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
@@ -14,9 +14,9 @@ import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 
-class OpenIdConnectHybridFlow(
-        private val openIdConnectAuthorizeCodeFlow: OpenIdConnectAuthorizeCodeFlow,
-        private val oAuthImplicitFlow: OAuthImplicitFlow,
+class OpenIdConnectHybridHandler(
+        private val openIdConnectAuthorizeCodeHandler: OpenIdConnectAuthorizeCodeHandler,
+        private val oAuthImplicitHandler: OAuthImplicitHandler,
         private val authorizeCodeStrategy: AuthorizeCodeStrategy,
         private val authorizeCodeStorage: AuthorizeCodeStorage,
         private val authorizeCodeSafeStorageParameters: List<String> = listOf("code", "redirect_uri"),
@@ -33,7 +33,7 @@ class OpenIdConnectHybridFlow(
                 PARAM_ID_TOKEN_HINT,
                 PARAM_NONCE
         )
-) : AuthorizeEndpointHandler, TokenEndpointHandler by openIdConnectAuthorizeCodeFlow {
+) : AuthorizeEndpointHandler, TokenEndpointHandler by openIdConnectAuthorizeCodeHandler {
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
         if (!request.shouldHandle())
@@ -76,7 +76,7 @@ class OpenIdConnectHybridFlow(
         if (request.getResponseTypes().contains(ResponseType.Token)) {
             request.getClient().mustGrantType(GrantType.Implicit)
 
-            oAuthImplicitFlow.issueImplicitAccessToken(request, response)
+            oAuthImplicitHandler.issueImplicitAccessToken(request, response)
 
             response.getAccessTokenFromFragment()
                     .let { openIdConnectTokenStrategy.leftMostHash(it) }

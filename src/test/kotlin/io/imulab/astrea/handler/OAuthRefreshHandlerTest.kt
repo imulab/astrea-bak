@@ -1,4 +1,4 @@
-package io.imulab.astrea.flow
+package io.imulab.astrea.handler
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.OAuthClient
@@ -12,7 +12,7 @@ import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.InvalidRefreshTokenException
-import io.imulab.astrea.handler.flow.OAuthRefreshFlow
+import io.imulab.astrea.handler.impl.OAuthRefreshHandler
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.impl.MemoryStorage
@@ -32,7 +32,7 @@ import java.time.LocalDateTime
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-class OAuthRefreshFlowTest {
+class OAuthRefreshHandlerTest {
 
     @BeforeEach
     fun prepare() {
@@ -49,7 +49,7 @@ class OAuthRefreshFlowTest {
 
     @Test
     fun `valid request should get new access token`() {
-        val flow = OAuthRefreshFlow(
+        val flow = OAuthRefreshHandler(
                 accessTokenStrategy = TestContext.accessTokenStrategy,
                 refreshTokenStrategy = TestContext.refreshTokenStrategy,
                 tokenRevocationStorage = TestContext.memoryStore
@@ -86,7 +86,7 @@ class OAuthRefreshFlowTest {
 
     @Test
     fun `invalid refresh token should be rejected`() {
-        val flow = OAuthRefreshFlow(
+        val flow = OAuthRefreshHandler(
                 accessTokenStrategy = TestContext.accessTokenStrategy,
                 refreshTokenStrategy = TestContext.refreshTokenStrategy,
                 tokenRevocationStorage = TestContext.memoryStore
@@ -109,7 +109,7 @@ class OAuthRefreshFlowTest {
 
     @Test
     fun `a different client false claiming this refresh token should fail`() {
-        val flow = OAuthRefreshFlow(
+        val flow = OAuthRefreshHandler(
                 accessTokenStrategy = TestContext.accessTokenStrategy,
                 refreshTokenStrategy = TestContext.refreshTokenStrategy,
                 tokenRevocationStorage = TestContext.memoryStore

@@ -1,4 +1,4 @@
-package io.imulab.astrea.flow
+package io.imulab.astrea.handler
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.crypt.JwtRs256
@@ -9,7 +9,7 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
-import io.imulab.astrea.handler.flow.OAuthResourceOwnerFlow
+import io.imulab.astrea.handler.impl.OAuthResourceOwnerHandler
 import io.imulab.astrea.spi.user.ResourceOwnerAuthenticator
 import io.imulab.astrea.spi.user.UserAuthenticationException
 import io.imulab.astrea.token.storage.impl.MemoryStorage
@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 
-class OAuthResourceOwnerFlowTest {
+class OAuthResourceOwnerHandlerTest {
 
     @Test
     fun `user with valid credential gets access token`() {
-        val flow = OAuthResourceOwnerFlow(
+        val flow = OAuthResourceOwnerHandler(
                 scopeStrategy = TestContext.scopeStrategy,
                 accessTokenStrategy = TestContext.accessTokenStrategy,
                 accessTokenStorage = TestContext.memoryStore,
@@ -70,7 +70,7 @@ class OAuthResourceOwnerFlowTest {
 
     @Test
     fun `user with invalid credential should fail`() {
-        val flow = OAuthResourceOwnerFlow(
+        val flow = OAuthResourceOwnerHandler(
                 scopeStrategy = TestContext.scopeStrategy,
                 accessTokenStrategy = TestContext.accessTokenStrategy,
                 accessTokenStorage = TestContext.memoryStore,

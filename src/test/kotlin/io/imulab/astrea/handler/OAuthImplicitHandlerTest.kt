@@ -1,4 +1,4 @@
-package io.imulab.astrea.flow
+package io.imulab.astrea.handler
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.crypt.JwtRs256
@@ -12,7 +12,7 @@ import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.ClientGrantTypeException
 import io.imulab.astrea.error.ScopeRejectedException
-import io.imulab.astrea.handler.flow.OAuthImplicitFlow
+import io.imulab.astrea.handler.impl.OAuthImplicitHandler
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class OAuthImplicitFlowTest {
+class OAuthImplicitHandlerTest {
 
     @AfterEach
     fun clean() {
@@ -34,7 +34,7 @@ class OAuthImplicitFlowTest {
 
     @Test
     fun `implicit flow passes`() {
-        val flow = OAuthImplicitFlow(
+        val flow = OAuthImplicitHandler(
                 scopeStrategy = TestContext.scopeStrategy,
                 accessTokenStorage = TestContext.memoryStorage,
                 accessTokenStrategy = TestContext.accessTokenStrategy
@@ -71,7 +71,7 @@ class OAuthImplicitFlowTest {
 
     @Test
     fun `client that has no right for scope shall fail`() {
-        val flow = OAuthImplicitFlow(
+        val flow = OAuthImplicitHandler(
                 scopeStrategy = TestContext.scopeStrategy,
                 accessTokenStorage = TestContext.memoryStorage,
                 accessTokenStrategy = TestContext.accessTokenStrategy
@@ -102,7 +102,7 @@ class OAuthImplicitFlowTest {
 
     @Test
     fun `client not capable of implicit flow shall fail`() {
-        val flow = OAuthImplicitFlow(
+        val flow = OAuthImplicitHandler(
                 scopeStrategy = TestContext.scopeStrategy,
                 accessTokenStorage = TestContext.memoryStorage,
                 accessTokenStrategy = TestContext.accessTokenStrategy

@@ -1,4 +1,4 @@
-package io.imulab.astrea.flow
+package io.imulab.astrea.handler
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.client.OAuthClient
@@ -15,7 +15,7 @@ import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.InvalidAuthorizeCodeException
-import io.imulab.astrea.handler.flow.OAuthAuthorizeCodeFlow
+import io.imulab.astrea.handler.impl.OAuthAuthorizeCodeHandler
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-class OAuthAuthorizeCodeFlowTest {
+class OAuthAuthorizeCodeHandlerTest {
 
     @AfterEach
     fun afterEach() {
@@ -89,7 +89,7 @@ class OAuthAuthorizeCodeFlowTest {
         }
     }
 
-    private fun testAuthorize(flow: OAuthAuthorizeCodeFlow): AuthorizeResponse {
+    private fun testAuthorize(handler: OAuthAuthorizeCodeHandler): AuthorizeResponse {
         val authorizeRequest = DefaultAuthorizeRequest.Builder().also {
             it.client = TestContext.client
             it.responseTypes = mutableSetOf(ResponseType.Code)
@@ -103,7 +103,7 @@ class OAuthAuthorizeCodeFlowTest {
         }.build() as AuthorizeRequest
         val authorizeResponse = DefaultAuthorizeResponse()
 
-        flow.handleAuthorizeRequest(authorizeRequest, authorizeResponse)
+        handler.handleAuthorizeRequest(authorizeRequest, authorizeResponse)
 
         assertTrue(authorizeRequest.hasAllResponseTypesBeenHandled())
         assertTrue(authorizeResponse.getCode().isNotBlank())
@@ -114,7 +114,7 @@ class OAuthAuthorizeCodeFlowTest {
         return authorizeResponse
     }
 
-    private fun testHandleAccess(flow: OAuthAuthorizeCodeFlow, authorizeResponse: AuthorizeResponse): AccessRequest {
+    private fun testHandleAccess(handler: OAuthAuthorizeCodeHandler, authorizeResponse: AuthorizeResponse): AccessRequest {
         val accessRequest = DefaultAccessRequest.Builder().also {
             it.setForm("code", authorizeResponse.getCode())
             it.setForm("redirect_uri", "https://test.com/callback")
@@ -123,15 +123,15 @@ class OAuthAuthorizeCodeFlowTest {
             it.client = TestContext.client
         }.build() as AccessRequest
 
-        flow.handleAccessRequest(accessRequest)
+        handler.handleAccessRequest(accessRequest)
 
         return accessRequest
     }
 
-    private fun testPopulateAccessResponse(flow: OAuthAuthorizeCodeFlow, accessRequest: AccessRequest) {
+    private fun testPopulateAccessResponse(handler: OAuthAuthorizeCodeHandler, accessRequest: AccessRequest) {
         val accessResponse = DefaultAccessResponse()
         assertDoesNotThrow {
-            flow.populateAccessResponse(accessRequest, accessResponse)
+            handler.populateAccessResponse(accessRequest, accessResponse)
         }
 
         assertTrue(accessResponse.getAccessToken().isNotBlank())
@@ -178,8 +178,8 @@ class OAuthAuthorizeCodeFlowTest {
                 grantTypes = listOf(GrantType.AuthorizationCode)
         )
 
-        fun getFlow(): OAuthAuthorizeCodeFlow =
-                OAuthAuthorizeCodeFlow(
+        fun getFlow(): OAuthAuthorizeCodeHandler =
+                OAuthAuthorizeCodeHandler(
                         scopeStrategy = scopeStrategy,
                         authorizeCodeStrategy = authorizeCodeStrategy,
                         authorizeCodeStorage = memoryStore,

@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.flow
+package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.getCode
@@ -18,7 +18,7 @@ import io.imulab.astrea.token.storage.OpenIdConnectRequestStorage
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.IdTokenStrategy
 
-class OpenIdConnectAuthorizeCodeFlow(
+class OpenIdConnectAuthorizeCodeHandler(
         private val authorizeCodeStrategy: AuthorizeCodeStrategy,
         private val openIdConnectRequestStorage: OpenIdConnectRequestStorage,
         private val openIdConnectRequestValidator: OpenIdConnectRequestValidator,
