@@ -44,7 +44,7 @@ class OpenIdConnectAuthorizeCodeHandlerTest {
     @ParameterizedTest(name = "#{index}: {0}")
     @MethodSource("authorizeRequestParams")
     fun testHandleAuthorizeRequest(
-            name: String,
+            @Suppress("UNUSED_PARAMETER") name: String,
             request: AuthorizeRequest,
             response: AuthorizeResponse,
             expectException: Class<Throwable>?,

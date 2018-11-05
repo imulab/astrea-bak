@@ -6,19 +6,19 @@ import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.domain.extension.*
+import io.imulab.astrea.domain.extension.getAccessTokenFromFragment
+import io.imulab.astrea.domain.extension.getIdTokenFromFragment
+import io.imulab.astrea.domain.extension.setAuthTime
+import io.imulab.astrea.domain.extension.setRequestAtTime
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
-import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.impl.DefaultOidcSession
 import io.imulab.astrea.handler.impl.OAuthImplicitHandler
-import io.imulab.astrea.handler.impl.OpenIdConnectAuthorizeCodeHandler
-import io.imulab.astrea.handler.impl.OpenIdConnectHybridHandler
+import io.imulab.astrea.handler.impl.OpenIdConnectImplicitHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
-import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.impl.HmacAuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
@@ -31,6 +31,7 @@ import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
 import org.jose4j.jwt.NumericDate
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.function.Executable
 import org.junit.jupiter.params.ParameterizedTest
@@ -41,7 +42,7 @@ import java.util.function.BiConsumer
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-class OpenIdConnectHybridHandlerTest {
+class OpenIdConnectImplicitHandlerTest {
 
     @ParameterizedTest(name = "#{index}: {0}")
     @MethodSource("handleAuthorizeRequestParams")
@@ -65,14 +66,19 @@ class OpenIdConnectHybridHandlerTest {
         additionalAssert?.accept(request, response)
     }
 
+    @AfterEach
+    fun cleanUp() {
+        TestContext.memoryStorage.clearAll()
+    }
+
     companion object {
         @JvmStatic
         fun handleAuthorizeRequestParams() = listOf(
                 Arguments.of(
-                        "response_type=code token",
+                        "response_type=token id_token",
                         DefaultAuthorizeRequest.Builder().also { b ->
                             b.run {
-                                addResponseTypes(ResponseType.Code, ResponseType.Token)
+                                addResponseTypes(ResponseType.Token, ResponseType.IdToken)
                                 addScopes(SCOPE_OPENID, "foo")
                                 addGrantedScopes(SCOPE_OPENID)
 
@@ -98,75 +104,22 @@ class OpenIdConnectHybridHandlerTest {
                                 setState("12345678")
                             }
                         }.build(),
-                        DefaultAuthorizeResponse().also {
-                            it.setCodeAsQuery(newAuthorizeCode())
-                        },
+                        DefaultAuthorizeResponse(),
                         null,
-                        BiConsumer<AuthorizeRequest, AuthorizeResponse> { req, resp ->
+                        BiConsumer<AuthorizeRequest, AuthorizeResponse> { _, resp ->
                             Assertions.assertDoesNotThrow {
-                                TestContext.memoryStorage.getOidcSession(
-                                        AuthorizeCode(code = resp.getCode(), signature = "not.important"),
-                                        Mockito.mock(OAuthRequest::class.java)
-                                )
-                                Assertions.assertTrue((req.getSession() as OidcSession).getIdTokenClaims().getAccessTokenHash().isNotEmpty())
+                                Assertions.assertTrue(resp.getCode().isEmpty())
                                 Assertions.assertTrue(resp.getAccessTokenFromFragment().isNotEmpty())
-                                Assertions.assertTrue(resp.getCode().isNotEmpty())
-                                Assertions.assertTrue(resp.getIdTokenFromFragment().isEmpty())
-                            }
-                        }
-                ),
-                Arguments.of(
-                        "response_type=code id_token",
-                        DefaultAuthorizeRequest.Builder().also { b ->
-                            b.run {
-                                addResponseTypes(ResponseType.Code, ResponseType.IdToken)
-                                addScopes(SCOPE_OPENID, "foo")
-                                addGrantedScopes(SCOPE_OPENID)
-
-                                setClient(TestContext.defaultClient)
-
-                                setSession(DefaultOidcSession.Builder().also {
-                                    it.getClaims().run {
-                                        subject = "imulab"
-                                        // satisfies: rat < auth_time when prompt=login
-                                        // automatically satisfies auth_time + max_age > rat
-                                        setAuthTime(nowMinusSeconds(300))
-                                        setRequestAtTime(nowMinusSeconds(600))
-                                    }
-                                }.build())
-
-                                setForm(PARAM_NONCE, "1234567890")
-                                setForm(PARAM_PROMPT, Prompt.Login.specValue)
-                                setForm(PARAM_MAX_AGE, "600")
-                                setForm(PARAM_ID_TOKEN_HINT, jwtWithClaims {
-                                    subject = "imulab"
-                                })
-
-                                setState("12345678")
-                            }
-                        }.build(),
-                        DefaultAuthorizeResponse().also {
-                            it.setCodeAsQuery(newAuthorizeCode())
-                        },
-                        null,
-                        BiConsumer<AuthorizeRequest, AuthorizeResponse> { req, resp ->
-                            Assertions.assertDoesNotThrow {
-                                TestContext.memoryStorage.getOidcSession(
-                                        AuthorizeCode(code = resp.getCode(), signature = "not.important"),
-                                        Mockito.mock(OAuthRequest::class.java)
-                                )
-                                Assertions.assertTrue((req.getSession() as OidcSession).getIdTokenClaims().getAccessTokenHash().isEmpty())
-                                Assertions.assertTrue(resp.getAccessTokenFromFragment().isEmpty())
-                                Assertions.assertTrue(resp.getCode().isNotEmpty())
                                 Assertions.assertTrue(resp.getIdTokenFromFragment().isNotEmpty())
                             }
                         }
                 ),
+
                 Arguments.of(
-                        "response_type=code token id_token",
+                        "response_type=id_token",
                         DefaultAuthorizeRequest.Builder().also { b ->
                             b.run {
-                                addResponseTypes(ResponseType.Code, ResponseType.Token, ResponseType.IdToken)
+                                addResponseTypes(ResponseType.IdToken)
                                 addScopes(SCOPE_OPENID, "foo")
                                 addGrantedScopes(SCOPE_OPENID)
 
@@ -192,20 +145,12 @@ class OpenIdConnectHybridHandlerTest {
                                 setState("12345678")
                             }
                         }.build(),
-                        DefaultAuthorizeResponse().also {
-                            it.setCodeAsQuery(newAuthorizeCode())
-                        },
+                        DefaultAuthorizeResponse(),
                         null,
-                        BiConsumer<AuthorizeRequest, AuthorizeResponse> { req, resp ->
+                        BiConsumer<AuthorizeRequest, AuthorizeResponse> { _, resp ->
                             Assertions.assertDoesNotThrow {
-                                TestContext.memoryStorage.getOidcSession(
-                                        AuthorizeCode(code = resp.getCode(), signature = "not.important"),
-                                        Mockito.mock(OAuthRequest::class.java)
-                                )
-                                Assertions.assertTrue((req.getSession() as OidcSession).getIdTokenClaims().getAccessTokenHash().isNotEmpty())
-                                Assertions.assertTrue((req.getSession() as OidcSession).getIdTokenClaims().getCodeHash().isNotEmpty())
-                                Assertions.assertTrue(resp.getAccessTokenFromFragment().isNotEmpty())
-                                Assertions.assertTrue(resp.getCode().isNotEmpty())
+                                Assertions.assertTrue(resp.getCode().isEmpty())
+                                Assertions.assertTrue(resp.getAccessTokenFromFragment().isEmpty())
                                 Assertions.assertTrue(resp.getIdTokenFromFragment().isNotEmpty())
                             }
                         }
@@ -268,24 +213,15 @@ class OpenIdConnectHybridHandlerTest {
 
         val accessTokenStrategy = JwtAccessTokenStrategy(jwtRs256 = jwtRs256, issuer = "foo")
 
-        val handler = OpenIdConnectHybridHandler(
-                authorizeCodeStrategy = authorizeCodeStrategy,
-                openIdConnectRequestStorage = memoryStorage,
-                openIdConnectRequestValidator = openIdConnectRequestValidator,
-                scopeStrategy = StringEqualityScopeStrategy,
-                authorizeCodeStorage = memoryStorage,
-                openIdConnectTokenStrategy = openIdTokenStrategy,
-                openIdConnectAuthorizeCodeHandler = OpenIdConnectAuthorizeCodeHandler(
-                        authorizeCodeStrategy = authorizeCodeStrategy,
-                        openIdConnectRequestStorage = memoryStorage,
-                        openIdConnectRequestValidator = openIdConnectRequestValidator,
-                        openIdTokenStrategy = openIdTokenStrategy
-                ),
-                oAuthImplicitHandler = OAuthImplicitHandler(
+        val handler = OpenIdConnectImplicitHandler(
+                oauthImplicitHandler = OAuthImplicitHandler(
                         scopeStrategy = StringEqualityScopeStrategy,
                         accessTokenStorage = memoryStorage,
                         accessTokenStrategy = accessTokenStrategy
-                )
+                ),
+                openIdConnectTokenStrategy = openIdTokenStrategy,
+                scopeStrategy = StringEqualityScopeStrategy,
+                openIdConnectRequestValidator = openIdConnectRequestValidator
         )
     }
 }

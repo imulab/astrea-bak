@@ -25,7 +25,7 @@ class OpenIdConnectImplicitHandler(
         request.getClient().mustGrantType(GrantType.Implicit)
 
         with(request.getNonce()) {
-            if (isEmpty())
+            if (isNullOrEmpty())
                 throw IllegalArgumentException("nonce required.")
             else if (length < minimumNonceEntropy)
                 throw IllegalArgumentException("nonce must be at least $minimumNonceEntropy in length.")
@@ -53,12 +53,14 @@ class OpenIdConnectImplicitHandler(
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
+        val idTokenOrPlusTokenResponseType =
+                getResponseTypes().exactly(ResponseType.IdToken) ||
+                        getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.IdToken))
+
         return when {
-            getResponseTypes().exactly(ResponseType.IdToken) -> true
-            getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.IdToken)) &&
-                    getGrantedScopes().contains(SCOPE_OPENID) -> true
-            !getResponseTypes().contains(ResponseType.Code) -> true
-            else -> false
+            !(getGrantedScopes().contains(SCOPE_OPENID) && idTokenOrPlusTokenResponseType) -> false
+            getResponseTypes().contains(ResponseType.Code) -> false
+            else -> true
         }
     }
 }
