@@ -32,6 +32,10 @@ fun JwtClaims.getRequestAtTime(): NumericDate? {
     return this.getNumericDateClaimValue(PARAM_REQUEST_AT_TIME)
 }
 
+fun JwtClaims.setRequestAtTime(time: NumericDate) {
+    this.setNumericDateClaim(PARAM_REQUEST_AT_TIME, time)
+}
+
 fun JwtClaims.setNonce(nonce: String) {
     this.setStringClaim(PARAM_NONCE, nonce)
 }

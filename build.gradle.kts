@@ -30,6 +30,7 @@ dependencies {
     compile("org.apache.httpcomponents:httpclient:${versions["apacheHttpClient"]}")
 
     testCompile("org.junit.jupiter:junit-jupiter-api:${versions["junit"]}")
+    testCompile("org.junit.jupiter:junit-jupiter-params:${versions["junit"]}")
     testCompile("org.mockito:mockito-core:${versions["mockito"]}")
     testCompile("com.beust:klaxon:${versions["klaxon"]}")
 
