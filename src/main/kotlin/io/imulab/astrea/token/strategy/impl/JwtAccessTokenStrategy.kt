@@ -7,8 +7,7 @@ import io.imulab.astrea.domain.extension.setScopes
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.JwtSession
 import io.imulab.astrea.domain.session.assertType
-import io.imulab.astrea.error.InvalidAccessTokenException
-import io.imulab.astrea.error.TokenInvalidity
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import java.time.LocalDateTime
@@ -32,18 +31,23 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
     override fun generateNewAccessToken(request: OAuthRequest): AccessToken {
         val session = request.getSession().assertType<JwtSession>()
 
-        if (session.getJwtClaims().claimsMap.isEmpty())
-            throw IllegalArgumentException("claim must not be empty.")
-
-        val expiry = session.getExpiry(TokenType.AccessToken)
-                ?: throw IllegalArgumentException("expiry must be set")
+        require(session.getJwtClaims().claimsMap.isNotEmpty()) {
+            "jwt session claims map must not be empty, did upstream overlook this?"
+        }
+        requireNotNull(session.getExpiry(TokenType.AccessToken)) {
+            "access token expiry must be set in jwt session, did upstream overlook this?"
+        }
 
         session.getJwtClaims().also {
             it.setGeneratedJwtId()
             it.issuer = issuer
             it.audience = listOf(request.getClient().getId())
             it.setIssuedAtToNow()
-            it.setExpirationTimeMinutesInTheFuture(LocalDateTime.now().until(expiry, ChronoUnit.MINUTES).toFloat())
+            it.setExpirationTimeMinutesInTheFuture(
+                    LocalDateTime.now().until(
+                            session.getExpiry(TokenType.AccessToken)!!,
+                            ChronoUnit.MINUTES
+                    ).toFloat())
             it.setScopes(request.getGrantedScopes())
         }
 
@@ -64,13 +68,13 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
             it.setRequireExpirationTime()
         }
         if (t != null)
-            throw InvalidAccessTokenException(TokenInvalidity.BadSignature, t.message)  // TODO update to correct cause
+            throw InvalidGrantException(token, t.message ?: "Failed to validate access token.")
     }
 
     private fun requireThreeParts(raw: String): List<String> {
         val parts = raw.split(DOT)
         if (parts.size != 3)
-            throw InvalidAccessTokenException(TokenInvalidity.BadFormat)
+            throw InvalidGrantException.BadFormat(raw)
         return parts
     }
 }

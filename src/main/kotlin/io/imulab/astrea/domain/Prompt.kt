@@ -1,5 +1,7 @@
 package io.imulab.astrea.domain
 
+import io.imulab.astrea.error.RequestParameterInvalidValueException
+
 enum class Prompt(val specValue: String) {
     None("none"),
     Login("long"),
@@ -11,7 +13,7 @@ enum class Prompt(val specValue: String) {
             val found = values().find {
                 it.specValue.equals(value, ignoreCase)
             }
-            return found ?: throw IllegalArgumentException("$value does not match any prompt.")
+            return found ?: throw RequestParameterInvalidValueException.InvalidPrompt(value)
         }
     }
 }

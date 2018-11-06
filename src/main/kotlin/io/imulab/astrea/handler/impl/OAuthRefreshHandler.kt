@@ -1,11 +1,13 @@
 package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.containsNone
 import io.imulab.astrea.domain.extension.getRefreshToken
 import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.error.ClientIdentityMismatchException
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.RefreshToken
@@ -30,6 +32,8 @@ class OAuthRefreshHandler(
         if (!supports(request))
             return
 
+        requireNotNull(request.getSession()) { "session must not be null." }
+
         request.getClient().mustGrantType(GrantType.RefreshToken)
 
         val refreshToken = request.getRefreshToken().let {
@@ -39,10 +43,9 @@ class OAuthRefreshHandler(
 
         val originalRequest = tokenRevocationStorage.getRefreshTokenSession(refreshToken, request.getSession()!!).also {
             if (it.getGrantedScopes().containsNone(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
-                throw ScopeNotGrantedException(SCOPE_OFFLINE)
-
+                throw InvalidGrantException.NoOfflineAccess(refreshToken.token)
             if (request.getClient().getId() != it.getClient().getId())
-                throw ClientIdentityMismatchException(it.getClient(), request.getClient())
+                throw InvalidGrantException.ClientIdentityMismatch(refreshToken.token)
         }
 
         request.run {
@@ -56,6 +59,8 @@ class OAuthRefreshHandler(
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
         if (!supports(request))
             return
+
+        requireNotNull(request.getSession()) { "session must not be null." }
 
         val oldRefreshToken = refreshTokenStrategy.fromRaw(request.getRefreshToken())
         val oldRequest = tokenRevocationStorage.getRefreshTokenSession(oldRefreshToken, request.getSession()!!).also {

@@ -26,6 +26,8 @@ class OpenIdConnectRefreshHandler(
         if (!supports(request))
             return
 
+        requireNotNull(request.getSession()) { "session must not be null" }
+
         request.getSession().assertType<OidcSession>().also {
             // reset
             it.getIdTokenClaims().expirationTime = null
@@ -37,9 +39,12 @@ class OpenIdConnectRefreshHandler(
         if (!supports(request))
             return
 
+        requireNotNull(request.getSession()) { "session must not be null" }
+
         val oidcSession = request.getSession().assertType<OidcSession>().also {
-            if (it.getIdTokenClaims().subject.isEmpty())
-                throw IllegalArgumentException("subject is empty.")
+            require(it.getIdTokenClaims().subject.isNotEmpty()) {
+                "oidc session id token subject claim must not be empty. did upstream overlook this?"
+            }
         }
 
         response.getAccessToken()

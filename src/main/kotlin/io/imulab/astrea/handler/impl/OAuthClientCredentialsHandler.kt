@@ -1,10 +1,13 @@
 package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.containsAny
+import io.imulab.astrea.domain.extension.mustAcceptAll
 import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
-import io.imulab.astrea.error.PublicClientConductingPrivateOpException
+import io.imulab.astrea.error.InvalidClientException
+import io.imulab.astrea.error.InvalidScopeException
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
@@ -31,13 +34,18 @@ class OAuthClientCredentialsHandler(
         if (!supports(request))
             return
 
-        // check client validity
-        if (request.getClient().isPublic())
-            throw PublicClientConductingPrivateOpException("client credentials handler")
-        request.getClient().mustGrantType(GrantType.ClientCredentials)
+        requireNotNull(request.getSession()) { "session must not be null." }
 
-        // check scope
-        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+        request.getClient().run {
+            if (isPublic())
+                throw InvalidClientException.PublicClient()
+
+            mustGrantType(GrantType.ClientCredentials)
+
+            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy) { e ->
+                InvalidScopeException.NotAcceptedByClient(e.scope)
+            }
+        }
 
         // set expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
@@ -46,6 +54,8 @@ class OAuthClientCredentialsHandler(
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
         if (!supports(request))
             return
+
+        requireNotNull(request.getSession()) { "session must not be null." }
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {
             accessTokenStorage.createAccessTokenSession(it, request.sanitize(emptyList()))

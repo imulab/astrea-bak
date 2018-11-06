@@ -2,7 +2,7 @@ package io.imulab.astrea.client
 
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.ResponseType
-import io.imulab.astrea.error.ClientGrantTypeException
+import io.imulab.astrea.error.UnauthorizedClientException
 
 /**
  * Represents a client in the context of OAuth protocol.
@@ -53,7 +53,7 @@ interface OAuthClient {
     fun mustGrantType(expected: GrantType, hard: Boolean = true): Boolean {
         if (!this.getGrantTypes().contains(expected)) {
             if (hard)
-                throw ClientGrantTypeException(this, expected)
+                throw UnauthorizedClientException(expected)
             else
                 return false
         }

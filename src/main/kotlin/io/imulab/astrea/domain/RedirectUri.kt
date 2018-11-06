@@ -1,7 +1,6 @@
 package io.imulab.astrea.domain
 
-import io.imulab.astrea.error.MalformedRedirectUriException
-import io.imulab.astrea.error.RedirectUriHasFragmentException
+import io.imulab.astrea.error.RequestParameterInvalidValueException
 import io.imulab.astrea.error.UnmatchedRedirectUriException
 import java.net.URI
 
@@ -19,13 +18,13 @@ fun RedirectUri?.determineRedirectUri(registered: List<String>): String {
         if (registered.size == 1)
             return registered[0]
         else
-            throw UnmatchedRedirectUriException()
+            throw RequestParameterInvalidValueException.MultipleRedirectUriRegistered()
     }
 
     if (registered.contains(this!!))
         return this
     else
-        throw UnmatchedRedirectUriException()
+        throw RequestParameterInvalidValueException.RougeRedirectUri(this)
 }
 
 /**
@@ -37,11 +36,11 @@ fun RedirectUri.checkValidRedirectUri() {
     try {
         val uri = URI.create(this)
         if (!uri.isAbsolute)
-            throw MalformedRedirectUriException(this)
+            throw RequestParameterInvalidValueException.MalformedRedirectUri(this, "The provided redirect URI is not absolute.")
         if (uri.rawFragment != null && uri.rawFragment.isNotEmpty())
-            throw RedirectUriHasFragmentException(this)
+            throw RequestParameterInvalidValueException.MalformedRedirectUri(this, "The provided redirect URI has fragment component.")
     } catch (e: IllegalArgumentException) {
-        throw MalformedRedirectUriException(this)
+        throw RequestParameterInvalidValueException.MalformedRedirectUri(this, e.message ?: "The provided redirect URI cannot be parsed.")
     }
 }
 
@@ -57,4 +56,9 @@ fun RedirectUri.isSecureRedirectUri(): Boolean {
     } catch (_: Exception) {
         false
     }
+}
+
+fun RedirectUri?.mustBeSecure() {
+    if (this != null && !this.isSecureRedirectUri())
+        throw RequestParameterInvalidValueException.InsecureRedirectUri(this)
 }

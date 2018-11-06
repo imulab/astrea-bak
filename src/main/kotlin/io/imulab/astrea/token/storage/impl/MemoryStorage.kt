@@ -3,10 +3,7 @@ package io.imulab.astrea.token.storage.impl
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.Session
-import io.imulab.astrea.error.InvalidAccessTokenException
-import io.imulab.astrea.error.InvalidAuthorizeCodeException
-import io.imulab.astrea.error.InvalidRefreshTokenException
-import io.imulab.astrea.error.TokenInvalidity
+import io.imulab.astrea.error.*
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.RefreshToken
@@ -43,13 +40,13 @@ class MemoryStorage :
         if (this.authorizeCodeMap.containsKey(code.signature)) {
             val rel = this.authorizeCodeMap[code.signature]!!
             if (!rel.active)
-                throw InvalidAuthorizeCodeException(TokenInvalidity.Inactive)
+                throw InvalidGrantException.Inactive(code.code)
             else if (rel.request.getSession()?.getExpiry(TokenType.AuthorizeCode)?.isBefore(LocalDateTime.now()) == true)
-                throw InvalidAuthorizeCodeException(TokenInvalidity.Expired)
+                throw InvalidGrantException.Expired(code.code)
             else
                 return rel.request
         } else {
-            throw InvalidAuthorizeCodeException(TokenInvalidity.NotFound)
+            throw InvalidGrantException.NotFound(code.code)
         }
     }
 
@@ -77,13 +74,13 @@ class MemoryStorage :
         if (this.accessTokenMap.containsKey(token.signature)) {
             val rel = this.accessTokenMap[token.signature]!!
             if (!rel.active)
-                throw InvalidAccessTokenException(TokenInvalidity.Inactive)
+                throw InvalidGrantException.Inactive(token.token)
             else if (rel.request.getSession()?.getExpiry(TokenType.AccessToken)?.isBefore(LocalDateTime.now()) == true)
-                throw InvalidAccessTokenException(TokenInvalidity.Expired)
+                throw InvalidGrantException.Expired(token.token)
             else
                 return rel.request
         } else {
-            throw InvalidAccessTokenException(TokenInvalidity.NotFound)
+            throw InvalidGrantException.NotFound(token.token)
         }
     }
 
@@ -109,13 +106,13 @@ class MemoryStorage :
         if (this.refreshTokenMap.containsKey(token.signature)) {
             val rel = this.refreshTokenMap[token.signature]!!
             if (!rel.active)
-                throw InvalidRefreshTokenException(TokenInvalidity.Inactive)
+                throw InvalidGrantException.Inactive(token.token)
             else if (rel.request.getSession()?.getExpiry(TokenType.RefreshToken)?.isBefore(LocalDateTime.now()) == true)
-                throw InvalidRefreshTokenException(TokenInvalidity.Expired)
+                throw InvalidGrantException.Expired(token.token)
             else
                 return rel.request
         } else {
-            throw InvalidRefreshTokenException(TokenInvalidity.NotFound)
+            throw InvalidGrantException.NotFound(token.token)
         }
     }
 
@@ -153,7 +150,7 @@ class MemoryStorage :
 
     override fun getOidcSession(authorizeCode: AuthorizeCode, request: OAuthRequest): OAuthRequest {
         return this.authorizeCodeToOidcMap[authorizeCode.code]
-                ?: throw InvalidAuthorizeCodeException(TokenInvalidity.NotFound)
+                ?: throw InvalidGrantException.NotFound(authorizeCode.code)
     }
 
     override fun deleteOidcSession(authorizeCode: AuthorizeCode) {

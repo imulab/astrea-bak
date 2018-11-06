@@ -6,9 +6,7 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
-import io.imulab.astrea.error.ClientIdentityMismatchException
-import io.imulab.astrea.error.MissingSessionException
-import io.imulab.astrea.error.RedirectUriMismatchException
+import io.imulab.astrea.error.*
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.RefreshToken
@@ -41,10 +39,10 @@ class OAuthAuthorizeCodeHandler(
         if (!request.getResponseTypes().exactly(ResponseType.Code))
             return
 
-        if (request.getRedirectUri()?.isSecureRedirectUri() != true)
-            throw IllegalArgumentException("insecure redirect uri.")
-
-        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+        request.getRedirectUri()?.mustBeSecure()
+        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy) { e ->
+            InvalidScopeException.NotAcceptedByClient(e.scope)
+        }
 
         val authCode = authorizeCodeStrategy.generateNewAuthorizeCode(request).also {
             request.getSession()!!.setExpiry(TokenType.AuthorizeCode, LocalDateTime.now().plus(authorizeCodeLifespan))
@@ -71,10 +69,9 @@ class OAuthAuthorizeCodeHandler(
         if (!supports(request))
             return
 
-        request.getClient().mustGrantType(GrantType.AuthorizationCode)
+        requireNotNull(request.getSession()) { "session must not be null" }
 
-        if (request.getSession() == null)
-            throw MissingSessionException()
+        request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
         // retrieve authorization code from session storage, and validate code
         val restoredRequest = authorizeCodeStrategy.fromRaw(request.getCode()).let { authorizeCode ->
@@ -89,13 +86,13 @@ class OAuthAuthorizeCodeHandler(
 
         // Compare and match the identity of the client making the request with the one restored from session.
         if (restoredRequest.getClient().getId() != request.getClient().getId())
-            throw ClientIdentityMismatchException(restoredRequest.getClient(), request.getClient())
+            throw InvalidGrantException.ClientIdentityMismatch(request.getCode())
 
         // Compare and match the redirect URI to prevent any malicious redirection.
         val restoredRedirectUri = restoredRequest.getRedirectUri()
         val presentedRedirectUri = request.getRedirectUri()
         if (restoredRedirectUri.isNotBlank() && restoredRedirectUri != presentedRedirectUri)
-            throw RedirectUriMismatchException(restoredRedirectUri, presentedRedirectUri)
+            throw InvalidGrantException.RedirectUriMismatch(request.getCode())
 
         request.run {
             setSession(restoredRequest.getSession()!!)

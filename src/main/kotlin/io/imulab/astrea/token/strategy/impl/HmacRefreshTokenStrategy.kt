@@ -3,8 +3,7 @@ package io.imulab.astrea.token.strategy.impl
 import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.domain.DOT
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.error.InvalidRefreshTokenException
-import io.imulab.astrea.error.TokenInvalidity
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.strategy.RefreshTokenStrategy
 
@@ -13,7 +12,7 @@ class HmacRefreshTokenStrategy(private val hmac: HmacSha256) : RefreshTokenStrat
     override fun fromRaw(raw: String): RefreshToken {
         val parts = raw.split(DOT)
         if (parts.size != 2)
-            throw InvalidRefreshTokenException(TokenInvalidity.BadFormat)
+            throw InvalidGrantException.BadFormat(raw)
         return RefreshToken(
                 token = raw,
                 signature = parts[1]
@@ -25,7 +24,7 @@ class HmacRefreshTokenStrategy(private val hmac: HmacSha256) : RefreshTokenStrat
         return when (parts.size) {
             1 -> hmac.sign(parts[0])
             2 -> parts[1]
-            else -> throw InvalidRefreshTokenException(TokenInvalidity.BadFormat)
+            else -> throw InvalidGrantException.BadFormat(token)
         }
     }
 
@@ -40,9 +39,9 @@ class HmacRefreshTokenStrategy(private val hmac: HmacSha256) : RefreshTokenStrat
     override fun validateRefreshToken(request: OAuthRequest, token: String) {
         val parts = token.split(DOT)
         if (parts.size != 2)
-            throw InvalidRefreshTokenException(TokenInvalidity.BadFormat)
+            throw InvalidGrantException.BadFormat(token)
 
         if (!hmac.validate(parts[0], parts[1]))
-            throw InvalidRefreshTokenException(TokenInvalidity.BadSignature)
+            throw InvalidGrantException.BadSignature(token)
     }
 }

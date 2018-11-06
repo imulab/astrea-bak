@@ -197,8 +197,8 @@ class Request(private var id: String = UUID.randomUUID().toString(),
                 setId()
             if (this.reqTime == null)
                 setRequestTime()
-            if (this.client == null)
-                throw IllegalStateException("client must be set.")
+
+            requireNotNull(this.client) { "client is not set." }
 
             return Request(
                     id = this.id!!,

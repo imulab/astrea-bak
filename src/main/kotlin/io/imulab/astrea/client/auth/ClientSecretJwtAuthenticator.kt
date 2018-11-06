@@ -4,6 +4,7 @@ import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.domain.JWT_BEARER_CLIENT_ASSERTION_TYPE
 import io.imulab.astrea.domain.PARAM_CLIENT_ASSERTION_TYPE
 import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.spi.http.singleValue
 
 /**
  * Implementation of [ClientAuthenticator] which is supported to handle 'client_secret_jwt'. However, we decided to
@@ -18,7 +19,7 @@ import io.imulab.astrea.spi.http.HttpRequestReader
 class ClientSecretJwtAuthenticator : ClientAuthenticator {
 
     override fun supports(reader: HttpRequestReader): Boolean {
-        return reader.formValue(PARAM_CLIENT_ASSERTION_TYPE) == JWT_BEARER_CLIENT_ASSERTION_TYPE
+        return reader.getForm().singleValue(PARAM_CLIENT_ASSERTION_TYPE) == JWT_BEARER_CLIENT_ASSERTION_TYPE
     }
 
     override fun authenticate(reader: HttpRequestReader): OAuthClient {

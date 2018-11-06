@@ -5,8 +5,10 @@ import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.error.ClientAuthenticationException
+import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.spi.http.mustSingleValue
+import io.imulab.astrea.spi.http.singleValue
 import org.jose4j.jwt.consumer.InvalidJwtException
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
 
@@ -26,19 +28,17 @@ class ClientPrivateKeyJwtAuthenticator(private val clientManager: ClientManager,
                                        private val tokenEndpointUrl: String) : ClientAuthenticator {
 
     override fun supports(reader: HttpRequestReader): Boolean {
-        return reader.formValue(PARAM_CLIENT_ASSERTION_TYPE) == JWT_BEARER_CLIENT_ASSERTION_TYPE
+        return reader.getForm().singleValue(PARAM_CLIENT_ASSERTION_TYPE) == JWT_BEARER_CLIENT_ASSERTION_TYPE
     }
 
     override fun authenticate(reader: HttpRequestReader): OAuthClient {
-        val clientAssertion = reader.formValue(PARAM_CLIENT_ASSERTION)
-        if (clientAssertion.isEmpty())
-            throw ClientAuthenticationException("client assertion is empty.")
+        val clientAssertion = reader.getForm().mustSingleValue(PARAM_CLIENT_ASSERTION)
 
         val clientId = resolveClientId(reader, clientAssertion)
         val client = clientManager.getClient(clientId) as? OpenIdConnectClient
-                ?: throw ClientAuthenticationException("Client is not capable of performing Open ID Connect authentication.")
+                ?: throw InvalidClientException.NonOidcClient()
         if (client.getTokenEndpointAuthMethod() != AuthMethod.PrivateKeyJwt)
-            throw ClientAuthenticationException("Client is not capable of performing Open ID Connect private_key_jwt authentication.")
+            throw InvalidClientException.IncapableOfAuthMethod(AuthMethod.PrivateKeyJwt)
 
         try {
             JwtConsumerBuilder()
@@ -53,7 +53,7 @@ class ClientPrivateKeyJwtAuthenticator(private val clientManager: ClientManager,
                     .build()
                     .process(clientAssertion)
         } catch (e: InvalidJwtException) {
-            throw ClientAuthenticationException("invalid client assertion (${e.message}).")
+            throw InvalidClientException.AuthenticationFailed(e.message ?: "")
         }
 
         return client
@@ -64,7 +64,7 @@ class ClientPrivateKeyJwtAuthenticator(private val clientManager: ClientManager,
      * found, we will run a no-verification pass on the assertion and extract the 'iss' value.
      */
     private fun resolveClientId(reader: HttpRequestReader, clientAssertion: String): String {
-        val clientId = reader.formValue(PARAM_CLIENT_ID)
+        val clientId = reader.getForm().singleValue(PARAM_CLIENT_ID)
         if (clientId.isNotBlank())
             return clientId
 

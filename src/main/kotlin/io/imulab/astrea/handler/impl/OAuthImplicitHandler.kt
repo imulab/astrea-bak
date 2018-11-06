@@ -4,6 +4,7 @@ import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
+import io.imulab.astrea.error.InvalidScopeException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
@@ -23,15 +24,22 @@ class OAuthImplicitHandler(
         if (!request.getResponseTypes().exactly(ResponseType.Token))
             return
 
+        requireNotNull(request.getSession()) { "session must not be null." }
+
         request.getClient().run {
             mustGrantType(GrantType.Implicit)
-            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+
+            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy) { e ->
+                InvalidScopeException.NotAcceptedByClient(e.scope)
+            }
         }
 
         issueImplicitAccessToken(request, response)
     }
 
     fun issueImplicitAccessToken(request: AuthorizeRequest, response: AuthorizeResponse) {
+        requireNotNull(request.getSession()) { "session must not be null." }
+
         val accessTokenExpiry = LocalDateTime.now().plus(accessTokenLifespan)
 
         request.getSession()!!.setExpiry(TokenType.AccessToken, accessTokenExpiry)

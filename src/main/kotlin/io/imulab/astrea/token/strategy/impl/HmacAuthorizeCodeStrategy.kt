@@ -4,8 +4,7 @@ import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.domain.DOT
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.error.InvalidAuthorizeCodeException
-import io.imulab.astrea.error.TokenInvalidity
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.strategy.AuthorizeCodeStrategy
 import java.time.LocalDateTime
@@ -15,7 +14,7 @@ class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256) : AuthorizeCodeStr
     override fun fromRaw(raw: String): AuthorizeCode {
         val parts = raw.split(DOT)
         if (parts.size != 2)
-            throw InvalidAuthorizeCodeException(TokenInvalidity.BadFormat)
+            throw InvalidGrantException.BadFormat(raw)
         return AuthorizeCode(
                 code = raw,
                 signature = parts[1]
@@ -27,7 +26,7 @@ class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256) : AuthorizeCodeStr
         return when (parts.size) {
             1 -> hmac.sign(parts[0])
             2 -> parts[1]
-            else -> throw InvalidAuthorizeCodeException(TokenInvalidity.BadFormat)
+            else -> throw InvalidGrantException.BadFormat(code)
         }
     }
 
@@ -41,13 +40,13 @@ class HmacAuthorizeCodeStrategy(private val hmac: HmacSha256) : AuthorizeCodeStr
 
     override fun validateAuthorizeCode(request: OAuthRequest, code: String) {
         if (request.getSession()?.getExpiry(TokenType.AuthorizeCode)?.isBefore(LocalDateTime.now()) == true)
-            throw InvalidAuthorizeCodeException(TokenInvalidity.Expired)
+            throw InvalidGrantException.Expired(code)
 
         val parts = code.split(DOT)
         if (parts.size != 2)
-            throw InvalidAuthorizeCodeException(TokenInvalidity.BadFormat)
+            throw InvalidGrantException.BadFormat(code)
 
         if (!hmac.validate(parts[0], parts[1]))
-            throw InvalidAuthorizeCodeException(TokenInvalidity.BadSignature)
+            throw InvalidGrantException.BadSignature(code)
     }
 }

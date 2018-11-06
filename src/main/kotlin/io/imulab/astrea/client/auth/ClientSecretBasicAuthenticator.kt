@@ -6,7 +6,7 @@ import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.crypt.PasswordEncoder
 import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.domain.COLON
-import io.imulab.astrea.error.ClientAuthenticationException
+import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.spi.http.HttpRequestReader
 import java.util.*
 
@@ -32,19 +32,19 @@ class ClientSecretBasicAuthenticator(private val clientManager: ClientManager,
         try {
             val parts = String(base64Decoder.decode(encoded)).split(COLON)
             if (parts.size != 2)
-                throw ClientAuthenticationException("Authorization header does not follow HTTP Basic authentication format.")
+                throw InvalidClientException.AuthenticationFailed("Authorization header does not follow HTTP Basic authentication format.")
             username = parts[0]
             password = parts[1]
-        } catch (e: IllegalArgumentException) {
-            throw ClientAuthenticationException("Authorization header does not contain valid base64 encoded string.")
+        } catch (_: IllegalArgumentException) {
+            throw InvalidClientException.AuthenticationFailed("Authorization header does not contain valid base64 encoded string.")
         }
 
         val client = clientManager.getClient(username)
         if ((client is OpenIdConnectClient) && (client.getTokenEndpointAuthMethod() != AuthMethod.ClientSecretBasic))
-            throw ClientAuthenticationException("Client is not capable of performing Open ID Connect client_secret_basic authentication.")
+            throw InvalidClientException.IncapableOfAuthMethod(AuthMethod.ClientSecretBasic)
 
         if (!passwordEncoder.matches(password, String(client.getHashedSecret())))
-            throw ClientAuthenticationException("Invalid credentials.")
+            throw InvalidClientException.AuthenticationFailed("Invalid credentials.")
 
         return client
     }

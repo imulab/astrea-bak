@@ -1,12 +1,10 @@
 package io.imulab.astrea.handler.impl
 
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.domain.extension.getPassword
-import io.imulab.astrea.domain.extension.getUsername
-import io.imulab.astrea.domain.extension.removePassword
-import io.imulab.astrea.domain.extension.setRefreshToken
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
+import io.imulab.astrea.error.InvalidScopeException
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.spi.user.ResourceOwnerAuthenticator
 import io.imulab.astrea.token.RefreshToken
@@ -35,17 +33,21 @@ class OAuthResourceOwnerHandler(
         if (!supports(request))
             return
 
+        requireNotNull(request.getSession()) { "session must not be null." }
+
         request.getClient().run {
             mustGrantType(GrantType.Password)
-            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+
+            getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy) { e ->
+                InvalidScopeException.NotAcceptedByClient(e.scope)
+            }
         }
 
         // authenticate user
-        val username = request.getUsername()
-        val password = request.getPassword()
-        if (username.isBlank() || password.isBlank())
-            throw IllegalArgumentException("username or password not provided.")
-        resourceOwnerAuthenticator.authenticate(username, password)
+        resourceOwnerAuthenticator.authenticate(
+                request.getUsername().requireNotNullOrEmpty(PARAM_USERNAME),
+                request.getPassword().requireNotNullOrEmpty(PARAM_PASSWORD)
+        )
 
         // clear password so we don't accidentally save it
         request.removePassword()
@@ -57,6 +59,8 @@ class OAuthResourceOwnerHandler(
     override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
         if (!supports(request))
             return
+
+        requireNotNull(request.getSession()) { "session must not be null." }
 
         val accessToken = accessTokenStrategy.generateNewAccessToken(request).also {
             accessTokenStorage.createAccessTokenSession(it, request.sanitize(emptyList()))

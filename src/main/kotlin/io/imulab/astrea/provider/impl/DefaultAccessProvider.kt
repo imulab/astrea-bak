@@ -7,13 +7,12 @@ import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.Session
-import io.imulab.astrea.error.EmptyRequestException
-import io.imulab.astrea.error.HttpMethodMismatchException
-import io.imulab.astrea.error.toRfc6749Error
+import io.imulab.astrea.error.*
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.provider.AccessProvider
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.HttpResponseWriter
+import io.imulab.astrea.spi.http.mustSingleValue
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.spi.json.JsonEncoder
 
@@ -23,30 +22,30 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
                             private val outputDebugInErrorResponse: Boolean = false) : AccessProvider {
 
     override fun newAccessRequest(reader: HttpRequestReader, session: Session): AccessRequest {
-        when {
-            reader.method() != "POST" -> throw HttpMethodMismatchException("POST", reader.method())
-            reader.getForm().isEmpty() -> throw EmptyRequestException()
-        }
+        require(reader.method().toUpperCase() == "POST")
 
-        val accessRequest = DefaultAccessRequest.Builder().also {
-            it.setSession(session)
-            it.setForm(reader.getForm())
-            it.addScopes(*(reader
-                    .getForm()
-                    .singleValue(PARAM_SCOPE)
-                    .split(SPACE)
-                    .filter { it.isNotEmpty() }
-                    .toTypedArray()
-                    ))
-            it.addGrantType(*(reader
-                    .getForm()
-                    .singleValue(PARAM_GRANT_TYPE)
-                    .split(SPACE)
-                    .filter { it.isNotEmpty() }
-                    .map { GrantType.fromSpecValue(it) }
-                    .toTypedArray()
-                    ))
-            it.client = clientAuthenticator.authenticate(reader)
+        if (reader.getForm().isEmpty())
+            throw RequestFormIsEmptyException()
+
+        val accessRequest = DefaultAccessRequest.Builder().also { b ->
+            b.setSession(session)
+
+            reader.getForm().run {
+                b.setForm(this)
+
+                mustSingleValue(PARAM_SCOPE)
+                        .split(SPACE)
+                        .filter { it.isNotEmpty() }
+                        .forEach { b.addScopes(it) }
+
+                mustSingleValue(PARAM_GRANT_TYPE)
+                        .split(SPACE)
+                        .filter { it.isNotEmpty() }
+                        .map { GrantType.fromSpecValue(it) }
+                        .forEach { b.addGrantType(it) }
+            }
+
+            b.client = clientAuthenticator.authenticate(reader)
         }.build() as AccessRequest
 
         tokenEndpointHandler.handleAccessRequest(accessRequest)
@@ -58,8 +57,8 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
         val response = DefaultAccessResponse()
 
         tokenEndpointHandler.populateAccessResponse(request, response)
-        if (response.getAccessToken().isEmpty() || response.getTokenType() == TokenType.Unknown)
-            throw RuntimeException("Token not generated. An internal error has occured.")
+        if (response.getAccessToken().isEmpty())
+            throw RequestNotProcessedException()
 
         return response
     }
@@ -78,6 +77,7 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
         }
     }
 
+    // TODO major redo for new error format
     override fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest, error: Throwable) {
         val rfc6749Error = error.toRfc6749Error()
         writer.setHeader("Content-Type", "application/json;charset=UTF-8")

@@ -5,22 +5,22 @@ import io.imulab.astrea.client.OpenIdConnectClient
 import io.imulab.astrea.client.assertType
 import io.imulab.astrea.crypt.ClientVerificationKeyResolver
 import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.extension.mustAllBeAcceptedBy
+import io.imulab.astrea.domain.extension.mustBeIn
+import io.imulab.astrea.domain.extension.requireNotNullOrEmpty
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.Session
-import io.imulab.astrea.error.Rfc6749Error
-import io.imulab.astrea.error.toRfc6749Error
+import io.imulab.astrea.error.*
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.provider.AuthorizeProvider
-import io.imulab.astrea.spi.http.HttpClient
-import io.imulab.astrea.spi.http.HttpRequestReader
-import io.imulab.astrea.spi.http.HttpResponseWriter
-import io.imulab.astrea.spi.http.singleValue
+import io.imulab.astrea.spi.http.*
 import io.imulab.astrea.spi.json.JsonEncoder
 import org.apache.http.client.utils.URIBuilder
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
+import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.util.*
 
@@ -40,54 +40,55 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
             it.setRequestTime(LocalDateTime.now())
         }
 
-        val form = reader.getForm()
-        builder.setForm(form)
+        val form = reader.getForm().also {
+            builder.setForm(it)
+        }
 
-        // client
-        val client = clientStore.getClient(form.singleValue(PARAM_CLIENT_ID))
-        builder.setClient(client)
+        val client = clientStore.getClient(form.mustSingleValue(PARAM_CLIENT_ID)).also {
+            builder.setClient(it)
+        }
 
         // oidc
-        tryParseOidcParameters(builder)
+        tryParseOidcParameters(builder) // TODO potential improvement of architecture
 
-        // redirect_uri
-        reader.formValueUnescaped(PARAM_REDIRECT_URI)
-                .determineRedirectUri(client.getRedirectUris())
-                .also {
-                    it.checkValidRedirectUri()
-                    builder.setRedirectUri(it)
-                }
-
-        // scope
-        reader.formValue(PARAM_SCOPE).also {
-            if (it.isBlank())
-                throw IllegalArgumentException("scope is mandatory.")
-        }.split(SPACE)
-                .filter { it.isNotEmpty() }
-                .filter { claimed ->
-                    client.getScopes().any { registered ->
-                        registered.accepts(claimed, scopeStrategy)
+        reader.getForm().run {
+            // redirect_uri
+            mustSingleValue(PARAM_REDIRECT_URI)
+                    .determineRedirectUri(client.getRedirectUris())
+                    .let {
+                        it.checkValidRedirectUri()
+                        builder.setRedirectUri(it)
                     }
-                }
-                .forEach { verified -> builder.addScopes(verified) }
 
-        // response_type
-        reader.formValue(PARAM_RESPONSE_TYPE).also {
-            if (it.isBlank())
-                throw IllegalArgumentException("response_type is mandatory.")
-        }.split(SPACE)
-                .filter { it.isNotEmpty() }
-                .map { ResponseType.fromSpecValue(it, ignoreCase = false) }
-                .filter { claimed -> client.getResponseTypes().contains(claimed) }
-                .forEach { verified -> builder.addResponseTypes(verified) }
+            // scope
+            mustSingleValue(PARAM_SCOPE)
+                    .requireNotNullOrEmpty(PARAM_SCOPE)
+                    .split(SPACE)
+                    .filter { it.isNotEmpty() }
+                    .mustAllBeAcceptedBy(client.getScopes(), scopeStrategy) { t ->
+                        InvalidScopeException.NotAcceptedByClient(t.scope)
+                    }
+                    .forEach { builder.addScopes(it) }
 
-        // state
-        reader.formValue(PARAM_STATE).also {
-            when {
-                it.isBlank() -> throw IllegalArgumentException("state is mandatory.")
-                it.length < minStateEntropy -> throw IllegalArgumentException("state length must be no less than $minStateEntropy.")
-                else -> builder.setState(it)
-            }
+            // response_type
+            mustSingleValue(PARAM_RESPONSE_TYPE)
+                    .requireNotNullOrEmpty(PARAM_RESPONSE_TYPE)
+                    .split(SPACE)
+                    .filter { it.isNotEmpty() }
+                    .map { ResponseType.fromSpecValue(it, ignoreCase = false) }
+                    .mustBeIn(client.getResponseTypes()) {
+                        RequestParameterUnsupportedValueException.ClientResponseType(it.message!!)
+                    }
+                    .forEach { builder.addResponseTypes(it) }
+
+            // state
+            mustSingleValue(PARAM_STATE)
+                    .requireNotNullOrEmpty(PARAM_STATE)
+                    .let {
+                        if (it.length < minStateEntropy)
+                            throw RequestParameterInvalidValueException.StateInsufficientEntropy(it, minStateEntropy)
+                        builder.setState(it)
+                    }
         }
 
         return builder.build() as AuthorizeRequest
@@ -118,6 +119,7 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         writer.setStatus(302)
     }
 
+    // TODO major redo for new error
     override fun encodeAuthorizeError(writer: HttpResponseWriter, request: AuthorizeRequest, error: Throwable) {
         val rfc6749Error = error.toRfc6749Error()
 
@@ -149,36 +151,36 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
     }
 
     private fun tryParseOidcParameters(builder: DefaultAuthorizeRequest.Builder) {
-        assert(builder.form.isNotEmpty())
-        assert(builder.client != null)
+        require(builder.form.isNotEmpty())
+        requireNotNull(builder.client)
 
         val form = builder.form
-        val scopes = form.singleValue(PARAM_SCOPE).split(SPACE)
 
-        if (!scopes.contains(SCOPE_OPENID))
+        if (!form.mustSingleValue(PARAM_SCOPE).split(SPACE).contains(SCOPE_OPENID))
             return
 
         // request, request_uri
-        var assertion = form.singleValue(PARAM_REQUEST)
-        val location = form.singleValue(PARAM_REQUEST_URI)
-        if (assertion.isBlank() && location.isBlank())
-            return
-        else if (location.isNotBlank()) {
-            if (assertion.isNotBlank())
-                throw IllegalArgumentException("Only one of 'request' and 'request_uri' may be used at the same time.")
+        val assertion: String = form.singleValue(PARAM_REQUEST).let {
+            val locationOfIt = form.singleValue(PARAM_REQUEST_URI)
 
-            try {
-                val locationResp = httpClient.get(location)
-                assertion = locationResp.toString()
-            } catch (_: Exception) {
-                throw IllegalStateException("Failed to read content at $location.")
+            if (it.isBlank()) {
+                return@let if (locationOfIt.isBlank()) "" else
+                    httpClient.get(locationOfIt).ensureStatus(expected = 200, exceptionEnhancer = { e ->
+                        InvalidRequestUriException(locationOfIt, "Received non-200 code ${e.message}.")
+                    }).body().toString(StandardCharsets.UTF_8)
+            } else {
+                return@let if (locationOfIt.isBlank()) it else
+                    throw RequestNotSupportedException("Cannot use both '$PARAM_REQUEST' and '$PARAM_REQUEST_URI' parameter in the same request.")
             }
         }
+        if (assertion.isBlank())
+            return
 
         // client
-        val client = builder.client.assertType<OpenIdConnectClient>()
-        if (client.getJsonWebKeys() == null && client.getJsonKeyKeysUri().isBlank())
-            throw IllegalStateException("OIDC client did not register JWK.")
+        val client = builder.client.assertType<OpenIdConnectClient>().also {
+            if (it.getJsonWebKeys() == null && it.getJsonKeyKeysUri().isBlank())
+                throw InvalidClientException.JwkNotFound()
+        }
 
         // JWT
         val jwtConsumer = JwtConsumerBuilder()
@@ -196,7 +198,7 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
                 when (v) {
                     is Collection<*> -> v.map { it.toString() }.filter { it.isNotBlank() }.forEach { builder.addScopes(it) }
                     is String -> v.split(SPACE).filter { it.isNotEmpty() }.forEach { builder.addScopes(it) }
-                    else -> throw IllegalArgumentException("scope in request object can only be list or string")
+                    else -> throw InvalidScopeException(v.toString(), "Scope can only be of list type or string type.")
                 }
                 builder.setForm(PARAM_SCOPE, builder.scopes.joinToString(separator = SPACE))
             } else {

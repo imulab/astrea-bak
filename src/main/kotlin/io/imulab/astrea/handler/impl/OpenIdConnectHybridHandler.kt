@@ -6,6 +6,8 @@ import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.error.InvalidScopeException
+import io.imulab.astrea.error.RequestParameterInvalidValueException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
@@ -39,14 +41,18 @@ class OpenIdConnectHybridHandler(
         if (!request.shouldHandle())
             return
 
+        requireNotNull(request.getSession()) { "session must not be null" }
+
         with(request.getNonce()) {
-            if (isNullOrEmpty())
-                throw IllegalArgumentException("nonce required.")
-            else if (length < minimumNonceEntropy)
-                throw IllegalArgumentException("nonce must be at least $minimumNonceEntropy in length.")
+            requireNotNullOrEmpty(PARAM_NONCE)
+
+            if (length < minimumNonceEntropy)
+                throw RequestParameterInvalidValueException.NonceInsufficientEntropy(this, minimumNonceEntropy)
         }
 
-        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy)
+        request.getClient().getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy) { e ->
+            InvalidScopeException.NotAcceptedByClient(e.scope)
+        }
 
         openIdConnectRequestValidator.validateRequest(request)
 

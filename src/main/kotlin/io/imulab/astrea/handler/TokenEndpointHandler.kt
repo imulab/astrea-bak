@@ -2,6 +2,7 @@ package io.imulab.astrea.handler
 
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
+import io.imulab.astrea.error.RequestNotProcessedException
 
 /**
  * Main logic for handling an token endpoint request.
@@ -38,11 +39,10 @@ interface TokenEndpointHandler {
 
         override fun handleAccessRequest(request: AccessRequest) {
             val handlers = delegates.filter { it.supports(request) }.takeIf { it.isNotEmpty() }
-                    ?: throw RuntimeException("TODO: no handler for token endpoint request.")
+                    ?: throw RequestNotProcessedException()
             handlers.forEach { it.handleAccessRequest(request) }
         }
 
-        // TODO?
         override fun populateAccessResponse(request: AccessRequest, response: AccessResponse) {
             delegates.forEach { it.populateAccessResponse(request, response) }
         }

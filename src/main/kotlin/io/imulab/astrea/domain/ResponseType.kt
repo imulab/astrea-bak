@@ -1,5 +1,7 @@
 package io.imulab.astrea.domain
 
+import io.imulab.astrea.error.RequestParameterInvalidValueException
+
 enum class ResponseType(val specValue: String) {
     Code("code"),
     Token("token"),
@@ -11,10 +13,11 @@ enum class ResponseType(val specValue: String) {
             val found = values().find {
                 it.specValue.equals(value, ignoreCase)
             }
-            return found ?: throw IllegalArgumentException("$value does not match any response type.")
+            return found ?: throw RequestParameterInvalidValueException.InvalidResponseType(value)
         }
     }
 }
 
 fun Collection<ResponseType>.exactly(expected: ResponseType): Boolean =
         this.size == 1 && this.contains(expected)
+

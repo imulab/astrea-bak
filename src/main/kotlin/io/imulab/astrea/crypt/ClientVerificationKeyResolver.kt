@@ -1,6 +1,7 @@
 package io.imulab.astrea.crypt
 
 import io.imulab.astrea.client.OpenIdConnectClient
+import io.imulab.astrea.error.InvalidRequestObjectException
 import org.jose4j.jwk.HttpsJwks
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.Use
@@ -14,7 +15,7 @@ class ClientVerificationKeyResolver(private val client: OpenIdConnectClient) : V
 
     override fun resolveKey(jws: JsonWebSignature?, nestingContext: MutableList<JsonWebStructure>?): Key {
         if (jws?.keyIdHeaderValue?.isEmpty() == true)
-            throw IllegalArgumentException("invalid request object, no kid is provided.")
+            throw InvalidRequestObjectException("kid header in json web key is not set.")
 
         val kid = jws?.keyIdHeaderValue!!
         if (client.getJsonWebKeys() != null)
@@ -27,6 +28,6 @@ class ClientVerificationKeyResolver(private val client: OpenIdConnectClient) : V
         val use = Use.SIGNATURE
         val kty = client.getRequestObjectSigningAlgorithm().keyType
         return keySet.findJsonWebKey(kid, kty, use, null)?.key
-                ?: throw IllegalArgumentException("public key not found by kid=$kid,use=$use,kty=$kty.")
+                ?: throw InvalidRequestObjectException("public key not found for kid=$kid use=$use kty=$kty.")
     }
 }

@@ -1,5 +1,7 @@
 package io.imulab.astrea.domain
 
+import io.imulab.astrea.error.RequestParameterInvalidValueException
+
 enum class GrantType(val specValue: String) {
     AuthorizationCode("authorization_code"),
     Implicit("implicit"),
@@ -12,7 +14,7 @@ enum class GrantType(val specValue: String) {
             val found = GrantType.values().find {
                 it.specValue.equals(value, ignoreCase)
             }
-            return found ?: throw IllegalArgumentException("$value does not match any grant type.")
+            return found ?: throw RequestParameterInvalidValueException.InvalidGrantType(value)
         }
     }
 }

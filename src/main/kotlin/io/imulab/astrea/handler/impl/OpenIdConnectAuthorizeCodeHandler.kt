@@ -10,6 +10,7 @@ import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.error.InvalidScopeException
 import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
@@ -39,8 +40,7 @@ class OpenIdConnectAuthorizeCodeHandler(
         if (!request.shouldHandle())
             return
 
-        if (response.getCode().isEmpty())
-            throw IllegalStateException("program error: authorize code not issued.")
+        require(response.getCode().isNotEmpty()) { "authorize code not issued. misplaced handler?" }
 
         openIdConnectRequestValidator.validateRequest(request)
 
@@ -66,18 +66,21 @@ class OpenIdConnectAuthorizeCodeHandler(
         if (!supports(request))
             return
 
+        requireNotNull(request.getSession()) { "session must not be null" }
+
         val authorizeRequest = openIdConnectRequestStorage.getOidcSession(
                 authorizeCodeStrategy.fromRaw(request.getCode()),
                 request)
 
         if (!authorizeRequest.getGrantedScopes().contains(SCOPE_OPENID))
-            throw ScopeNotGrantedException(SCOPE_OPENID)
+            throw InvalidScopeException.NotGrantedByResourceOwner(SCOPE_OPENID)
 
         request.getClient().mustGrantType(GrantType.AuthorizationCode)
 
         request.getSession().assertType<OidcSession>().run {
-            if (getIdTokenClaims().subject.isEmpty())
-                throw IllegalArgumentException("subject is empty.")
+            require(getIdTokenClaims().subject.isNotEmpty()) {
+                "oidc session id token subject claim must be set. did upstream overlook this?"
+            }
 
             response.getAccessToken()
                     .let { openIdTokenStrategy.leftMostHash(it) }

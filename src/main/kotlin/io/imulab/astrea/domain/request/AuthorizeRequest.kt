@@ -3,7 +3,6 @@ package io.imulab.astrea.domain.request
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.checkValidRedirectUri
 import io.imulab.astrea.domain.determineRedirectUri
-import io.imulab.astrea.error.IllegalRedirectUriException
 
 /**
  * Context for the OAuth2 Authorize Endpoint.
@@ -62,7 +61,7 @@ class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,
             this.redirectUri
                     .determineRedirectUri(this.baseRequest.getClient().getRedirectUris())
                     .checkValidRedirectUri()
-        } catch (_: IllegalRedirectUriException) {
+        } catch (_: Throwable) {
             return false
         }
 
@@ -89,8 +88,8 @@ class DefaultAuthorizeRequest(private val baseRequest: OAuthRequest,
         fun setState(state: String) = apply { this.state = state }
 
         override fun build(): OAuthRequest {
-            if (this.state.isNullOrBlank())
-                throw IllegalStateException("state must be set.")
+            requireNotNull(this.state) { "state not set." }
+            require(this.state!!.isNotBlank()) { "state set but blank." }
 
             return DefaultAuthorizeRequest(
                     baseRequest = super.build(),

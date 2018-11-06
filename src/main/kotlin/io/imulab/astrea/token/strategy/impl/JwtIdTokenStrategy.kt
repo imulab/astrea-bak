@@ -10,6 +10,7 @@ import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.error.RequestParameterInvalidValueException
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.token.IdToken
 import io.imulab.astrea.token.strategy.IdTokenStrategy
@@ -27,8 +28,9 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
     override fun generateIdToken(request: OAuthRequest): IdToken {
         val session = request.getSession().assertType<OidcSession>()
 
-        if (session.getIdTokenClaims().subject.isBlank())
-            throw IllegalArgumentException("id token subject is not set.")
+        require(session.getIdTokenClaims().subject.isNotEmpty()) {
+            "oidc session id token subject claim is not set, did upstream overlook this?"
+        }
 
         if (!request.getGrantTypes().contains(GrantType.RefreshToken))
             whenGrantTypeIsNotRefreshToken(request)
@@ -95,7 +97,7 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
             request.getIdTokenHint().run {
                 if (isNotEmpty() &&
                         jwtRs256.decode(this).jwtClaims.subject != it.session.getIdTokenClaims().subject)
-                    throw IllegalArgumentException("mismatched subject from id_token_hint")
+                    throw RequestParameterInvalidValueException.MismatchedSubjectClaim(source = "id_token_hint")
             }
         }
     }
