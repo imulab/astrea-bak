@@ -1,7 +1,6 @@
 package io.imulab.astrea.domain
 
 import io.imulab.astrea.error.RequestParameterInvalidValueException
-import io.imulab.astrea.error.UnmatchedRedirectUriException
 import java.net.URI
 
 typealias RedirectUri = String
@@ -11,7 +10,8 @@ typealias RedirectUri = String
  * supply a redirect URI, it must be determined from the only registered redirect URI; if
  * user did supply a redirect URI, it must match with one of the registered redirect URI.
  *
- * @throws UnmatchedRedirectUriException when a match cannot be determined.
+ * @throws RequestParameterInvalidValueException.MultipleRedirectUriRegistered when a match cannot be determined.
+ * @throws RequestParameterInvalidValueException.RougeRedirectUri when request provided non-registered value
  */
 fun RedirectUri?.determineRedirectUri(registered: List<String>): String {
     if (this.isNullOrBlank()) {

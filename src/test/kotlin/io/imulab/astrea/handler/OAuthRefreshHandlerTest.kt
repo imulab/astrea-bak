@@ -10,8 +10,7 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
-import io.imulab.astrea.error.ClientIdentityMismatchException
-import io.imulab.astrea.error.InvalidRefreshTokenException
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.handler.impl.OAuthRefreshHandler
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.RefreshToken
@@ -102,7 +101,7 @@ class OAuthRefreshHandlerTest {
             }))
         }.build() as AccessRequest
 
-        assertThrows(InvalidRefreshTokenException::class.java) {
+        assertThrows(InvalidGrantException::class.java) {
             flow.handleAccessRequest(request)
         }
     }
@@ -129,7 +128,7 @@ class OAuthRefreshHandlerTest {
             }))
         }.build() as AccessRequest
 
-        assertThrows(ClientIdentityMismatchException::class.java) {
+        assertThrows(InvalidGrantException.ClientIdentityMismatch::class.java) {
             flow.handleAccessRequest(request)
         }
     }

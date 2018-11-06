@@ -10,9 +10,9 @@ import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.Session
+import io.imulab.astrea.error.OAuthException
 import io.imulab.astrea.error.RequestFormIsEmptyException
 import io.imulab.astrea.error.RequestNotProcessedException
-import io.imulab.astrea.error.toRfc6749Error
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.provider.AccessProvider
 import io.imulab.astrea.spi.http.HttpRequestReader
@@ -81,11 +81,14 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
         }
     }
 
-    // TODO major redo for new error format
     override fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest, error: Throwable) {
-        val rfc6749Error = error.toRfc6749Error()
-        writer.setHeader("Content-Type", "application/json;charset=UTF-8")
-        writer.setStatus(rfc6749Error.getStatusCode())
-        writer.writeBody(jsonEncoder.encode(rfc6749Error.toMap(outputDebugInErrorResponse)))
+        val exception = error as? OAuthException ?: OAuthException.ServerException(error)
+
+        writer.run {
+            setStatus(exception.statusCode())
+            setHeader("Content-Type", "application/json;charset=UTF-8")
+            exception.extraHeaders().forEach(this::setHeader)
+            writeBody(jsonEncoder.encode(exception.toMap(outputDebugInErrorResponse)))
+        }
     }
 }

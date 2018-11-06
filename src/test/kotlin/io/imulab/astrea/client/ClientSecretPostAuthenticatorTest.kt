@@ -2,7 +2,7 @@ package io.imulab.astrea.client
 
 import io.imulab.astrea.client.auth.ClientSecretPostAuthenticator
 import io.imulab.astrea.crypt.BCryptPasswordEncoder
-import io.imulab.astrea.error.ClientAuthenticationException
+import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.spi.http.HttpRequestReader
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -32,8 +32,10 @@ class ClientSecretPostAuthenticatorTest {
 
         val request = Mockito.mock(HttpRequestReader::class.java).also {
             Mockito.`when`(it.method()).thenReturn("POST")
-            Mockito.`when`(it.formValue("client_id")).thenReturn("foo")
-            Mockito.`when`(it.formValue("client_secret")).thenReturn("s3cret")
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf("foo"),
+                    "client_secret" to listOf("s3cret")
+            ))
         }
 
         Assertions.assertTrue(authenticator.supports(request))
@@ -50,12 +52,14 @@ class ClientSecretPostAuthenticatorTest {
 
         val request = Mockito.mock(HttpRequestReader::class.java).also {
             Mockito.`when`(it.method()).thenReturn("POST")
-            Mockito.`when`(it.formValue("client_id")).thenReturn("foo")
-            Mockito.`when`(it.formValue("client_secret")).thenReturn("invalid")
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf("foo"),
+                    "client_secret" to listOf("invalid")
+            ))
         }
 
         Assertions.assertTrue(authenticator.supports(request))
-        Assertions.assertThrows(ClientAuthenticationException::class.java) {
+        Assertions.assertThrows(InvalidClientException.AuthenticationFailed::class.java) {
             authenticator.authenticate(request)
         }
     }

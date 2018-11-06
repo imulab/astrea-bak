@@ -119,34 +119,35 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         writer.setStatus(302)
     }
 
-    // TODO major redo for new error
     override fun encodeAuthorizeError(writer: HttpResponseWriter, request: AuthorizeRequest, error: Throwable) {
-        val rfc6749Error = error.toRfc6749Error()
+        val exception = error as? OAuthException ?: OAuthException.ServerException(error)
 
         if (!request.isRedirectUriValid()) {
-            writer.setStatus(rfc6749Error.getStatusCode())
+            writer.setStatus(exception.statusCode())
             writer.setHeader("Content-Type", "application/json;charset=UTF-8")
-            writer.writeBody(jsonEncoder.encode(rfc6749Error.toMap(outputDebugInErrorResponse)))
+            exception.extraHeaders().forEach(writer::setHeader)
+            writer.writeBody(jsonEncoder.encode(exception.toMap(outputDebugInErrorResponse)))
             return
         }
 
         val redirectUri = URIBuilder(request.getRedirectUri()!!).also { builder ->
             if (request.getResponseTypes().isNotEmpty()
                     && !(request.getResponseTypes().exactly(ResponseType.Code))
-                    && rfc6749Error.error != Rfc6749Error.UnsupportedResponseType
+                    && !exception.isResponseTypeRelated()
             ) {
-                builder.fragment = rfc6749Error
+                builder.fragment = exception
                         .toMap(outputDebugInErrorResponse)
                         .entries
                         .joinToString("&") { "${it.key}=${it.value}" }
             } else {
-                rfc6749Error
+                exception
                         .toMap(outputDebugInErrorResponse)
                         .forEach { t, u -> builder.setParameter(t, u) }
             }
         }.build().toString()
 
         writer.setHeader("Location", redirectUri)
+        exception.extraHeaders().forEach(writer::setHeader)
         writer.setStatus(302)
     }
 

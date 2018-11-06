@@ -9,8 +9,7 @@ import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
-import io.imulab.astrea.error.Rfc6749Error
-import io.imulab.astrea.error.Rfc6749Exception
+import io.imulab.astrea.error.OAuthException
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.provider.impl.DefaultAccessProvider
 import io.imulab.astrea.spi.http.HttpResponseWriter
@@ -47,11 +46,9 @@ class EncodeAccessErrorTest {
             }))
         }.build() as AccessRequest
 
-        val error = object : Rfc6749Exception(
-                Rfc6749Error.InvalidRequestUri,
-                "test-description",
-                "test-hint",
-                "test-debug") {}
+        val error = object : OAuthException("test-code", "test-description") {
+            override fun statusCode(): Int = 400
+        }
 
         val collector = hashMapOf<String, String>()
         provider.encodeAccessError(TestContext.httpResponseWriter(collector), request, error)
@@ -60,11 +57,9 @@ class EncodeAccessErrorTest {
         assertEquals("application/json;charset=UTF-8", collector["header_Content-Type"])
 
         val json = TestContext.klaxonParser.parse<Map<String, String>>(collector["body"]!!)!!
-        assertEquals(Rfc6749Error.InvalidRequestUri.statusCode.toString(), json["status_code"])
-        assertEquals("test-debug", json["debug"])
+        assertEquals("400", json["status_code"])
         assertEquals("test-description", json["error_description"])
-        assertEquals("test-hint", json["hint"])
-        assertEquals(Rfc6749Error.InvalidRequestUri.specValue, json["error"])
+        assertEquals("test-code", json["error"])
     }
 
     @Test
@@ -100,9 +95,9 @@ class EncodeAccessErrorTest {
         assertEquals("application/json;charset=UTF-8", collector["header_Content-Type"])
 
         val json = TestContext.klaxonParser.parse<Map<String, String>>(collector["body"]!!)!!
-        assertEquals(Rfc6749Error.Unknown.statusCode.toString(), json["status_code"])
-        assertEquals("generic", json["debug"])
-        assertEquals(Rfc6749Error.Unknown.specValue, json["error"])
+        assertEquals("500", json["status_code"])
+        assertEquals("server_error", json["error"])
+        assertEquals("generic", json["error_description"])
     }
 
     private object TestContext {

@@ -9,7 +9,7 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
-import io.imulab.astrea.error.ClientGrantTypeException
+import io.imulab.astrea.error.UnauthorizedClientException
 import io.imulab.astrea.handler.impl.OAuthClientCredentialsHandler
 import io.imulab.astrea.token.storage.RefreshTokenStorage
 import io.imulab.astrea.token.storage.impl.MemoryStorage
@@ -96,7 +96,7 @@ class OAuthClientCredentialsHandlerTest {
             }))
         }.build() as AccessRequest
 
-        assertThrows(ClientGrantTypeException::class.java) {
+        assertThrows(UnauthorizedClientException::class.java) {
             flow.handleAccessRequest(request)
         }
     }

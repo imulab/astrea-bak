@@ -10,8 +10,8 @@ import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
-import io.imulab.astrea.error.ClientGrantTypeException
-import io.imulab.astrea.error.ScopeRejectedException
+import io.imulab.astrea.error.InvalidScopeException
+import io.imulab.astrea.error.UnauthorizedClientException
 import io.imulab.astrea.handler.impl.OAuthImplicitHandler
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
@@ -95,7 +95,7 @@ class OAuthImplicitHandlerTest {
 
         val response = DefaultAuthorizeResponse()
 
-        assertThrows(ScopeRejectedException::class.java) {
+        assertThrows(InvalidScopeException.NotAcceptedByClient::class.java) {
             flow.handleAuthorizeRequest(request, response)
         }
     }
@@ -126,7 +126,7 @@ class OAuthImplicitHandlerTest {
 
         val response = DefaultAuthorizeResponse()
 
-        assertThrows(ClientGrantTypeException::class.java) {
+        assertThrows(UnauthorizedClientException::class.java) {
             flow.handleAuthorizeRequest(request, response)
         }
     }

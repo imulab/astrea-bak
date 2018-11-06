@@ -14,7 +14,7 @@ import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession
-import io.imulab.astrea.error.InvalidAuthorizeCodeException
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.handler.impl.OAuthAuthorizeCodeHandler
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
@@ -55,7 +55,7 @@ class OAuthAuthorizeCodeHandlerTest {
     fun `expired authorize code should fail`() {
         val flow = TestContext.getFlow()
 
-        assertThrows(InvalidAuthorizeCodeException::class.java) {
+        assertThrows(InvalidGrantException::class.java) {
             val authorizeResponse = testAuthorize(flow)
             TestContext.memoryStore.expireAuthorizeCode(authorizeResponse.getCode().split(".")[1])
             testHandleAccess(flow, authorizeResponse)
@@ -66,7 +66,7 @@ class OAuthAuthorizeCodeHandlerTest {
     fun `altered authorize code should fail`() {
         val flow = TestContext.getFlow()
 
-        assertThrows(InvalidAuthorizeCodeException::class.java) {
+        assertThrows(InvalidGrantException::class.java) {
             val authorizeResponse = testAuthorize(flow)
             flow.handleAccessRequest(DefaultAccessRequest.Builder().also {
                 it.setForm("code", "altered" + authorizeResponse.getCode())
@@ -82,7 +82,7 @@ class OAuthAuthorizeCodeHandlerTest {
     fun `non-existing code should fail`() {
         val flow = TestContext.getFlow()
 
-        assertThrows(InvalidAuthorizeCodeException::class.java) {
+        assertThrows(InvalidGrantException::class.java) {
             val authorizeResponse = testAuthorize(flow)
             TestContext.memoryStore.clearAuthorizeCodes()
             testHandleAccess(flow, authorizeResponse)

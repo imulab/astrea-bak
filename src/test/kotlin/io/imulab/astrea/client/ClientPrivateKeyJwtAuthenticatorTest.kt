@@ -4,7 +4,7 @@ import io.imulab.astrea.client.auth.ClientPrivateKeyJwtAuthenticator
 import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.domain.JWT_BEARER_CLIENT_ASSERTION_TYPE
-import io.imulab.astrea.error.ClientAuthenticationException
+import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.spi.http.HttpRequestReader
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.RsaJsonWebKey
@@ -24,24 +24,25 @@ class ClientPrivateKeyJwtAuthenticatorTest {
     fun `registered oidc client perform good request should pass`() {
         val authenticator = ClientPrivateKeyJwtAuthenticator(clientManager, tokenEndpointUrl)
         val request = Mockito.mock(HttpRequestReader::class.java).also {
-            Mockito.`when`(it.formValue("client_id")).thenReturn("foo")
-            Mockito.`when`(it.formValue("client_assertion_type"))
-                    .thenReturn(JWT_BEARER_CLIENT_ASSERTION_TYPE)
-            Mockito.`when`(it.formValue("client_assertion")).thenReturn(
-                    JsonWebSignature().also {
-                        it.payload = JwtClaims().also {
-                            it.setGeneratedJwtId()
-                            it.issuer = "foo"
-                            it.subject = "foo"
-                            it.setAudience(tokenEndpointUrl)
-                            it.setIssuedAtToNow()
-                            it.setExpirationTimeMinutesInTheFuture(10f)
-                        }.toJson()
-                        it.keyIdHeaderValue = "test-key"
-                        it.key = testJwk.rsaPrivateKey
-                        it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
-                    }.compactSerialization
-            )
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf("foo"),
+                    "client_assertion_type" to listOf(JWT_BEARER_CLIENT_ASSERTION_TYPE),
+                    "client_assertion" to listOf(
+                            JsonWebSignature().also {
+                                it.payload = JwtClaims().also {
+                                    it.setGeneratedJwtId()
+                                    it.issuer = "foo"
+                                    it.subject = "foo"
+                                    it.setAudience(tokenEndpointUrl)
+                                    it.setIssuedAtToNow()
+                                    it.setExpirationTimeMinutesInTheFuture(10f)
+                                }.toJson()
+                                it.keyIdHeaderValue = "test-key"
+                                it.key = testJwk.rsaPrivateKey
+                                it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
+                            }.compactSerialization
+                    )
+            ))
         }
 
         Assertions.assertTrue(authenticator.supports(request))
@@ -52,24 +53,25 @@ class ClientPrivateKeyJwtAuthenticatorTest {
     fun `registered oidc client perform good request without client_id should still pass`() {
         val authenticator = ClientPrivateKeyJwtAuthenticator(clientManager, tokenEndpointUrl)
         val request = Mockito.mock(HttpRequestReader::class.java).also {
-            Mockito.`when`(it.formValue("client_id")).thenReturn("")
-            Mockito.`when`(it.formValue("client_assertion_type"))
-                    .thenReturn(JWT_BEARER_CLIENT_ASSERTION_TYPE)
-            Mockito.`when`(it.formValue("client_assertion")).thenReturn(
-                    JsonWebSignature().also {
-                        it.payload = JwtClaims().also {
-                            it.setGeneratedJwtId()
-                            it.issuer = "foo"
-                            it.subject = "foo"
-                            it.setAudience(tokenEndpointUrl)
-                            it.setIssuedAtToNow()
-                            it.setExpirationTimeMinutesInTheFuture(10f)
-                        }.toJson()
-                        it.keyIdHeaderValue = "test-key"
-                        it.key = testJwk.rsaPrivateKey
-                        it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
-                    }.compactSerialization
-            )
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf(""),
+                    "client_assertion_type" to listOf(JWT_BEARER_CLIENT_ASSERTION_TYPE),
+                    "client_assertion" to listOf(
+                            JsonWebSignature().also {
+                                it.payload = JwtClaims().also {
+                                    it.setGeneratedJwtId()
+                                    it.issuer = "foo"
+                                    it.subject = "foo"
+                                    it.setAudience(tokenEndpointUrl)
+                                    it.setIssuedAtToNow()
+                                    it.setExpirationTimeMinutesInTheFuture(10f)
+                                }.toJson()
+                                it.keyIdHeaderValue = "test-key"
+                                it.key = testJwk.rsaPrivateKey
+                                it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
+                            }.compactSerialization
+                    )
+            ))
         }
 
         Assertions.assertTrue(authenticator.supports(request))
@@ -80,28 +82,29 @@ class ClientPrivateKeyJwtAuthenticatorTest {
     fun `mismatched issuer should fail`() {
         val authenticator = ClientPrivateKeyJwtAuthenticator(clientManager, tokenEndpointUrl)
         val request = Mockito.mock(HttpRequestReader::class.java).also {
-            Mockito.`when`(it.formValue("client_id")).thenReturn("")
-            Mockito.`when`(it.formValue("client_assertion_type"))
-                    .thenReturn(JWT_BEARER_CLIENT_ASSERTION_TYPE)
-            Mockito.`when`(it.formValue("client_assertion")).thenReturn(
-                    JsonWebSignature().also {
-                        it.payload = JwtClaims().also {
-                            it.setGeneratedJwtId()
-                            it.issuer = "mismatch"
-                            it.subject = "foo"
-                            it.setAudience(tokenEndpointUrl)
-                            it.setIssuedAtToNow()
-                            it.setExpirationTimeMinutesInTheFuture(10f)
-                        }.toJson()
-                        it.keyIdHeaderValue = "test-key"
-                        it.key = testJwk.rsaPrivateKey
-                        it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
-                    }.compactSerialization
-            )
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf("foo"),
+                    "client_assertion_type" to listOf(JWT_BEARER_CLIENT_ASSERTION_TYPE),
+                    "client_assertion" to listOf(
+                            JsonWebSignature().also {
+                                it.payload = JwtClaims().also {
+                                    it.setGeneratedJwtId()
+                                    it.issuer = "mismatch"
+                                    it.subject = "foo"
+                                    it.setAudience(tokenEndpointUrl)
+                                    it.setIssuedAtToNow()
+                                    it.setExpirationTimeMinutesInTheFuture(10f)
+                                }.toJson()
+                                it.keyIdHeaderValue = "test-key"
+                                it.key = testJwk.rsaPrivateKey
+                                it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
+                            }.compactSerialization
+                    )
+            ))
         }
 
         Assertions.assertTrue(authenticator.supports(request))
-        Assertions.assertThrows(ClientAuthenticationException::class.java) {
+        Assertions.assertThrows(InvalidClientException.AuthenticationFailed::class.java) {
             authenticator.authenticate(request)
         }
     }

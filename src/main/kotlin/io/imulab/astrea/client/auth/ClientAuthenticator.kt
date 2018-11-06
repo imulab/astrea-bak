@@ -3,7 +3,7 @@ package io.imulab.astrea.client.auth
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.crypt.PasswordEncoder
-import io.imulab.astrea.error.ClientAuthenticationException
+import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.spi.http.HttpRequestReader
 
 /**
@@ -22,7 +22,7 @@ interface ClientAuthenticator {
     /**
      * Authenticate the client using the supplied information from [reader]. When the authentication is successful,
      * implementations must return the constructed [OAuthClient]. Otherwise, in case of authentication failure,
-     * implementations must throw [ClientAuthenticationException].
+     * implementations must throw [InvalidClientException.AuthenticationFailed] exception.
      */
     fun authenticate(reader: HttpRequestReader): OAuthClient
 
@@ -58,7 +58,7 @@ interface ClientAuthenticator {
                 if (authenticator.supports(reader))
                     return authenticator.authenticate(reader)
             }
-            throw ClientAuthenticationException("Nothing can authenticate the client.")
+            throw InvalidClientException.AuthenticationFailed("No authenticator can handle request.")
         }
     }
 }

@@ -14,7 +14,9 @@ class ClientNoneAuthenticatorTest {
     fun `a public oauth client should pass`() {
         val authenticator = ClientNoneAuthenticator(clientManager)
         val request = Mockito.mock(HttpRequestReader::class.java).also {
-            Mockito.`when`(it.formValue("client_id")).thenReturn("foo")
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf("foo")
+            ))
         }
         Assertions.assertTrue(authenticator.supports(request))
         Assertions.assertEquals("foo", authenticator.authenticate(request).getId())
@@ -24,7 +26,9 @@ class ClientNoneAuthenticatorTest {
     fun `a public oidc client with none auth method should pass`() {
         val authenticator = ClientNoneAuthenticator(clientManager)
         val request = Mockito.mock(HttpRequestReader::class.java).also {
-            Mockito.`when`(it.formValue("client_id")).thenReturn("bar")
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf("bar")
+            ))
         }
         Assertions.assertTrue(authenticator.supports(request))
         Assertions.assertEquals("bar", authenticator.authenticate(request).getId())
@@ -34,7 +38,9 @@ class ClientNoneAuthenticatorTest {
     fun `a non-public client should not pass`() {
         val authenticator = ClientNoneAuthenticator(clientManager)
         val request = Mockito.mock(HttpRequestReader::class.java).also {
-            Mockito.`when`(it.formValue("client_id")).thenReturn("private")
+            Mockito.`when`(it.getForm()).thenReturn(mapOf(
+                    "client_id" to listOf("private")
+            ))
         }
         Assertions.assertFalse(authenticator.supports(request))
     }

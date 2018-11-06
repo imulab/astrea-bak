@@ -5,8 +5,7 @@ import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.request.AuthorizeRequest
-import io.imulab.astrea.error.Rfc6749Error
-import io.imulab.astrea.error.Rfc6749Exception
+import io.imulab.astrea.error.OAuthException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.provider.impl.DefaultAuthorizeProvider
 import io.imulab.astrea.spi.http.HttpClient
@@ -27,7 +26,7 @@ class EncodeAuthorizeErrorTest {
                 expectedAudience = "test",
                 httpClient = Mockito.mock(HttpClient::class.java),
                 clientStore = Mockito.mock(ClientManager::class.java),
-                outputDebugInErrorResponse = true,
+                outputDebugInErrorResponse = false,
                 jsonEncoder = TestContext.testJsonEncoder
         )
 
@@ -35,26 +34,20 @@ class EncodeAuthorizeErrorTest {
         Mockito.`when`(request.getRedirectUri()).thenReturn("https://test.com/callback")
         Mockito.`when`(request.isRedirectUriValid()).thenReturn(true)
 
-        val error = object : Rfc6749Exception(
-                Rfc6749Error.InvalidRequestUri,
-                "test-description",
-                "test-hint",
-                "test-debug") {}
+        val error = object : OAuthException("test-code", "test-description") {
+            override fun statusCode(): Int = 400
+        }
 
         val collector = hashMapOf<String, String>()
         provider.encodeAuthorizeError(TestContext.httpResponseWriter(collector), request, error)
 
         Assertions.assertEquals("302", collector["status"])
         Assertions.assertEquals("https://test.com/callback?" +
-                "status_code=${Rfc6749Error.InvalidRequestUri.statusCode}" +
-                "&" +
-                "debug=test-debug" +
+                "status_code=400" +
                 "&" +
                 "error_description=test-description" +
                 "&" +
-                "hint=test-hint" +
-                "&" +
-                "error=${Rfc6749Error.InvalidRequestUri.specValue}", collector["header_Location"])
+                "error=test-code", collector["header_Location"])
     }
 
     @Test
@@ -65,7 +58,7 @@ class EncodeAuthorizeErrorTest {
                 expectedAudience = "test",
                 httpClient = Mockito.mock(HttpClient::class.java),
                 clientStore = Mockito.mock(ClientManager::class.java),
-                outputDebugInErrorResponse = true,
+                outputDebugInErrorResponse = false,
                 jsonEncoder = TestContext.testJsonEncoder
         )
 
@@ -74,26 +67,20 @@ class EncodeAuthorizeErrorTest {
         Mockito.`when`(request.isRedirectUriValid()).thenReturn(true)
         Mockito.`when`(request.getResponseTypes()).thenReturn(setOf(ResponseType.Token))
 
-        val error = object : Rfc6749Exception(
-                Rfc6749Error.InvalidRequestUri,
-                "test-description",
-                "test-hint",
-                "test-debug") {}
+        val error = object : OAuthException("test-code", "test-description") {
+            override fun statusCode(): Int = 400
+        }
 
         val collector = hashMapOf<String, String>()
         provider.encodeAuthorizeError(TestContext.httpResponseWriter(collector), request, error)
 
         Assertions.assertEquals("302", collector["status"])
         Assertions.assertEquals("https://test.com/callback#" +
-                "status_code=${Rfc6749Error.InvalidRequestUri.statusCode}" +
-                "&" +
-                "debug=test-debug" +
+                "status_code=400" +
                 "&" +
                 "error_description=test-description" +
                 "&" +
-                "hint=test-hint" +
-                "&" +
-                "error=${Rfc6749Error.InvalidRequestUri.specValue}", collector["header_Location"])
+                "error=test-code", collector["header_Location"])
     }
 
     @Test
@@ -104,7 +91,7 @@ class EncodeAuthorizeErrorTest {
                 expectedAudience = "test",
                 httpClient = Mockito.mock(HttpClient::class.java),
                 clientStore = Mockito.mock(ClientManager::class.java),
-                outputDebugInErrorResponse = true,
+                outputDebugInErrorResponse = false,
                 jsonEncoder = TestContext.testJsonEncoder
         )
 
@@ -119,11 +106,11 @@ class EncodeAuthorizeErrorTest {
 
         Assertions.assertEquals("302", collector["status"])
         Assertions.assertEquals("https://test.com/callback?" +
-                "status_code=${Rfc6749Error.Unknown.statusCode}" +
+                "status_code=500" +
                 "&" +
-                "debug=generic" +
+                "error_description=generic" +
                 "&" +
-                "error=${Rfc6749Error.Unknown.specValue}", collector["header_Location"])
+                "error=server_error", collector["header_Location"])
     }
 
     private object TestContext {

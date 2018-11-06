@@ -1,8 +1,6 @@
 package io.imulab.astrea.domain
 
-import io.imulab.astrea.error.MalformedRedirectUriException
-import io.imulab.astrea.error.RedirectUriHasFragmentException
-import io.imulab.astrea.error.UnmatchedRedirectUriException
+import io.imulab.astrea.error.RequestParameterInvalidValueException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -15,7 +13,7 @@ class RedirectUriTest {
         val shouldThrow = Executable {
             "foo/bar?hey".checkValidRedirectUri()
         }
-        assertThrows(MalformedRedirectUriException::class.java, shouldThrow)
+        assertThrows(RequestParameterInvalidValueException.MalformedRedirectUri::class.java, shouldThrow)
     }
 
     @Test
@@ -23,7 +21,7 @@ class RedirectUriTest {
         val shouldThrow = Executable {
             "https://foo.com/bar?hey#hello".checkValidRedirectUri()
         }
-        assertThrows(RedirectUriHasFragmentException::class.java, shouldThrow)
+        assertThrows(RequestParameterInvalidValueException.MalformedRedirectUri::class.java, shouldThrow)
     }
 
     @Test
@@ -38,7 +36,7 @@ class RedirectUriTest {
         val notRegistered = "https://hello.imulab.io/callback"
         val another = "https://world.imulab.io/callback"
         val shouldThrow = Executable { notRegistered.determineRedirectUri(listOf(another)) }
-        assertThrows(UnmatchedRedirectUriException::class.java, shouldThrow)
+        assertThrows(RequestParameterInvalidValueException.RougeRedirectUri::class.java, shouldThrow)
     }
 
     @Test
@@ -52,7 +50,7 @@ class RedirectUriTest {
         val one = "https://hello.imulab.io/callback"
         val another = "https://world.imulab.io/callback"
         val shouldThrow = Executable { "".determineRedirectUri(listOf(one, another)) }
-        assertThrows(UnmatchedRedirectUriException::class.java, shouldThrow)
+        assertThrows(RequestParameterInvalidValueException.MultipleRedirectUriRegistered::class.java, shouldThrow)
     }
 
 }

@@ -6,7 +6,7 @@ import io.imulab.astrea.client.DefaultOidcClient
 import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.StringEqualityScopeStrategy
-import io.imulab.astrea.error.IllegalRedirectUriException
+import io.imulab.astrea.error.RequestParameterInvalidValueException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.provider.impl.DefaultAuthorizeProvider
 import io.imulab.astrea.spi.http.HttpClient
@@ -22,10 +22,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.function.Executable
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
-import org.mockito.invocation.InvocationOnMock
 
 class NewAuthorizeRequestTest {
 
@@ -95,7 +93,7 @@ class NewAuthorizeRequestTest {
         ))
         val provider = mockedProvider()
         val shouldFail = Executable { provider.newAuthorizeRequest(httpRequestReader) }
-        assertThrows(IllegalRedirectUriException::class.java, shouldFail)
+        assertThrows(RequestParameterInvalidValueException.RougeRedirectUri::class.java, shouldFail)
     }
 
     /**
@@ -207,21 +205,11 @@ class NewAuthorizeRequestTest {
     }
 
     /**
-     * Returns a mocked [HttpRequestReader] which uses the supplied [urlValues] as return answers. This
-     * mocked version only cares about [HttpRequestReader.getForm], [HttpRequestReader.formValue], and
-     * [HttpRequestReader.formValueUnescaped]. In addition, [HttpRequestReader.formValueUnescaped] uses
-     * value supplied through [urlValues] directly, no addition processing is done.
+     * Returns a mocked [HttpRequestReader] which uses the supplied [urlValues] as return answers.
      */
     private fun mockHttpRequestReader(urlValues: UrlValues): HttpRequestReader {
         val httpRequest = mock(HttpRequestReader::class.java)
-        val answerFromUrlValues = { invocation: InvocationOnMock? ->
-            urlValues[invocation?.getArgument(0) ?: ""]?.get(0)
-        }
-
         `when`(httpRequest.getForm()).thenReturn(urlValues)
-        `when`(httpRequest.formValueUnescaped(ArgumentMatchers.anyString())).thenAnswer(answerFromUrlValues)
-        `when`(httpRequest.formValue(ArgumentMatchers.anyString())).thenAnswer(answerFromUrlValues)
-
         return httpRequest
     }
 

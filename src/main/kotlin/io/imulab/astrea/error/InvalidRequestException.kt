@@ -12,7 +12,10 @@ import io.imulab.astrea.domain.*
  * client, or is otherwise malformed.
  */
 sealed class InvalidRequestException(description: String? = null)
-    : OAuthException("invalid_request", description)
+    : OAuthException("invalid_request", description) {
+
+    override fun statusCode(): Int = 400
+}
 
 /**
  * Common base class for any [InvalidRequestException] that involves a request parameter name
@@ -49,7 +52,9 @@ open class RequestParameterInvalidValueException(parameterName: String, value: S
     : RequestParameterException("parameter '$parameterName' has invalid value '$value'. ${hint ?: ""}".trim()) {
 
     class InvalidResponseType(value: String)
-        : RequestParameterInvalidValueException(PARAM_RESPONSE_TYPE, value)
+        : RequestParameterInvalidValueException(PARAM_RESPONSE_TYPE, value) {
+        override fun isResponseTypeRelated(): Boolean = true
+    }
 
     class InvalidGrantType(value: String)
         : RequestParameterInvalidValueException(PARAM_GRANT_TYPE, value)
@@ -90,8 +95,12 @@ open class RequestParameterUnsupportedValueException(parameterName: String, valu
      * Registered response types of client does not contain the requested response type.
      */
     class ClientResponseType(value: String)
-        : RequestParameterUnsupportedValueException(PARAM_RESPONSE_TYPE, value, "Client does not supported such response type.")
+        : RequestParameterUnsupportedValueException(PARAM_RESPONSE_TYPE, value, "Client does not supported such response type.") {
+        override fun isResponseTypeRelated(): Boolean = true
+    }
 
     class ResponseTypeNotHandled(value: String)
-        : RequestParameterUnsupportedValueException(PARAM_RESPONSE_TYPE, value, "Server does not supported such response type.")
+        : RequestParameterUnsupportedValueException(PARAM_RESPONSE_TYPE, value, "Server does not supported such response type.") {
+        override fun isResponseTypeRelated(): Boolean = true
+    }
 }

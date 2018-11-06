@@ -12,6 +12,8 @@ import io.imulab.astrea.domain.AuthMethod
  */
 open class InvalidClientException(reason: String) : OAuthException("invalid_client", reason) {
 
+    override fun statusCode(): Int = 401
+
     /**
      * Thrown when neither Json Web Keys nor Json Web Keys URI was registered.
      */

@@ -6,7 +6,7 @@ import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
-import io.imulab.astrea.error.InvalidAccessTokenException
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator
@@ -43,7 +43,7 @@ class JwtAccessTokenStrategyTest {
 
         val accessTokenFromStrategy1 = strategy1.generateNewAccessToken(createOAuthRequest())
 
-        Assertions.assertThrows(InvalidAccessTokenException::class.java) {
+        Assertions.assertThrows(InvalidGrantException::class.java) {
             strategy2.validateAccessToken(
                     Mockito.mock(OAuthRequest::class.java),
                     accessTokenFromStrategy1.token

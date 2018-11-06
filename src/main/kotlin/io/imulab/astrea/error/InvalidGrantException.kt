@@ -10,6 +10,8 @@ package io.imulab.astrea.error
 open class InvalidGrantException(grant: String, reason: String)
     : OAuthException("invalid_grant", "Supplied grant '$grant' is invalid: $reason") {
 
+    override fun statusCode(): Int = 400
+
     class ClientIdentityMismatch(grant: String) : InvalidGrantException(grant, "It was issued to another client.")
 
     class RedirectUriMismatch(grant: String) : InvalidGrantException(grant, "It was registered to a different redirect URI.")

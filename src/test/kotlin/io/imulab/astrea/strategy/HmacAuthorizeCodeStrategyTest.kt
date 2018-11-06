@@ -4,7 +4,7 @@ import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.Session
-import io.imulab.astrea.error.InvalidAuthorizeCodeException
+import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.strategy.impl.HmacAuthorizeCodeStrategy
 import org.junit.jupiter.api.Assertions
@@ -36,7 +36,7 @@ class HmacAuthorizeCodeStrategyTest {
         val strategy = HmacAuthorizeCodeStrategy(hmac = cipher)
         val oauthReq = Mockito.mock(OAuthRequest::class.java)
 
-        Assertions.assertThrows(InvalidAuthorizeCodeException::class.java) {
+        Assertions.assertThrows(InvalidGrantException::class.java) {
             strategy.generateNewAuthorizeCode(oauthReq).also {
                 strategy.validateAuthorizeCode(oauthReq, AuthorizeCode(
                         code = "x" + it.code,
@@ -56,7 +56,7 @@ class HmacAuthorizeCodeStrategyTest {
         val oauthReq = Mockito.mock(OAuthRequest::class.java)
         Mockito.`when`(oauthReq.getSession()).thenReturn(session)
 
-        Assertions.assertThrows(InvalidAuthorizeCodeException::class.java) {
+        Assertions.assertThrows(InvalidGrantException::class.java) {
             strategy.generateNewAuthorizeCode(oauthReq).also {
                 strategy.validateAuthorizeCode(oauthReq, it.code)
             }
