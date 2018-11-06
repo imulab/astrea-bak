@@ -10,7 +10,7 @@ import io.imulab.astrea.error.RequestParameterMissingException
  *
  * If all element is in [universe], this method returns the list representation of [this].
  */
-inline fun <reified T: Any> Iterable<T>.mustBeIn(
+inline fun <reified T : Any> Iterable<T>.mustBeIn(
         universe: Collection<T>,
         noinline exceptionEnhancer: ((IllegalArgumentException) -> Throwable)? = null
 ): List<T> {

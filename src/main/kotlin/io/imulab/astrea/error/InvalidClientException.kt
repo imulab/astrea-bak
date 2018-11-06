@@ -36,5 +36,5 @@ open class InvalidClientException(reason: String) : OAuthException("invalid_clie
     /**
      * Thrown when authentication fails.
      */
-    class AuthenticationFailed(reason: String): InvalidClientException("Client failed authentication. $reason".trim())
+    class AuthenticationFailed(reason: String) : InvalidClientException("Client failed authentication. $reason".trim())
 }

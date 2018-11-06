@@ -11,7 +11,6 @@ import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.error.InvalidScopeException
-import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator

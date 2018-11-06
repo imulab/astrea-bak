@@ -22,7 +22,7 @@ interface HttpResponseReader {
     fun ensureStatus(
             expected: Int,
             exceptionEnhancer: ((IllegalStateException) -> Throwable)? = null
-    ) : HttpResponseReader {
+    ): HttpResponseReader {
         if (expected != statusCode())
             throw IllegalStateException(statusCode().toString())
                     .let { if (exceptionEnhancer != null) exceptionEnhancer(it) else it }

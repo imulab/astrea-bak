@@ -1,19 +1,23 @@
 package io.imulab.astrea.provider.impl
 
 import io.imulab.astrea.client.auth.ClientAuthenticator
-import io.imulab.astrea.domain.*
+import io.imulab.astrea.domain.GrantType
+import io.imulab.astrea.domain.PARAM_GRANT_TYPE
+import io.imulab.astrea.domain.PARAM_SCOPE
+import io.imulab.astrea.domain.SPACE
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.DefaultAccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.Session
-import io.imulab.astrea.error.*
+import io.imulab.astrea.error.RequestFormIsEmptyException
+import io.imulab.astrea.error.RequestNotProcessedException
+import io.imulab.astrea.error.toRfc6749Error
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.provider.AccessProvider
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.HttpResponseWriter
 import io.imulab.astrea.spi.http.mustSingleValue
-import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.spi.json.JsonEncoder
 
 class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator,

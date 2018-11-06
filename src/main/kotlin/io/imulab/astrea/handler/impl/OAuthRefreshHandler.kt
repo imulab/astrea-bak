@@ -6,9 +6,7 @@ import io.imulab.astrea.domain.extension.getRefreshToken
 import io.imulab.astrea.domain.extension.setRefreshToken
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
-import io.imulab.astrea.error.ClientIdentityMismatchException
 import io.imulab.astrea.error.InvalidGrantException
-import io.imulab.astrea.error.ScopeNotGrantedException
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.TokenRevocationStorage

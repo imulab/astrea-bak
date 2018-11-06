@@ -40,7 +40,8 @@ fun RedirectUri.checkValidRedirectUri() {
         if (uri.rawFragment != null && uri.rawFragment.isNotEmpty())
             throw RequestParameterInvalidValueException.MalformedRedirectUri(this, "The provided redirect URI has fragment component.")
     } catch (e: IllegalArgumentException) {
-        throw RequestParameterInvalidValueException.MalformedRedirectUri(this, e.message ?: "The provided redirect URI cannot be parsed.")
+        throw RequestParameterInvalidValueException.MalformedRedirectUri(this, e.message
+                ?: "The provided redirect URI cannot be parsed.")
     }
 }
 

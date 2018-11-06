@@ -64,7 +64,7 @@ open class RequestParameterInvalidValueException(parameterName: String, value: S
         : RequestParameterInvalidValueException(PARAM_NONCE, value, "Nonce entropy is less than $minimumEntropy.")
 
     class InsecureRedirectUri(uri: String)
-            : RequestParameterInvalidValueException(PARAM_REDIRECT_URI, uri, "Redirect URI '$uri' is not using HTTPS or 127.0.0.1 as host.")
+        : RequestParameterInvalidValueException(PARAM_REDIRECT_URI, uri, "Redirect URI '$uri' is not using HTTPS or 127.0.0.1 as host.")
 
     class MismatchedSubjectClaim(source: String)
         : RequestParameterInvalidValueException("sub", "n/a", "Detected contradicting value for 'sub' claim from $source.")
@@ -83,7 +83,8 @@ open class RequestParameterInvalidValueException(parameterName: String, value: S
  * A parameter (except scope) value is valid, but not supported.
  */
 open class RequestParameterUnsupportedValueException(parameterName: String, value: String, hint: String? = null)
-    : RequestParameterException("parameter '$parameterName' has valid value '$value', but is not supported for processing. ${hint ?: ""}".trim()) {
+    : RequestParameterException("parameter '$parameterName' has valid value '$value', but is not supported for processing. ${hint
+        ?: ""}".trim()) {
 
     /**
      * Registered response types of client does not contain the requested response type.
