@@ -37,7 +37,7 @@ class OAuthPkceHandlerTest {
     @ParameterizedTest(name = "#{index}: {0}")
     @MethodSource("params")
     fun testPkce(
-            testName: String,
+            @Suppress("UNUSED_PARAMETER") testName: String,
             handler: OAuthPkceHandler,
             challenge: String,
             verifier: String,
