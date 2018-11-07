@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     java
     kotlin("jvm") version "1.2.51"
+    id("jacoco")
 }
 
 group = "io.imulab"
@@ -43,4 +44,19 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.withType<JacocoReport> {
+    reports {
+        html.apply {
+            isEnabled = true
+        }
+        xml.apply {
+            isEnabled = true
+        }
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.2"
 }

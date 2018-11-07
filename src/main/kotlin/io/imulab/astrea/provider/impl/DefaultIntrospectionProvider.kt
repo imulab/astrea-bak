@@ -57,7 +57,7 @@ class DefaultIntrospectionProvider(
             return
         }
 
-        assert(response.getAccessRequest() != null)
+        checkNotNull(response.getAccessRequest())
 
         response.getAccessRequest()!!.let { ar ->
             mutableMapOf<String, Any>().also { m ->
