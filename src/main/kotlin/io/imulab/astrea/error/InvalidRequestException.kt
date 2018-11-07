@@ -65,6 +65,9 @@ open class RequestParameterInvalidValueException(parameterName: String, value: S
     class InvalidCodeChallengeMethod(value: String)
         : RequestParameterInvalidValueException(PARAM_CODE_CHALLENGE_METHOD, value)
 
+    class InvalidTokenTypeHint(value: String)
+        : RequestParameterInvalidValueException(PARAM_TOKEN_TYPE_HINT, value)
+
     class StateInsufficientEntropy(value: String, minimumEntropy: Int)
         : RequestParameterInvalidValueException(PARAM_STATE, value, "State entropy is less than $minimumEntropy.")
 

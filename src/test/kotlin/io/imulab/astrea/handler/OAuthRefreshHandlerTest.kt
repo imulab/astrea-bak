@@ -7,7 +7,7 @@ import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.AccessRequest
-import io.imulab.astrea.domain.request.DefaultAccessRequest
+import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.InvalidGrantException

@@ -2,6 +2,7 @@ package io.imulab.astrea.provider
 
 import io.imulab.astrea.domain.request.IntrospectRequest
 import io.imulab.astrea.domain.response.IntrospectResponse
+import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.HttpResponseWriter
 
@@ -12,7 +13,7 @@ interface IntrospectionProvider {
     /**
      * Initiate and create an introspection request.
      */
-    fun newIntrospectRequest(reader: HttpRequestReader): IntrospectRequest
+    fun newIntrospectRequest(reader: HttpRequestReader, session: Session): IntrospectRequest
 
     /**
      * Conducts introspection and returns result of the introspection.

@@ -8,6 +8,7 @@ import io.imulab.astrea.crypt.SigningAlgorithm
 import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.*
+import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse

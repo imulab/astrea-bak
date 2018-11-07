@@ -1,6 +1,9 @@
 package io.imulab.astrea.domain.extension
 
 import io.imulab.astrea.error.RequestParameterMissingException
+import org.jose4j.jwt.NumericDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
  * Requires the list of iterable provided by [this] be contained in the collection named [universe].
@@ -34,4 +37,8 @@ fun String?.requireNotNullOrEmpty(
         throw RequestParameterMissingException(parameterName)
                 .let { if (exceptionEnhancer != null) exceptionEnhancer(it) else it }
     return this
+}
+
+fun NumericDate.toLocalDateTime(): LocalDateTime {
+    return LocalDateTime.ofEpochSecond(this.value, 0, ZoneOffset.UTC)
 }

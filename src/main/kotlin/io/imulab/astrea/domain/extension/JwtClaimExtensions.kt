@@ -57,3 +57,9 @@ fun JwtClaims.setNonce(nonce: String) {
 fun JwtClaims.setScopes(scopes: List<Scope>) {
     this.setStringListClaim(PARAM_SCOPE, scopes)
 }
+
+fun JwtClaims.getScopes(): List<Scope> {
+    return if (this.hasClaim(PARAM_SCOPE))
+        this.getStringListClaimValue(PARAM_SCOPE)
+    else emptyList()
+}

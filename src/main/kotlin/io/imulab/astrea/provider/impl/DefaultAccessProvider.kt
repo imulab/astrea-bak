@@ -6,7 +6,7 @@ import io.imulab.astrea.domain.PARAM_GRANT_TYPE
 import io.imulab.astrea.domain.PARAM_SCOPE
 import io.imulab.astrea.domain.SPACE
 import io.imulab.astrea.domain.request.AccessRequest
-import io.imulab.astrea.domain.request.DefaultAccessRequest
+import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.Session
