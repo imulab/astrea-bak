@@ -28,3 +28,10 @@ open class InvalidGrantException(grant: String, reason: String)
 
     class BadSignature(grant: String) : InvalidGrantException(grant, "Its signature does not match the grant.")
 }
+
+/**
+ * Thrown when PKCE code challenge verification fails.
+ */
+class CodeChallengeException : OAuthException("invalid_grant", "Code challenge failed verification.") {
+    override fun statusCode(): Int = 400
+}

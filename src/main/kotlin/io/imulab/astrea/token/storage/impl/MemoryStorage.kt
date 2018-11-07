@@ -24,7 +24,8 @@ class MemoryStorage :
         AccessTokenStorage,
         RefreshTokenStorage,
         TokenRevocationStorage,
-        OpenIdConnectRequestStorage {
+        OpenIdConnectRequestStorage,
+        PkceSessionStorage {
 
     // start: AuthorizeCodeStorage -------------------------------------------------------------------------------------
 
@@ -159,11 +160,29 @@ class MemoryStorage :
 
     // end: OpenIdConnectRequestStorage --------------------------------------------------------------------------------
 
+    // start: PkceSessionStorage ---------------------------------------------------------------------------------------
+
+    override fun getPkceSession(authorizeCode: AuthorizeCode, session: Session): OAuthRequest {
+        return this.authorizeCodePkceMap[authorizeCode.signature]
+                ?: throw InvalidGrantException.NotFound(authorizeCode.code)
+    }
+
+    override fun createPkceSession(authorizeCode: AuthorizeCode, request: OAuthRequest) {
+        this.authorizeCodePkceMap[authorizeCode.signature] = request
+    }
+
+    override fun deletePkceSession(authorizeCode: AuthorizeCode) {
+        this.authorizeCodePkceMap.remove(authorizeCode.signature)
+    }
+
+    // end: PkceSessionStorage -----------------------------------------------------------------------------------------
+
     // start: test utilities -------------------------------------------------------------------------------------------
 
     fun clearAuthorizeCodes() {
         this.authorizeCodeMap.clear()
         this.authorizeCodeToOidcMap.clear()
+        this.authorizeCodePkceMap.clear()
     }
 
     fun clearAccessTokens() {
@@ -221,6 +240,7 @@ class MemoryStorage :
     private val accessTokenToRequestIdMap: MutableMap<String, AccessTokenSession> = hashMapOf()
     private val refreshTokenToRequestIdMap: MutableMap<String, RefreshTokenSession> = hashMapOf()
     private val authorizeCodeToOidcMap: MutableMap<String, OAuthRequest> = hashMapOf()
+    private val authorizeCodePkceMap: MutableMap<String, OAuthRequest> = hashMapOf()
 
     private class AuthorizeCodeSession(val code: AuthorizeCode, val request: OAuthRequest, var active: Boolean)
     private class AccessTokenSession(val token: AccessToken, val request: OAuthRequest, var active: Boolean)

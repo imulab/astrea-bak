@@ -26,8 +26,12 @@ inline fun <reified T : Any> Iterable<T>.mustBeIn(
 }
 
 // utility extension to allow fluent string checking
-fun String?.requireNotNullOrEmpty(parameterName: String): String {
+fun String?.requireNotNullOrEmpty(
+        parameterName: String,
+        exceptionEnhancer: ((RequestParameterMissingException) -> Throwable)? = null
+): String {
     if (this == null || this.isEmpty())
         throw RequestParameterMissingException(parameterName)
+                .let { if (exceptionEnhancer != null) exceptionEnhancer(it) else it }
     return this
 }

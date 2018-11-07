@@ -62,11 +62,17 @@ open class RequestParameterInvalidValueException(parameterName: String, value: S
     class InvalidPrompt(value: String)
         : RequestParameterInvalidValueException(PARAM_PROMPT, value)
 
+    class InvalidCodeChallengeMethod(value: String)
+        : RequestParameterInvalidValueException(PARAM_CODE_CHALLENGE_METHOD, value)
+
     class StateInsufficientEntropy(value: String, minimumEntropy: Int)
         : RequestParameterInvalidValueException(PARAM_STATE, value, "State entropy is less than $minimumEntropy.")
 
     class NonceInsufficientEntropy(value: String, minimumEntropy: Int)
         : RequestParameterInvalidValueException(PARAM_NONCE, value, "Nonce entropy is less than $minimumEntropy.")
+
+    class CodeVerifierInsufficientEntropy(minimumEntropy: Int)
+        : RequestParameterInvalidValueException(PARAM_CODE_VERIFIER, "<redacted>", "Code verifier entropy is less than $minimumEntropy.")
 
     class InsecureRedirectUri(uri: String)
         : RequestParameterInvalidValueException(PARAM_REDIRECT_URI, uri, "Redirect URI '$uri' is not using HTTPS or 127.0.0.1 as host.")
@@ -82,6 +88,9 @@ open class RequestParameterInvalidValueException(parameterName: String, value: S
 
     class MalformedRedirectUri(uri: String, reason: String)
         : RequestParameterInvalidValueException(PARAM_REDIRECT_URI, uri, reason)
+
+    class UnsupportedCodeChallengeMethod(disallow: CodeChallengeMethod)
+        : RequestParameterInvalidValueException(PARAM_CODE_CHALLENGE_METHOD, disallow.specValue, "This code challenge method is not allowed by server.")
 }
 
 /**
