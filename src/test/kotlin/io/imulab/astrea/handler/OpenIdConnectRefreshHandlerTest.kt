@@ -10,7 +10,7 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultOidcSession
-import io.imulab.astrea.handler.impl.OpenIdConnectRefreshHandler
+import io.imulab.astrea.handler.flow.OpenIdConnectRefreshHandler
 import io.imulab.astrea.token.strategy.impl.JwtIdTokenStrategy
 import org.jose4j.jwk.JsonWebKeySet
 import org.jose4j.jwk.RsaJsonWebKey

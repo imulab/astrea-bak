@@ -12,7 +12,7 @@ import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.InvalidScopeException
 import io.imulab.astrea.error.UnauthorizedClientException
-import io.imulab.astrea.handler.impl.OAuthImplicitHandler
+import io.imulab.astrea.handler.flow.OAuthImplicitHandler
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy

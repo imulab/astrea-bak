@@ -15,7 +15,7 @@ import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.InvalidGrantException
-import io.imulab.astrea.handler.impl.OAuthAuthorizeCodeHandler
+import io.imulab.astrea.handler.flow.OAuthAuthorizeCodeHandler
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy

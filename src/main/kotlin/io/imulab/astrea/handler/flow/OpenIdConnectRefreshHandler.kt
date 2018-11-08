@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.impl
+package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.GrantType
 import io.imulab.astrea.domain.SCOPE_OPENID

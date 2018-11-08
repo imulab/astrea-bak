@@ -1,14 +1,12 @@
-package io.imulab.astrea.handler.impl
+package io.imulab.astrea.handler.flow
 
 import io.imulab.astrea.domain.*
-import io.imulab.astrea.domain.extension.containsAny
-import io.imulab.astrea.domain.extension.mustAcceptAll
-import io.imulab.astrea.domain.extension.setRefreshToken
+import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.response.AccessResponse
-import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.error.InvalidScopeException
 import io.imulab.astrea.handler.TokenEndpointHandler
+import io.imulab.astrea.spi.user.ResourceOwnerAuthenticator
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.storage.RefreshTokenStorage
@@ -18,17 +16,18 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAmount
 
-class OAuthClientCredentialsHandler(
+class OAuthResourceOwnerHandler(
         private val scopeStrategy: ScopeStrategy,
-        private val accessTokenLifespan: TemporalAmount = Duration.ofMinutes(30),
+        private val resourceOwnerAuthenticator: ResourceOwnerAuthenticator,
         private val accessTokenStrategy: AccessTokenStrategy,
         private val accessTokenStorage: AccessTokenStorage,
+        private val accessTokenLifespan: TemporalAmount = Duration.ofMinutes(30),
         private val refreshTokenStrategy: RefreshTokenStrategy,
         private val refreshTokenStorage: RefreshTokenStorage
 ) : TokenEndpointHandler {
 
     override fun supports(request: AccessRequest): Boolean =
-            request.getGrantTypes().exactly(GrantType.ClientCredentials)
+            request.getGrantTypes().exactly(GrantType.Password)
 
     override fun handleAccessRequest(request: AccessRequest) {
         if (!supports(request))
@@ -37,17 +36,23 @@ class OAuthClientCredentialsHandler(
         requireNotNull(request.getSession()) { "session must not be null." }
 
         request.getClient().run {
-            if (isPublic())
-                throw InvalidClientException.PublicClient()
-
-            mustGrantType(GrantType.ClientCredentials)
+            mustGrantType(GrantType.Password)
 
             getScopes().mustAcceptAll(request.getRequestScopes(), scopeStrategy) { e ->
                 InvalidScopeException.NotAcceptedByClient(e.scope)
             }
         }
 
-        // set expiry
+        // authenticate user
+        resourceOwnerAuthenticator.authenticate(
+                request.getUsername().requireNotNullOrEmpty(PARAM_USERNAME),
+                request.getPassword().requireNotNullOrEmpty(PARAM_PASSWORD)
+        )
+
+        // clear password so we don't accidentally save it
+        request.removePassword()
+
+        // set access token expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
     }
 

@@ -9,7 +9,7 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
-import io.imulab.astrea.handler.impl.OAuthResourceOwnerHandler
+import io.imulab.astrea.handler.flow.OAuthResourceOwnerHandler
 import io.imulab.astrea.spi.user.ResourceOwnerAuthenticator
 import io.imulab.astrea.spi.user.UserAuthenticationException
 import io.imulab.astrea.token.storage.impl.MemoryStorage

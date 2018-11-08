@@ -11,7 +11,7 @@ import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.InvalidGrantException
-import io.imulab.astrea.handler.impl.OAuthRefreshHandler
+import io.imulab.astrea.handler.flow.OAuthRefreshHandler
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.storage.impl.MemoryStorage

@@ -13,7 +13,7 @@ import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.CodeChallengeException
 import io.imulab.astrea.error.RequestParameterInvalidValueException
-import io.imulab.astrea.handler.impl.OAuthPkceHandler
+import io.imulab.astrea.handler.flow.OAuthPkceHandler
 import io.imulab.astrea.handler.validator.DisallowPkceValidator
 import io.imulab.astrea.handler.validator.PkceValidator
 import io.imulab.astrea.handler.validator.PlainPkceValidator

@@ -14,9 +14,9 @@ import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.impl.DefaultOidcSession
-import io.imulab.astrea.handler.impl.OAuthImplicitHandler
-import io.imulab.astrea.handler.impl.OpenIdConnectAuthorizeCodeHandler
-import io.imulab.astrea.handler.impl.OpenIdConnectHybridHandler
+import io.imulab.astrea.handler.flow.OAuthImplicitHandler
+import io.imulab.astrea.handler.flow.OpenIdConnectAuthorizeCodeHandler
+import io.imulab.astrea.handler.flow.OpenIdConnectHybridHandler
 import io.imulab.astrea.handler.validator.OpenIdConnectRequestValidator
 import io.imulab.astrea.token.AuthorizeCode
 import io.imulab.astrea.token.storage.impl.MemoryStorage

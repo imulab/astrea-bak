@@ -10,7 +10,7 @@ import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAccessResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.UnauthorizedClientException
-import io.imulab.astrea.handler.impl.OAuthClientCredentialsHandler
+import io.imulab.astrea.handler.flow.OAuthClientCredentialsHandler
 import io.imulab.astrea.token.storage.RefreshTokenStorage
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
