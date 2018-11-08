@@ -22,7 +22,7 @@ interface RevocationEndpointHandler {
 
     private class PrioritizingRevocationEndpointHandler(
             private val delegates: List<RevocationEndpointHandler>
-    ): RevocationEndpointHandler {
+    ) : RevocationEndpointHandler {
         override fun supports(tokenType: TokenType): Boolean =
                 this.delegates.any { it.supports(tokenType) }
 
@@ -33,7 +33,9 @@ interface RevocationEndpointHandler {
                     o2.supports(request.getTokenType()) -> -1
                     else -> 0
                 }
-            }).find { it.revokeToken(request) }?.let { true } ?: false
+            }).filter { it.supports(request.getTokenType()) }
+                    .find { it.revokeToken(request) }
+                    ?.let { true } ?: false
         }
     }
 }

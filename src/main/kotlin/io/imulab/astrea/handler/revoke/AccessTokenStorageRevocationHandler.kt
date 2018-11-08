@@ -13,7 +13,7 @@ class AccessTokenStorageRevocationHandler(
         private val accessTokenStrategy: AccessTokenStrategy,
         private val accessTokenStorage: AccessTokenStorage,
         private val tokenRevocationStorage: TokenRevocationStorage
-): RevocationEndpointHandler {
+) : RevocationEndpointHandler {
 
     override fun supports(tokenType: TokenType): Boolean =
             tokenType == TokenType.AccessToken || tokenType == TokenType.Unknown

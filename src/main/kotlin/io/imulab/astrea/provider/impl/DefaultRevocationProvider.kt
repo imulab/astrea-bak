@@ -21,7 +21,7 @@ class DefaultRevocationProvider(
         private val clientAuthenticator: ClientAuthenticator,
         private val handler: RevocationEndpointHandler,
         private val jsonEncoder: JsonEncoder
-): RevocationProvider {
+) : RevocationProvider {
 
     override fun revoke(reader: HttpRequestReader) {
         require(reader.method().toUpperCase() == "POST")
@@ -67,5 +67,5 @@ class DefaultRevocationProvider(
     }
 
     // internal exception used as communication signal, not expected to be used elsewhere.
-    private object RevocationDidNotSucceedException: RuntimeException()
+    private object RevocationDidNotSucceedException : RuntimeException()
 }

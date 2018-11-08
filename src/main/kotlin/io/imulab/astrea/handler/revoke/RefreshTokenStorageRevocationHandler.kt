@@ -13,7 +13,7 @@ class RefreshTokenStorageRevocationHandler(
         private val refreshTokenStrategy: RefreshTokenStrategy,
         private val refreshTokenStorage: RefreshTokenStorage,
         private val tokenRevocationStorage: TokenRevocationStorage
-): RevocationEndpointHandler {
+) : RevocationEndpointHandler {
 
     override fun supports(tokenType: TokenType): Boolean =
             tokenType == TokenType.RefreshToken || tokenType == TokenType.Unknown

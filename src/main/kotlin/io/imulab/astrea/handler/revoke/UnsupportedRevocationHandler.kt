@@ -7,7 +7,7 @@ import io.imulab.astrea.handler.RevocationEndpointHandler
 
 class UnsupportedRevocationHandler(
         private val unsupported: List<TokenType> = emptyList()
-): RevocationEndpointHandler {
+) : RevocationEndpointHandler {
 
     override fun supports(tokenType: TokenType): Boolean = unsupported.contains(tokenType)
 
