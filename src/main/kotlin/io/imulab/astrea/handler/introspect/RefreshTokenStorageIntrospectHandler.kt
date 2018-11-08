@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.impl
+package io.imulab.astrea.handler.introspect
 
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.AccessRequest

@@ -21,8 +21,8 @@ import io.imulab.astrea.domain.response.IntrospectResponse
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.handler.IntrospectEndpointHandler
-import io.imulab.astrea.handler.impl.AccessTokenJwtIntrospectHandler
-import io.imulab.astrea.handler.impl.RefreshTokenStorageIntrospectHandler
+import io.imulab.astrea.handler.introspect.AccessTokenJwtIntrospectHandler
+import io.imulab.astrea.handler.introspect.RefreshTokenStorageIntrospectHandler
 import io.imulab.astrea.provider.IntrospectionProvider
 import io.imulab.astrea.provider.impl.DefaultIntrospectionProvider
 import io.imulab.astrea.spi.http.HttpRequestReader

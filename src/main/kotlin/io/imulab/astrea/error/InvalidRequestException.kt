@@ -94,6 +94,9 @@ open class RequestParameterInvalidValueException(parameterName: String, value: S
 
     class UnsupportedCodeChallengeMethod(disallow: CodeChallengeMethod)
         : RequestParameterInvalidValueException(PARAM_CODE_CHALLENGE_METHOD, disallow.specValue, "This code challenge method is not allowed by server.")
+
+    class UnsupportedTokenType(tokenType: TokenType)
+        : RequestParameterInvalidValueException(PARAM_TOKEN_TYPE, tokenType.specValue, "Operation on this token type is not supported by server.")
 }
 
 /**

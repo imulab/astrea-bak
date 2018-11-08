@@ -1,4 +1,4 @@
-package io.imulab.astrea.handler.impl
+package io.imulab.astrea.handler.introspect
 
 import io.imulab.astrea.client.DefaultOAuthClient
 import io.imulab.astrea.crypt.JwtRs256

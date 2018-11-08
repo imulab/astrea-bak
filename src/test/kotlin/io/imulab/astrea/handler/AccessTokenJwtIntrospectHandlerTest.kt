@@ -7,7 +7,7 @@ import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.extension.setScopes
 import io.imulab.astrea.domain.request.impl.DefaultIntrospectRequest
 import io.imulab.astrea.domain.session.impl.DefaultSession
-import io.imulab.astrea.handler.impl.AccessTokenJwtIntrospectHandler
+import io.imulab.astrea.handler.introspect.AccessTokenJwtIntrospectHandler
 import org.jose4j.jwk.RsaJsonWebKey
 import org.jose4j.jwk.RsaJwkGenerator
 import org.jose4j.jwk.Use
