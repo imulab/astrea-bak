@@ -8,7 +8,6 @@ import io.imulab.astrea.domain.response.impl.DefaultIntrospectResponse
 import io.imulab.astrea.handler.IntrospectEndpointHandler
 import io.imulab.astrea.token.storage.AccessTokenStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
-import java.lang.Exception
 
 /**
  * Implementation of [IntrospectEndpointHandler] that reads access token information from [AccessTokenStorage].

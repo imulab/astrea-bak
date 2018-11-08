@@ -15,6 +15,11 @@ open class InvalidClientException(reason: String) : OAuthException("invalid_clie
     override fun statusCode(): Int = 401
 
     /**
+     * Thrown when client is not found.
+     */
+    class NotFound : InvalidClientException("Client not found.")
+
+    /**
      * Thrown when neither Json Web Keys nor Json Web Keys URI was registered.
      */
     class JwkNotFound : InvalidClientException("Client did not register either json web key or json web key URI.")

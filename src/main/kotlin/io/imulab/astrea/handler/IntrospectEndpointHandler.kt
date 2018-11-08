@@ -31,7 +31,7 @@ interface IntrospectEndpointHandler {
      * sooner. In the worst case, all delegates are visited. If still not found, it will return a [IntrospectResponse]
      * with [IntrospectResponse.isActive] set to false.
      */
-    private class PrioritizingIntrospectEndpointHandler(private val delegates: List<IntrospectEndpointHandler>): IntrospectEndpointHandler {
+    private class PrioritizingIntrospectEndpointHandler(private val delegates: List<IntrospectEndpointHandler>) : IntrospectEndpointHandler {
 
         override fun inspects(): Collection<TokenType> {
             return delegates.flatMap { it.inspects() }.toSet()

@@ -3,7 +3,6 @@ package io.imulab.astrea.token.strategy.impl
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.DOT
 import io.imulab.astrea.domain.TokenType
-import io.imulab.astrea.domain.extension.getUsername
 import io.imulab.astrea.domain.extension.setScopes
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.JwtSession
@@ -11,6 +10,7 @@ import io.imulab.astrea.domain.session.assertType
 import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
+import org.jose4j.jwt.ReservedClaimNames
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -41,7 +41,8 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
 
         session.getJwtClaims().also {
             it.setGeneratedJwtId()
-            it.subject = session.getUsername()
+            if (!it.hasClaim(ReservedClaimNames.SUBJECT))
+                it.subject = session.getUsername()
             it.issuer = issuer
             it.audience = listOf(request.getClient().getId())
             it.setIssuedAtToNow()

@@ -7,8 +7,8 @@ import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.setCodeAsQuery
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
-import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
+import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.CodeChallengeException

@@ -1,7 +1,6 @@
 package io.imulab.astrea.domain.request
 
 import io.imulab.astrea.client.OAuthClient
-import io.imulab.astrea.domain.Scope
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.session.Session
 

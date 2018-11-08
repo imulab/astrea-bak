@@ -1,7 +1,6 @@
 package io.imulab.astrea.client
 
 import io.imulab.astrea.client.auth.ClientBearerPreIntrospectionAuthenticator
-import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.PARAM_TOKEN
 import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.error.InvalidClientException
@@ -9,9 +8,6 @@ import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
-import org.jose4j.jwk.RsaJsonWebKey
-import org.jose4j.jwk.RsaJwkGenerator
-import org.jose4j.jwk.Use
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows

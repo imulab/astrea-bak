@@ -54,11 +54,8 @@ interface ClientAuthenticator {
         override fun supports(reader: HttpRequestReader): Boolean = true
 
         override fun authenticate(reader: HttpRequestReader): OAuthClient {
-            for (authenticator in chain) {
-                if (authenticator.supports(reader))
-                    return authenticator.authenticate(reader)
-            }
-            throw InvalidClientException.AuthenticationFailed("No authenticator can handle request.")
+            return chain.find { it.supports(reader) }?.authenticate(reader)
+                    ?: throw InvalidClientException.AuthenticationFailed("No authenticator can handle request.")
         }
     }
 }
