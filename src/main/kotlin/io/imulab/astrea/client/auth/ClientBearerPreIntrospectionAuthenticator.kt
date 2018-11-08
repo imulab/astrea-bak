@@ -4,6 +4,7 @@ import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.domain.PARAM_TOKEN
 import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.InvalidClientException
+import io.imulab.astrea.handler.IntrospectEndpointHandler
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.token.storage.AccessTokenStorage
