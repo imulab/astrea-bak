@@ -3,6 +3,7 @@ package io.imulab.astrea.token.strategy.impl
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.DOT
 import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.extension.getUsername
 import io.imulab.astrea.domain.extension.setScopes
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.JwtSession
@@ -40,6 +41,7 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
 
         session.getJwtClaims().also {
             it.setGeneratedJwtId()
+            it.subject = session.getUsername()
             it.issuer = issuer
             it.audience = listOf(request.getClient().getId())
             it.setIssuedAtToNow()

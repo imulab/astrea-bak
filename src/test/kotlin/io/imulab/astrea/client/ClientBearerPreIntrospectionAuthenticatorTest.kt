@@ -79,15 +79,6 @@ class ClientBearerPreIntrospectionAuthenticatorTest {
 
     private object TestContext {
 
-        private val testJwk: RsaJsonWebKey by lazy {
-            RsaJwkGenerator.generateJwk(2048).also {
-                it.use = Use.SIGNATURE
-                it.keyId = "test-key"
-            }
-        }
-
-        val jwtRs256 = JwtRs256(testJwk)
-
         val memoryStorage by lazy { MemoryStorage() }
 
         val token1 = AccessToken("token_1", "sig_1")
