@@ -69,4 +69,15 @@ object RequestSupport {
     ): AccessRequest {
         return newAccessRequest(form, grantTypes, scopes, grantedScopes, session, client)
     }
+
+    fun newAccessRequestForImplicitFlow(
+            form: UrlValues = emptyMap(),
+            grantTypes: Set<GrantType> = setOf(GrantType.Implicit),
+            scopes: Set<Scope> = setOf("foo", "bar", SCOPE_OFFLINE),
+            grantedScopes: Set<Scope> = setOf("foo", SCOPE_OFFLINE),
+            session: Session? = DefaultJwtSession(claims = JwtClaims().also { it.setGeneratedJwtId() }),
+            client: OAuthClient = ClientSupport.foo()
+    ): AccessRequest {
+        return newAccessRequest(form, grantTypes, scopes, grantedScopes, session, client)
+    }
 }
