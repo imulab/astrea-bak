@@ -6,6 +6,7 @@ import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.Scope
 import io.imulab.astrea.domain.TokenType
+import io.imulab.astrea.domain.extension.setScopes
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
@@ -32,7 +33,7 @@ object TokenSupport {
                 scopes: List<Scope> = listOf("foo"),
                 grantedScopes: List<Scope> = listOf("foo"),
                 client: OAuthClient = ClientSupport.foo(),
-                jwtClaims: JwtClaims = JwtClaims(),
+                jwtClaims: JwtClaims = JwtClaims().also { it.setScopes(grantedScopes) },
                 jwtHeaders: Map<String, String> = emptyMap(),
                 expiry: LocalDateTime = LocalDateTime.now().plusHours(1)
         ): io.imulab.astrea.token.AccessToken {

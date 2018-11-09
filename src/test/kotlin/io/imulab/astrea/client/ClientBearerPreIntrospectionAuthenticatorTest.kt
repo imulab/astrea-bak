@@ -3,8 +3,12 @@ package io.imulab.astrea.client
 import io.imulab.astrea.client.auth.ClientBearerPreIntrospectionAuthenticator
 import io.imulab.astrea.domain.PARAM_TOKEN
 import io.imulab.astrea.domain.request.AccessRequest
+import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
 import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.spi.http.HttpRequestReader
+import io.imulab.astrea.support.ClientSupport
+import io.imulab.astrea.support.HttpSupport
+import io.imulab.astrea.support.TokenSupport
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.storage.impl.MemoryStorage
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
@@ -25,19 +29,24 @@ class ClientBearerPreIntrospectionAuthenticatorTest {
                     Mockito.`when`(it.getClient()).thenReturn(DefaultOAuthClient("c1", ByteArray(0)))
                 }
         )
+
+        ctx.memoryStorage.createAccessTokenSession(
+                ctx.tokenOne,
+                DefaultAccessRequest.Builder().also {
+                    it.client = ClientSupport.foo()
+                }.build()
+        )
     }
 
     @Test
     fun `introspect token and bearer access token cannot be one`() {
-        val request = Mockito.mock(HttpRequestReader::class.java).also {
-            Mockito.`when`(it.getHeader("Authorization")).thenReturn("Bearer token_1")
-            Mockito.`when`(it.getForm()).thenReturn(mapOf(
-                    PARAM_TOKEN to listOf("token_1")
-            ))
-        }
+        val req = HttpSupport.request(
+                headers = mapOf("Authorization" to "Bearer ${ctx.tokenOne.token}"),
+                forms = mapOf(PARAM_TOKEN to listOf(ctx.tokenOne.token))
+        )
 
         assertThrows(InvalidClientException.AuthenticationFailed::class.java) {
-            TestContext.clientAuthenticator.authenticate(request)
+            ctx.authenticator.authenticate(req)
         }
     }
 
@@ -71,6 +80,21 @@ class ClientBearerPreIntrospectionAuthenticatorTest {
     @AfterEach
     fun cleanUp() {
         TestContext.memoryStorage.clearAll()
+        ctx.memoryStorage.clearAll()
+    }
+
+    private object ctx {
+        val memoryStorage by lazy { MemoryStorage() }
+
+        val tokenOne = TokenSupport.AccessToken.new()
+        val tokenTwo = TokenSupport.AccessToken.new()
+
+        val strategy: AccessTokenStrategy = TokenSupport.AccessToken.defaultStrategy
+
+        val authenticator = ClientBearerPreIntrospectionAuthenticator(
+                accessTokenStorage = memoryStorage,
+                accessTokenStrategy = strategy
+        )
     }
 
     private object TestContext {
