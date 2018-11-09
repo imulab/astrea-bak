@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets
 
 object ClientSupport {
 
-    private const val OPEN_SECRET = "s3cret"
+    const val OPEN_SECRET = "s3cret"
     const val OPEN_CALLBACK = "https://test.com/callback"
     private const val OPEN_REQUEST_URI = "https://test.com/request"
     private const val OPEN_JWK_ID = "default-jwk"
