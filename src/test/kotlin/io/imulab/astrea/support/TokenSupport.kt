@@ -18,6 +18,7 @@ import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
+import java.security.Key
 import java.time.LocalDateTime
 
 object TokenSupport {
@@ -97,9 +98,22 @@ object TokenSupport {
     fun customJwt(issuer: String = ISSUER,
                   subject: String = "developer",
                   audience: String = "test-case",
-                  claimsModifier: (JwtClaims) -> Unit = {}): String {
-        return JsonWebSignature().also {
-            it.payload = JwtClaims().also {
+                  claimsModifier: (JwtClaims) -> Unit = {},
+                  keyId: String = KeySupport.defaultJwk.keyId,
+                  key: Key = KeySupport.defaultJwk.rsaPrivateKey,
+                  alg: String = AlgorithmIdentifiers.RSA_USING_SHA256): String {
+        return customJws(issuer, subject, audience, claimsModifier, keyId, key, alg).compactSerialization
+    }
+
+    fun customJws(issuer: String = ISSUER,
+                  subject: String = "developer",
+                  audience: String = "test-case",
+                  claimsModifier: (JwtClaims) -> Unit = {},
+                  keyId: String = KeySupport.defaultJwk.keyId,
+                  key: Key = KeySupport.defaultJwk.rsaPrivateKey,
+                  alg: String = AlgorithmIdentifiers.RSA_USING_SHA256): JsonWebSignature {
+        return JsonWebSignature().also { jws ->
+            jws.payload = JwtClaims().also {
                 it.setGeneratedJwtId()
                 it.issuer = issuer
                 it.subject = subject
@@ -107,9 +121,9 @@ object TokenSupport {
                 it.setIssuedAtToNow()
                 it.setExpirationTimeMinutesInTheFuture(10f)
             }.also(claimsModifier).toJson()
-            it.keyIdHeaderValue = KeySupport.defaultJwk.keyId
-            it.key = KeySupport.defaultJwk.rsaPrivateKey
-            it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
-        }.compactSerialization
+            jws.keyIdHeaderValue = keyId
+            jws.key = key
+            jws.algorithmHeaderValue = alg
+        }
     }
 }
