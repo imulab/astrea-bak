@@ -11,6 +11,8 @@ import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.strategy.AccessTokenStrategy
 import org.jose4j.jwt.ReservedClaimNames
+import org.jose4j.jwt.consumer.ErrorCodes
+import org.jose4j.jwt.consumer.InvalidJwtException
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -70,8 +72,19 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
             it.setRequireIssuedAt()
             it.setRequireExpirationTime()
         }
-        if (t != null)
-            throw InvalidGrantException(token, t.message ?: "Failed to validate access token.")
+
+        when (t) {
+            null -> return
+            is InvalidJwtException -> {
+                when {
+                    t.errorDetails.any { it.errorCode == ErrorCodes.EXPIRED } -> throw InvalidGrantException.Expired(token)
+                    t.errorDetails.any{ it.errorCode == ErrorCodes.SIGNATURE_INVALID } -> throw InvalidGrantException.BadSignature(token)
+                    else -> throw InvalidGrantException.BadFormat(token)
+                }
+            }
+            else -> throw InvalidGrantException(token, t.message ?: "Failed to validate access token.")
+        }
+
     }
 
     private fun requireThreeParts(raw: String): List<String> {

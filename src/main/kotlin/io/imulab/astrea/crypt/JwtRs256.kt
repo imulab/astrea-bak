@@ -50,8 +50,6 @@ class JwtRs256(private val jwk: RsaJsonWebKey) {
      * Returns a [Throwable] if any exception occurs; otherwise null.
      */
     fun validate(jwt: String, extraCriteria: (JwtConsumerBuilder) -> Unit = {}): Throwable? {
-        AlgorithmIdentifiers.RSA_USING_SHA256
-
         return try {
             decode(jwt, extraCriteria); null
         } catch (t: Throwable) {
