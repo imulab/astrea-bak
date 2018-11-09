@@ -27,7 +27,8 @@ dependencies {
             "jBCrypt" to "0.4",
             "apacheHttpClient" to "4.5.6",
             "klaxon" to "3.0.1",
-            "spek" to "2.0.0-rc.1"
+            "spek" to "2.0.0-rc.1",
+            "assertj" to "3.11.1"
     )
 
     implementation(kotlin("stdlib-jdk8"))
@@ -46,6 +47,7 @@ dependencies {
         exclude(group = "org.junit.platform")
         exclude(group = "org.jetbrains.kotlin")
     }
+    testImplementation("org.assertj:assertj-core:${versions["assertj"]}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${versions["junitPlatform"]}")
     testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:${versions["kotlin"]}")
 }
