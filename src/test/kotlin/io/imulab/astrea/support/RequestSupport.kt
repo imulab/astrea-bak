@@ -10,6 +10,7 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
+import io.imulab.astrea.domain.session.JwtSession
 import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession
@@ -44,13 +45,28 @@ object RequestSupport {
 
     fun newAccessRequest(form: UrlValues = emptyMap(),
                          grantTypes: Set<GrantType> = setOf(GrantType.AuthorizationCode),
+                         scopes: Set<Scope> = setOf("foo", "bar", SCOPE_OFFLINE),
+                         grantedScopes: Set<Scope> = setOf("foo", SCOPE_OFFLINE),
                          session: Session? = null,
                          client: OAuthClient = ClientSupport.foo()): AccessRequest {
         return DefaultAccessRequest.Builder().also {
             it.setForm(form)
             it.addGrantType(grantTypes.toList())
+            it.scopes.addAll(scopes)
+            it.grantedScopes.addAll(grantedScopes)
             it.session = session ?: DefaultSession()
             it.client = client
         }.build() as AccessRequest
+    }
+
+    fun newAccessRequestForClientCredentialsFlow(
+            form: UrlValues = emptyMap(),
+            grantTypes: Set<GrantType> = setOf(GrantType.ClientCredentials),
+            scopes: Set<Scope> = setOf("foo", "bar", SCOPE_OFFLINE),
+            grantedScopes: Set<Scope> = setOf("foo", SCOPE_OFFLINE),
+            session: Session? = DefaultJwtSession(claims = JwtClaims().also { it.setGeneratedJwtId() }),
+            client: OAuthClient = ClientSupport.foo()
+    ): AccessRequest {
+        return newAccessRequest(form, grantTypes, scopes, grantedScopes, session, client)
     }
 }
