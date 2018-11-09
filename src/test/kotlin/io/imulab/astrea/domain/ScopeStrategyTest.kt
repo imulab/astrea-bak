@@ -11,10 +11,7 @@ class ScopeStrategyTest {
         @JvmStatic
         fun hierarchicalTestSource() = listOf(
                 Arguments.of("book", "book", true),
-                Arguments.of("book", "pen", false),
-                Arguments.of("book", "book.read", false),
                 Arguments.of("book.*", "book.read", true),
-                Arguments.of("book.read", "book", false),
                 Arguments.of("book.123.*", "book.123.read", true)
         )
     }
