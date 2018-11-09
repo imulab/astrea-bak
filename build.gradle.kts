@@ -1,3 +1,4 @@
+import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
