@@ -16,67 +16,67 @@ import org.spekframework.spek2.style.specification.describe
 
 object ClientBearerAuthenticatorSpec : Spek({
 
-    describe("""
-        Spec for ${ClientBearerPreIntrospectionAuthenticator::class.java.simpleName}
-    """.trimIndent()) {
-        val memoryStorage = MemoryStorage()
-        val strategy: AccessTokenStrategy = TokenSupport.AccessToken.defaultStrategy
-        val authenticator = ClientBearerPreIntrospectionAuthenticator(
-                accessTokenStorage = memoryStorage,
-                accessTokenStrategy = strategy
-        )
+    val memoryStorage = MemoryStorage()
+    val strategy: AccessTokenStrategy = TokenSupport.AccessToken.defaultStrategy
+    val authenticator = ClientBearerPreIntrospectionAuthenticator(
+            accessTokenStorage = memoryStorage,
+            accessTokenStrategy = strategy
+    )
 
-        describe("Authenticator should succeed") {
-            it ("""
-                when client has proper authentication
-            """.trimIndent()) {
-                val properToken = TokenSupport.AccessToken.new().also {
-                    memoryStorage.createAccessTokenSession(it, DefaultAccessRequest.Builder().also { b ->
-                        b.client = ClientSupport.foo()
-                    }.build())
-                }
-
-                assertThat(
-                        authenticator.authenticate(HttpSupport.request(
-                                headers = mapOf("Authorization" to "Bearer ${properToken.token}")
-                        ))
-                ).extracting { client ->
-                    client.getId()
-                }.isEqualTo(ClientSupport.foo().getId())
+    describe("Authenticator should succeed") {
+        it ("""
+            when client has proper authentication
+        """.trimIndent()) {
+            val properToken = TokenSupport.AccessToken.new().also {
+                memoryStorage.createAccessTokenSession(it, DefaultAccessRequest.Builder().also { b ->
+                    b.client = ClientSupport.foo()
+                }.build())
             }
+
+            assertThat(
+                    authenticator.authenticate(HttpSupport.request(
+                            headers = mapOf("Authorization" to "Bearer ${properToken.token}")
+                    ))
+            ).extracting { client ->
+                client.getId()
+            }.isEqualTo(ClientSupport.foo().getId())
         }
 
-        describe("Authenticator should throw exception") {
-            it("""
-                when client entailed by authentication and introspection is the same one.
-            """.trimIndent()) {
-                val token = TokenSupport.AccessToken.new().also {
-                    memoryStorage.createAccessTokenSession(it, DefaultAccessRequest.Builder().also { b ->
-                        b.client = ClientSupport.foo()
-                    }.build())
-                }
+        afterEach {
+            memoryStorage.clearAll()
+        }
+    }
 
-                assertThatThrownBy {
-                    authenticator.authenticate(HttpSupport.request(
-                            headers = mapOf("Authorization" to "Bearer ${token.token}"),
-                            forms = mapOf(PARAM_TOKEN to listOf(token.token))
-                    ))
-                }.isInstanceOf(InvalidClientException.AuthenticationFailed::class.java)
+    describe("Authenticator should throw exception") {
+        it("""
+            when client entailed by authentication and introspection is the same one.
+        """.trimIndent()) {
+            val token = TokenSupport.AccessToken.new().also {
+                memoryStorage.createAccessTokenSession(it, DefaultAccessRequest.Builder().also { b ->
+                    b.client = ClientSupport.foo()
+                }.build())
             }
 
-            it("""
-                when token is not in storage
-            """.trimIndent()) {
-                val tokenNotInStorage = TokenSupport.AccessToken.new()
-                val anotherToken = TokenSupport.AccessToken.new()
+            assertThatThrownBy {
+                authenticator.authenticate(HttpSupport.request(
+                        headers = mapOf("Authorization" to "Bearer ${token.token}"),
+                        forms = mapOf(PARAM_TOKEN to listOf(token.token))
+                ))
+            }.isInstanceOf(InvalidClientException.AuthenticationFailed::class.java)
+        }
 
-                assertThatThrownBy {
-                    authenticator.authenticate(HttpSupport.request(
-                            headers = mapOf("Authorization" to "Bearer ${tokenNotInStorage.token}"),
-                            forms = mapOf(PARAM_TOKEN to listOf(anotherToken.token))
-                    ))
-                }.isInstanceOf(InvalidClientException.AuthenticationFailed::class.java)
-            }
+        it("""
+            when token is not in storage
+        """.trimIndent()) {
+            val tokenNotInStorage = TokenSupport.AccessToken.new()
+            val anotherToken = TokenSupport.AccessToken.new()
+
+            assertThatThrownBy {
+                authenticator.authenticate(HttpSupport.request(
+                        headers = mapOf("Authorization" to "Bearer ${tokenNotInStorage.token}"),
+                        forms = mapOf(PARAM_TOKEN to listOf(anotherToken.token))
+                ))
+            }.isInstanceOf(InvalidClientException.AuthenticationFailed::class.java)
         }
 
         afterEach {

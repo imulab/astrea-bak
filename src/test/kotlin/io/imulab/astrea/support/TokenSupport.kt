@@ -15,6 +15,8 @@ import io.imulab.astrea.spi.http.UrlValues
 import io.imulab.astrea.token.strategy.impl.HmacAuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.impl.HmacRefreshTokenStrategy
 import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
+import org.jose4j.jws.AlgorithmIdentifiers
+import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
 import java.time.LocalDateTime
 
@@ -90,5 +92,24 @@ object TokenSupport {
                 it.session = DefaultSession()
             }.build())
         }
+    }
+
+    fun customJwt(issuer: String = ISSUER,
+                  subject: String = "developer",
+                  audience: String = "test-case",
+                  claimsModifier: (JwtClaims) -> Unit = {}): String {
+        return JsonWebSignature().also {
+            it.payload = JwtClaims().also {
+                it.setGeneratedJwtId()
+                it.issuer = issuer
+                it.subject = subject
+                it.setAudience(audience)
+                it.setIssuedAtToNow()
+                it.setExpirationTimeMinutesInTheFuture(10f)
+            }.also(claimsModifier).toJson()
+            it.keyIdHeaderValue = KeySupport.defaultJwk.keyId
+            it.key = KeySupport.defaultJwk.rsaPrivateKey
+            it.algorithmHeaderValue = AlgorithmIdentifiers.RSA_USING_SHA256
+        }.compactSerialization
     }
 }
