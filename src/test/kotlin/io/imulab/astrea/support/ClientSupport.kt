@@ -106,7 +106,7 @@ object ClientSupport {
             Mockito.`when`(manager.getClient(c.getId())).thenReturn(c)
             Mockito.`when`(manager.getClient(Mockito.argThat { id ->
                 !clients.map { it.getId() }.contains(id)
-            })).thenThrow(InvalidClientException.NotFound::class.java)
+            } ?: "")).thenThrow(InvalidClientException.NotFound::class.java)
         }
         return manager
     }

@@ -17,7 +17,7 @@ import org.spekframework.spek2.style.specification.describe
 object ClientBearerAuthenticatorSpec : Spek({
 
     describe("""
-        "Spec for ${ClientBearerPreIntrospectionAuthenticator::class.java.simpleName}"
+        Spec for ${ClientBearerPreIntrospectionAuthenticator::class.java.simpleName}
     """.trimIndent()) {
         val memoryStorage = MemoryStorage()
         val strategy: AccessTokenStrategy = TokenSupport.AccessToken.defaultStrategy
