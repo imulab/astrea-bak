@@ -2,10 +2,12 @@ package io.imulab.astrea.token.strategy.impl
 
 import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.domain.DOT
+import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.RefreshToken
 import io.imulab.astrea.token.strategy.RefreshTokenStrategy
+import java.time.LocalDateTime
 
 class HmacRefreshTokenStrategy(private val hmac: HmacSha256) : RefreshTokenStrategy {
 
@@ -37,6 +39,9 @@ class HmacRefreshTokenStrategy(private val hmac: HmacSha256) : RefreshTokenStrat
     }
 
     override fun validateRefreshToken(request: OAuthRequest, token: String) {
+        if (request.getSession()?.getExpiry(TokenType.RefreshToken)?.isBefore(LocalDateTime.now()) == true)
+            throw InvalidGrantException.Expired(token)
+
         val parts = token.split(DOT)
         if (parts.size != 2)
             throw InvalidGrantException.BadFormat(token)

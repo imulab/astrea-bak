@@ -26,7 +26,7 @@ object HmacAuthorizeCodeStrategySpec : Spek({
         }
     }
 
-    describe("verify should succeed") {
+    describe("verify") {
 
         describe("should succeed") {
             it("""
