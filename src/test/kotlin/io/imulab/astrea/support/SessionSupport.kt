@@ -7,8 +7,10 @@ import java.time.LocalDateTime
 
 object SessionSupport {
 
-    fun default(expiry: Map<TokenType, LocalDateTime> = mapOf()): Session {
-        return DefaultSession().also {
+    fun default(username: String = "",
+                subject: String = "",
+                expiry: Map<TokenType, LocalDateTime> = mapOf()): Session {
+        return DefaultSession(username, subject).also {
             expiry.forEach { t, u -> it.setExpiry(t, u) }
         }
     }
