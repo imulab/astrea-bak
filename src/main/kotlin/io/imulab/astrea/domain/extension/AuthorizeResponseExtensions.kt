@@ -52,6 +52,10 @@ fun AuthorizeResponse.setStateAsQuery(state: String) {
     this.addQuery(PARAM_STATE, state)
 }
 
+fun AuthorizeResponse.getStateFromQuery(): String {
+    return this.getQueries().singleValue(PARAM_STATE)
+}
+
 fun AuthorizeResponse.setScopesAsQuery(scopes: List<Scope>) {
     this.addQuery(PARAM_SCOPE, scopes.joinToString(SPACE))
 }
