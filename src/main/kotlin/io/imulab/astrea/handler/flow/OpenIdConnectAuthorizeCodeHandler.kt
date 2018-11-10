@@ -68,8 +68,7 @@ class OpenIdConnectAuthorizeCodeHandler(
         requireNotNull(request.getSession()) { "session must not be null" }
 
         val authorizeRequest = openIdConnectRequestStorage.getOidcSession(
-                authorizeCodeStrategy.fromRaw(request.getCode()),
-                request)
+                authorizeCodeStrategy.fromRaw(request.getCode()))
 
         if (!authorizeRequest.getGrantedScopes().contains(SCOPE_OPENID))
             throw InvalidScopeException.NotGrantedByResourceOwner(SCOPE_OPENID)

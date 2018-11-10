@@ -60,7 +60,7 @@ class OAuthPkceHandler(
                 .requireNotNullOrEmpty(PARAM_CODE)
                 .let { authorizeCodeStrategy.fromRaw(it) }
                 .let { c ->
-                    pkceSessionStorage.getPkceSession(c, request.getSession()!!).also {
+                    pkceSessionStorage.getPkceSession(c).also {
                         pkceSessionStorage.deletePkceSession(c)
                     }
                 }

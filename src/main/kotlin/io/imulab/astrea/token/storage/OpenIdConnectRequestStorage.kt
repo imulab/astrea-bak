@@ -16,7 +16,7 @@ interface OpenIdConnectRequestStorage {
     /**
      * Retrieve OIDC request given [authorizeCode].
      */
-    fun getOidcSession(authorizeCode: AuthorizeCode, request: OAuthRequest): OAuthRequest
+    fun getOidcSession(authorizeCode: AuthorizeCode): OAuthRequest
 
     /**
      * Delete the OIDC request session associated with the [authorizeCode].

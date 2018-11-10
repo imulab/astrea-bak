@@ -39,7 +39,7 @@ class OAuthRefreshHandler(
             return@let RefreshToken(token = it, signature = refreshTokenStrategy.computeRefreshTokenSignature(it))
         }
 
-        val originalRequest = tokenRevocationStorage.getRefreshTokenSession(refreshToken, request.getSession()!!).also {
+        val originalRequest = tokenRevocationStorage.getRefreshTokenSession(refreshToken).also {
             if (it.getGrantedScopes().containsNone(SCOPE_OFFLINE, SCOPE_OFFLINE_ACCESS))
                 throw InvalidGrantException.NoOfflineAccess(refreshToken.token)
             if (request.getClient().getId() != it.getClient().getId())
@@ -61,7 +61,7 @@ class OAuthRefreshHandler(
         requireNotNull(request.getSession()) { "session must not be null." }
 
         val oldRefreshToken = refreshTokenStrategy.fromRaw(request.getRefreshToken())
-        val oldRequest = tokenRevocationStorage.getRefreshTokenSession(oldRefreshToken, request.getSession()!!).also {
+        val oldRequest = tokenRevocationStorage.getRefreshTokenSession(oldRefreshToken).also {
             tokenRevocationStorage.revokeAccessToken(it.getId())
             tokenRevocationStorage.revokeRefreshToken(it.getId())
         }

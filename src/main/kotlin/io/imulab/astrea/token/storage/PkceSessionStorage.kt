@@ -1,7 +1,6 @@
 package io.imulab.astrea.token.storage
 
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.token.AuthorizeCode
 
 /**
@@ -17,7 +16,7 @@ interface PkceSessionStorage {
      *
      * @throws [io.imulab.astrea.error.InvalidGrantException.NotFound] if not found
      */
-    fun getPkceSession(authorizeCode: AuthorizeCode, session: Session): OAuthRequest
+    fun getPkceSession(authorizeCode: AuthorizeCode): OAuthRequest
 
     /**
      * Associates the given [authorizeCode] with the [request]. The saved [request] needs to be

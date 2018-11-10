@@ -2,7 +2,6 @@ package io.imulab.astrea.handler.revoke
 
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.RevocationRequest
-import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.handler.RevocationEndpointHandler
 import io.imulab.astrea.token.storage.AccessTokenStorage
@@ -22,7 +21,7 @@ class AccessTokenStorageRevocationHandler(
         return try {
             request.getToken()
                     .let { accessTokenStrategy.fromRaw(it) }
-                    .let { accessTokenStorage.getAccessTokenSession(it, DefaultSession()) }
+                    .let { accessTokenStorage.getAccessTokenSession(it) }
                     .let {
                         if (it.getClient().getId() != request.getClient().getId())
                             throw InvalidGrantException.ClientIdentityMismatch(request.getToken())

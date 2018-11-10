@@ -76,7 +76,7 @@ class OAuthAuthorizeCodeHandler(
 
         // retrieve authorization code from session storage, and validate code
         val restoredRequest = authorizeCodeStrategy.fromRaw(request.getCode()).let { authorizeCode ->
-            authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!).also {
+            authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode).also {
                 // Note: original impl used presented request instead of stored request, make sure we are right
                 authorizeCodeStrategy.validateAuthorizeCode(it, authorizeCode.code)
             }
@@ -108,7 +108,7 @@ class OAuthAuthorizeCodeHandler(
 
         // retrieve authorization code from session storage
         val authorizeCode = authorizeCodeStrategy.fromRaw(request.getCode())
-        val restoredRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode, request.getSession()!!)
+        val restoredRequest = authorizeCodeStorage.getAuthorizeCodeSession(authorizeCode)
 
         // transfer grants of scopes
         restoredRequest.getGrantedScopes().forEach(request::grantScope)

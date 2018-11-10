@@ -2,7 +2,6 @@ package io.imulab.astrea.client.auth
 
 import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.domain.PARAM_TOKEN
-import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.error.InvalidClientException
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.singleValue
@@ -31,7 +30,7 @@ class ClientBearerPreIntrospectionAuthenticator(
 
         return try {
             accessToken.let { accessTokenStrategy.fromRaw(it) }
-                    .let { accessTokenStorage.getAccessTokenSession(it, DefaultSession()) }
+                    .let { accessTokenStorage.getAccessTokenSession(it) }
                     .getClient()
         } catch (e: Exception) {
             throw InvalidClientException.AuthenticationFailed(e.message ?: "")

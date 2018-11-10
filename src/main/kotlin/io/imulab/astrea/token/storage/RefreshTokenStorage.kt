@@ -1,7 +1,6 @@
 package io.imulab.astrea.token.storage
 
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.token.RefreshToken
 
 /**
@@ -17,7 +16,7 @@ interface RefreshTokenStorage {
     /**
      * Retrieves refresh token request for [token]. [OAuthRequest.getSession] should be populated.
      */
-    fun getRefreshTokenSession(token: RefreshToken, session: Session): OAuthRequest
+    fun getRefreshTokenSession(token: RefreshToken): OAuthRequest
 
     /**
      * Removes information related to the refresh [token].

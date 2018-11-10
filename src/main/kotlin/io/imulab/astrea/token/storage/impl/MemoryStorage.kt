@@ -2,7 +2,6 @@ package io.imulab.astrea.token.storage.impl
 
 import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.error.InvalidGrantException
 import io.imulab.astrea.token.AccessToken
 import io.imulab.astrea.token.AuthorizeCode
@@ -37,7 +36,7 @@ class MemoryStorage :
         )
     }
 
-    override fun getAuthorizeCodeSession(code: AuthorizeCode, session: Session): OAuthRequest {
+    override fun getAuthorizeCodeSession(code: AuthorizeCode): OAuthRequest {
         if (this.authorizeCodeMap.containsKey(code.signature)) {
             val rel = this.authorizeCodeMap[code.signature]!!
             if (!rel.active)
@@ -71,7 +70,7 @@ class MemoryStorage :
         this.accessTokenToRequestIdMap[request.getId()] = session
     }
 
-    override fun getAccessTokenSession(token: AccessToken, session: Session): OAuthRequest {
+    override fun getAccessTokenSession(token: AccessToken): OAuthRequest {
         if (this.accessTokenMap.containsKey(token.signature)) {
             val rel = this.accessTokenMap[token.signature]!!
             if (!rel.active)
@@ -103,7 +102,7 @@ class MemoryStorage :
         this.refreshTokenToRequestIdMap[request.getId()] = session
     }
 
-    override fun getRefreshTokenSession(token: RefreshToken, session: Session): OAuthRequest {
+    override fun getRefreshTokenSession(token: RefreshToken): OAuthRequest {
         if (this.refreshTokenMap.containsKey(token.signature)) {
             val rel = this.refreshTokenMap[token.signature]!!
             if (!rel.active)
@@ -149,7 +148,7 @@ class MemoryStorage :
         this.authorizeCodeToOidcMap[authorizeCode.code] = request
     }
 
-    override fun getOidcSession(authorizeCode: AuthorizeCode, request: OAuthRequest): OAuthRequest {
+    override fun getOidcSession(authorizeCode: AuthorizeCode): OAuthRequest {
         return this.authorizeCodeToOidcMap[authorizeCode.code]
                 ?: throw InvalidGrantException.NotFound(authorizeCode.code)
     }
@@ -162,7 +161,7 @@ class MemoryStorage :
 
     // start: PkceSessionStorage ---------------------------------------------------------------------------------------
 
-    override fun getPkceSession(authorizeCode: AuthorizeCode, session: Session): OAuthRequest {
+    override fun getPkceSession(authorizeCode: AuthorizeCode): OAuthRequest {
         return this.authorizeCodePkceMap[authorizeCode.signature]
                 ?: throw InvalidGrantException.NotFound(authorizeCode.code)
     }

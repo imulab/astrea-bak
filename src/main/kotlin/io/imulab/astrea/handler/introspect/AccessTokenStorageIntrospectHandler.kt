@@ -22,7 +22,7 @@ class AccessTokenStorageIntrospectHandler(
     override fun introspectToken(request: IntrospectRequest): IntrospectResponse {
         return try {
             val r = accessTokenStrategy.fromRaw(request.getToken()).let {
-                accessTokenStorage.getAccessTokenSession(it, request.getSession())
+                accessTokenStorage.getAccessTokenSession(it)
             } as AccessRequest
 
             accessTokenStrategy.validateAccessToken(r, request.getToken())

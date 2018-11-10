@@ -1,7 +1,6 @@
 package io.imulab.astrea.token.storage
 
 import io.imulab.astrea.domain.request.OAuthRequest
-import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.token.AccessToken
 
 /**
@@ -17,7 +16,7 @@ interface AccessTokenStorage {
     /**
      * Retrieves access token request for [token]. [OAuthRequest.getSession] should be populated.
      */
-    fun getAccessTokenSession(token: AccessToken, session: Session): OAuthRequest
+    fun getAccessTokenSession(token: AccessToken): OAuthRequest
 
     /**
      * Removes information related to the access [token].
