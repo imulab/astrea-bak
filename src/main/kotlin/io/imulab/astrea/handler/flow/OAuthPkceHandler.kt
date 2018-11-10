@@ -23,7 +23,7 @@ class OAuthPkceHandler(
 ) : AuthorizeEndpointHandler, TokenEndpointHandler {
 
     override fun handleAuthorizeRequest(request: AuthorizeRequest, response: AuthorizeResponse) {
-        if (request.getResponseTypes().exactly(ResponseType.Code) || !request.getClient().isPublic())
+        if (!request.getResponseTypes().exactly(ResponseType.Code) || !request.getClient().isPublic())
             return
 
         require(response.getCode().isNotEmpty()) {

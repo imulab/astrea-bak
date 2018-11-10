@@ -27,6 +27,7 @@ object RequestSupport {
             grantedScopes: Set<Scope> = setOf("foo", SCOPE_OFFLINE),
             state: String = "1234567890",
             session: Session? = null,
+            form: UrlValues = emptyMap(),
             jwtClaimModifier: (JwtClaims) -> Unit = {}
     ): AuthorizeRequest {
         return DefaultAuthorizeRequest.Builder().also { b ->
@@ -36,6 +37,7 @@ object RequestSupport {
             b.scopes.addAll(scopes)
             b.grantedScopes.addAll(grantedScopes)
             b.state = state
+            b.setForm(form)
             b.session = session ?: DefaultJwtSession.Builder().also {
                 it.getClaims().setScopes(listOf("foo", SCOPE_OFFLINE))
                 it.getClaims().also(jwtClaimModifier)

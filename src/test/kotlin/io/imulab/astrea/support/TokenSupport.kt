@@ -3,6 +3,8 @@ package io.imulab.astrea.support
 import io.imulab.astrea.client.OAuthClient
 import io.imulab.astrea.crypt.HmacSha256
 import io.imulab.astrea.crypt.JwtRs256
+import io.imulab.astrea.crypt.hash.ShaHasher
+import io.imulab.astrea.domain.CodeChallengeMethod
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.Scope
 import io.imulab.astrea.domain.TokenType
@@ -18,8 +20,10 @@ import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
+import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.time.LocalDateTime
+import java.util.*
 
 object TokenSupport {
 
@@ -92,6 +96,26 @@ object TokenSupport {
                 it.client = client
                 it.session = DefaultSession()
             }.build())
+        }
+    }
+
+    object Pkce {
+
+        private val encoder = Base64.getUrlEncoder().withoutPadding()
+
+        fun challengeAndVerifier(method: CodeChallengeMethod = CodeChallengeMethod.S256,
+                                 verifier: String): Pair<String, String> {
+            return Pair(
+                    first = encoder.encodeToString(
+                            when (method) {
+                                CodeChallengeMethod.Plain ->
+                                    verifier.toByteArray(StandardCharsets.UTF_8)
+                                CodeChallengeMethod.S256 ->
+                                    ShaHasher.usingSha256().hash(verifier.toByteArray(StandardCharsets.UTF_8))
+                            }
+                    ),
+                    second = encoder.encodeToString(verifier.toByteArray(StandardCharsets.UTF_8))
+            )
         }
     }
 
