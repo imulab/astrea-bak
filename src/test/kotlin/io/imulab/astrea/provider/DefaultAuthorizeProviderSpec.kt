@@ -1,7 +1,11 @@
 package io.imulab.astrea.provider
 
+import io.imulab.astrea.domain.PARAM_SCOPE
+import io.imulab.astrea.domain.PARAM_STATE
 import io.imulab.astrea.domain.ResponseType
 import io.imulab.astrea.domain.request.AuthorizeRequest
+import io.imulab.astrea.domain.response.AuthorizeResponse
+import io.imulab.astrea.domain.response.impl.DefaultAuthorizeResponse
 import io.imulab.astrea.error.OAuthException
 import io.imulab.astrea.support.HttpSupport
 import io.imulab.astrea.support.ProviderSupport
@@ -14,6 +18,58 @@ import org.spekframework.spek2.style.specification.describe
 import java.lang.RuntimeException
 
 object DefaultAuthorizeProviderSpec : Spek({
+
+    describe("write responses") {
+
+        val provider: AuthorizeProvider = ProviderSupport.Authorize.forTestJsonCapability()
+        val request: AuthorizeRequest = RequestSupport.newAuthorizeRequest()
+
+        it("""
+            encode response as queries
+        """.trimIndent()) {
+            val response: AuthorizeResponse = DefaultAuthorizeResponse().also {
+                it.addQuery(PARAM_SCOPE, "foo bar")
+                it.addQuery(PARAM_STATE, "1234567890")
+            }
+            val writer: HttpSupport.MapHttpResponseWriter = HttpSupport.response()
+
+            assertThatCode {
+                provider.encodeAuthorizeResponse(writer, request, response)
+            }.doesNotThrowAnyException()
+
+            writer.assertStatus(302)
+            URIBuilder(writer.getHeader("Location")).run {
+                assertThat(queryParams.find { it.name == PARAM_SCOPE }?.value)
+                        .isNotNull()
+                        .asString()
+                        .contains("foo", "bar")
+                assertThat(queryParams.find { it.name == PARAM_STATE }?.value)
+                        .isNotNull()
+                        .asString()
+                        .isEqualTo("1234567890")
+            }
+        }
+
+        it("""
+            encode response as fragments
+        """.trimIndent()) {
+            val response: AuthorizeResponse = DefaultAuthorizeResponse().also {
+                it.addFragment(PARAM_SCOPE, "foo bar")
+                it.addFragment(PARAM_STATE, "1234567890")
+            }
+            val writer: HttpSupport.MapHttpResponseWriter = HttpSupport.response()
+
+            assertThatCode {
+                provider.encodeAuthorizeResponse(writer, request, response)
+            }.doesNotThrowAnyException()
+
+            writer.assertStatus(302)
+            URIBuilder(writer.getHeader("Location")).run {
+                assertThat(fragment).contains("$PARAM_SCOPE=foo bar")
+                assertThat(fragment).contains("$PARAM_STATE=1234567890")
+            }
+        }
+    }
 
     describe("write errors") {
 
