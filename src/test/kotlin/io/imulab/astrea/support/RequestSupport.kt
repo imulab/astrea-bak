@@ -16,6 +16,7 @@ import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession
 import io.imulab.astrea.spi.http.UrlValues
 import org.jose4j.jwt.JwtClaims
+import java.util.*
 
 object RequestSupport {
 
@@ -45,13 +46,15 @@ object RequestSupport {
         }.build() as AuthorizeRequest
     }
 
-    fun newAccessRequest(form: UrlValues = emptyMap(),
+    fun newAccessRequest(id: String = UUID.randomUUID().toString(),
+                         form: UrlValues = emptyMap(),
                          grantTypes: Set<GrantType> = setOf(GrantType.AuthorizationCode),
                          scopes: Set<Scope> = setOf("foo", "bar", SCOPE_OFFLINE),
                          grantedScopes: Set<Scope> = setOf("foo", SCOPE_OFFLINE),
                          session: Session? = null,
                          client: OAuthClient = ClientSupport.foo()): AccessRequest {
         return DefaultAccessRequest.Builder().also {
+            it.setId(id)
             it.setForm(form)
             it.addGrantType(grantTypes.toList())
             it.scopes.addAll(scopes)
@@ -62,6 +65,7 @@ object RequestSupport {
     }
 
     fun newAccessRequestForClientCredentialsFlow(
+            id: String = UUID.randomUUID().toString(),
             form: UrlValues = emptyMap(),
             grantTypes: Set<GrantType> = setOf(GrantType.ClientCredentials),
             scopes: Set<Scope> = setOf("foo", "bar", SCOPE_OFFLINE),
@@ -69,17 +73,6 @@ object RequestSupport {
             session: Session? = DefaultJwtSession(claims = JwtClaims().also { it.setGeneratedJwtId() }),
             client: OAuthClient = ClientSupport.foo()
     ): AccessRequest {
-        return newAccessRequest(form, grantTypes, scopes, grantedScopes, session, client)
-    }
-
-    fun newAccessRequestForImplicitFlow(
-            form: UrlValues = emptyMap(),
-            grantTypes: Set<GrantType> = setOf(GrantType.Implicit),
-            scopes: Set<Scope> = setOf("foo", "bar", SCOPE_OFFLINE),
-            grantedScopes: Set<Scope> = setOf("foo", SCOPE_OFFLINE),
-            session: Session? = DefaultJwtSession(claims = JwtClaims().also { it.setGeneratedJwtId() }),
-            client: OAuthClient = ClientSupport.foo()
-    ): AccessRequest {
-        return newAccessRequest(form, grantTypes, scopes, grantedScopes, session, client)
+        return newAccessRequest(id, form, grantTypes, scopes, grantedScopes, session, client)
     }
 }
