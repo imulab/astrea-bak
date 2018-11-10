@@ -2,8 +2,11 @@ package io.imulab.astrea.support
 
 import com.beust.klaxon.Klaxon
 import io.imulab.astrea.client.ClientManager
+import io.imulab.astrea.client.auth.ClientAuthenticator
 import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
+import io.imulab.astrea.handler.TokenEndpointHandler
+import io.imulab.astrea.provider.impl.DefaultAccessProvider
 import io.imulab.astrea.provider.impl.DefaultAuthorizeProvider
 import io.imulab.astrea.spi.http.HttpClient
 import io.imulab.astrea.spi.json.JsonEncoder
@@ -27,6 +30,22 @@ object ProviderSupport {
                             return Klaxon().toJsonString(any).toByteArray(StandardCharsets.UTF_8)
                         }
                     }
+            )
+        }
+    }
+
+    object Access {
+
+        fun forTestJsonCapability(): DefaultAccessProvider {
+            return DefaultAccessProvider(
+                    clientAuthenticator = mock(ClientAuthenticator::class.java),
+                    jsonEncoder = object : JsonEncoder {
+                        override fun encode(any: Any, pretty: Boolean): ByteArray {
+                            return Klaxon().toJsonString(any).toByteArray(StandardCharsets.UTF_8)
+                        }
+                    },
+                    outputDebugInErrorResponse = true,
+                    tokenEndpointHandler = mock(TokenEndpointHandler::class.java)
             )
         }
     }
