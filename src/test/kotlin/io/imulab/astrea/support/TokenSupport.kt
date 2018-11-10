@@ -17,6 +17,7 @@ import io.imulab.astrea.spi.http.UrlValues
 import io.imulab.astrea.token.strategy.impl.HmacAuthorizeCodeStrategy
 import io.imulab.astrea.token.strategy.impl.HmacRefreshTokenStrategy
 import io.imulab.astrea.token.strategy.impl.JwtAccessTokenStrategy
+import io.imulab.astrea.token.strategy.impl.JwtIdTokenStrategy
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature
 import org.jose4j.jwt.JwtClaims
@@ -28,6 +29,14 @@ import java.util.*
 object TokenSupport {
 
     val ISSUER = "astrea"
+
+    object IdToken {
+
+        val defaultStraegy = JwtIdTokenStrategy(
+                jwtRs256 = JwtRs256(KeySupport.defaultJwk),
+                issuer = ISSUER
+        )
+    }
 
     object AccessToken {
 

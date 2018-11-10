@@ -1,12 +1,13 @@
 package io.imulab.astrea.handler.validator
 
 import io.imulab.astrea.crypt.JwtRs256
-import io.imulab.astrea.domain.Prompt
+import io.imulab.astrea.domain.*
 import io.imulab.astrea.domain.extension.*
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.OAuthRequest
 import io.imulab.astrea.domain.session.OidcSession
 import io.imulab.astrea.domain.session.assertType
+import io.imulab.astrea.error.RequestParameterInvalidValueException
 import org.jose4j.jwt.NumericDate
 
 class OpenIdConnectRequestValidator(
@@ -51,8 +52,10 @@ class OpenIdConnectRequestValidator(
 
             request.getIdTokenHint().run {
                 if (isNotEmpty() &&
-                        jwtRs256.decode(this).jwtClaims.subject != it.session.getIdTokenClaims().subject)
-                    throw IllegalArgumentException("mismatched subject from id_token_hint")
+                        jwtRs256.decode(this, extraCriteria = { b ->
+                            b.setSkipDefaultAudienceValidation()
+                        }).jwtClaims.subject != it.session.getIdTokenClaims().subject)
+                    throw RequestParameterInvalidValueException.MismatchedSubjectClaim(PARAM_ID_TOKEN_HINT)
             }
         }
     }
@@ -74,54 +77,58 @@ class OpenIdConnectRequestValidator(
 
             fun mustOnlyAllowedPrompts(allowed: List<Prompt>) {
                 if (!allowed.containsAll(prompts))
-                    throw IllegalArgumentException("Contains disallowed prompt value.")
+                    throw RequestParameterInvalidValueException(
+                            PARAM_PROMPT,
+                            prompts.joinToString(separator = SPACE) { it.specValue },
+                            "Contains disallowed prompt value.")
             }
 
             fun mustStandaloneNonePrompt() {
                 if (prompts.size > 1 && prompts.contains(Prompt.None))
-                    throw IllegalArgumentException("'none' prompt requested along with others.")
+                    throw RequestParameterInvalidValueException(PARAM_PROMPT, "'none' prompt requested along with others.")
             }
 
             fun mustNotNonePromptIfPublicClient() {
                 if (request.getClient().isPublic() && prompts.contains(Prompt.None))
-                    throw IllegalArgumentException("public client requiring user consent, but provided 'none' as prompt.")
+                    throw RequestParameterInvalidValueException(PARAM_PROMPT, "public client requiring user consent, but provided 'none' as prompt.")
             }
 
             fun mustNotEmptyClaimSubject() {
                 if (session.getIdTokenClaims().subject.isEmpty())
-                    throw IllegalArgumentException("claim subject is empty.")
+                    throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "claim subject is empty.")
             }
 
             fun optionalAuthTimeIsBeforeNow(leewaySeconds: Long = 0) {
                 if (authTime != null && authTime.isOnOrAfter(NumericDate.now().plusSeconds(leewaySeconds)))
-                    throw IllegalArgumentException("auth_time is before now.")
+                    throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "auth_time is before now.")
             }
 
             fun mustAuthTime() {
                 if (authTime == null)
-                    throw IllegalArgumentException("auth_time not specified.")
+                    throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "auth_time not specified.")
             }
 
             fun mustRequestTime() {
                 if (reqTime == null)
-                    throw IllegalArgumentException("rat not specified.")
+                    throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "rat not specified.")
             }
 
             fun mustAuthTimePlusMaxAgeIsAfterRequestTime() {
                 if (authTime!!.plusSeconds(maxAge!!).isBefore(reqTime!!))
-                    throw IllegalArgumentException("rat expired beyond auth_time and max_age")
+                    throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "rat expired beyond auth_time and max_age")
             }
 
             fun mustAuthTimeIsBeforeRequestTime() {
                 if (authTime!!.isAfter(reqTime!!))
-                    throw IllegalArgumentException("auth_time happened after rat.")
+                    throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "auth_time happened after rat.")
             }
 
             fun mustAuthTimeIsAfterRequestTime() {
                 if (authTime!!.isBefore(reqTime!!))
-                    throw IllegalArgumentException("auth_time happened after rat.")
+                    throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "auth_time happened after rat.")
             }
 
+            // TODO move this
             private fun NumericDate.plusSeconds(seconds: Long): NumericDate =
                     NumericDate.fromSeconds(this.value + seconds)
         }

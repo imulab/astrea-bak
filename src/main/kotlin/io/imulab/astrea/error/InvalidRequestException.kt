@@ -21,7 +21,7 @@ sealed class InvalidRequestException(description: String? = null)
  * Common base class for any [InvalidRequestException] that involves a request parameter name
  */
 abstract class RequestParameterException(val parameterName: String, description: String? = null)
-    : InvalidRequestException(description ?: "parameter '$parameterName' is invalid.")
+    : InvalidRequestException(description ?: "parameter $parameterName is invalid.")
 
 /**
  * Thrown when request form is empty.
@@ -37,19 +37,19 @@ class RequestNotProcessedException : InvalidRequestException("Server cannot proc
  * A required parameter is missing or provided as blank.
  */
 class RequestParameterMissingException(parameterName: String)
-    : RequestParameterException("parameter '$parameterName' is missing or blank.")
+    : RequestParameterException(parameterName, "parameter <$parameterName> is missing or blank.")
 
 /**
  * A parameter is included twice in the request.
  */
 class RequestParameterRepeatedException(parameterName: String)
-    : RequestParameterException("parameter '$parameterName' is provided more than once in the request.")
+    : RequestParameterException(parameterName, "parameter <$parameterName> is provided more than once in the request.")
 
 /**
  * A parameter value is invalid.
  */
 open class RequestParameterInvalidValueException(parameterName: String, value: String, hint: String? = null)
-    : RequestParameterException("parameter '$parameterName' has invalid value '$value'. ${hint ?: ""}".trim()) {
+    : RequestParameterException(parameterName, "<$parameterName> has invalid value <$value>. ${hint ?: ""}".trim()) {
 
     class InvalidResponseType(value: String)
         : RequestParameterInvalidValueException(PARAM_RESPONSE_TYPE, value) {
