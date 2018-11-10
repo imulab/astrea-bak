@@ -96,7 +96,9 @@ class JwtIdTokenStrategy(private val jwtRs256: JwtRs256,
 
             request.getIdTokenHint().run {
                 if (isNotEmpty() &&
-                        jwtRs256.decode(this).jwtClaims.subject != it.session.getIdTokenClaims().subject)
+                        jwtRs256.decode(this) { b ->
+                            b.setSkipDefaultAudienceValidation()
+                        }.jwtClaims.subject != it.session.getIdTokenClaims().subject)
                     throw RequestParameterInvalidValueException.MismatchedSubjectClaim(source = "id_token_hint")
             }
         }
