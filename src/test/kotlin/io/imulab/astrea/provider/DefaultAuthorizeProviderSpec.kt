@@ -14,7 +14,6 @@ import org.assertj.core.api.Assertions.*
 import org.jose4j.jwt.consumer.InvalidJwtException
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.lang.RuntimeException
 
 object DefaultAuthorizeProviderSpec : Spek({
 

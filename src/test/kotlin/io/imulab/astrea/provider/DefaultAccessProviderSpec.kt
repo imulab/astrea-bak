@@ -8,10 +8,10 @@ import io.imulab.astrea.error.OAuthException
 import io.imulab.astrea.support.HttpSupport
 import io.imulab.astrea.support.ProviderSupport
 import io.imulab.astrea.support.RequestSupport
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.lang.RuntimeException
 import java.time.LocalDateTime
 
 object DefaultAccessProviderSpec : Spek({

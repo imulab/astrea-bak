@@ -9,14 +9,19 @@ import io.imulab.astrea.crypt.BCryptPasswordEncoder
 import io.imulab.astrea.crypt.JwtRs256
 import io.imulab.astrea.domain.ScopeStrategy
 import io.imulab.astrea.domain.StringEqualityScopeStrategy
+import io.imulab.astrea.domain.TokenType
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.IntrospectEndpointHandler
+import io.imulab.astrea.handler.RevocationEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.handler.introspect.AccessTokenJwtIntrospectHandler
 import io.imulab.astrea.handler.introspect.RefreshTokenStorageIntrospectHandler
+import io.imulab.astrea.handler.revoke.AccessTokenStorageRevocationHandler
+import io.imulab.astrea.handler.revoke.UnsupportedRevocationHandler
 import io.imulab.astrea.provider.impl.DefaultAccessProvider
 import io.imulab.astrea.provider.impl.DefaultAuthorizeProvider
 import io.imulab.astrea.provider.impl.DefaultIntrospectionProvider
+import io.imulab.astrea.provider.impl.DefaultRevocationProvider
 import io.imulab.astrea.spi.http.HttpClient
 import io.imulab.astrea.spi.json.JsonEncoder
 import io.imulab.astrea.token.storage.impl.MemoryStorage
@@ -93,6 +98,27 @@ object ProviderSupport {
                             RefreshTokenStorageIntrospectHandler(
                                     refreshTokenStorage = memoryStorage,
                                     refreshTokenStrategy = TokenSupport.RefreshToken.defaultStrategy)
+                    )
+            )
+        }
+    }
+
+    object Revocation {
+
+        fun forDefaultTest(memoryStorage: MemoryStorage): DefaultRevocationProvider {
+            return DefaultRevocationProvider(
+                    jsonEncoder = mock(JsonEncoder::class.java),
+                    clientAuthenticator = ClientSecretBasicAuthenticator(
+                            clientManager = ClientSupport.clientManager(ClientSupport.foo(), ClientSupport.bar()),
+                            passwordEncoder = BCryptPasswordEncoder()
+                    ),
+                    handler = RevocationEndpointHandler.with(
+                            AccessTokenStorageRevocationHandler(
+                                    accessTokenStrategy = TokenSupport.AccessToken.defaultStrategy,
+                                    accessTokenStorage = memoryStorage,
+                                    tokenRevocationStorage = memoryStorage
+                            ),
+                            UnsupportedRevocationHandler(listOf(TokenType.RefreshToken))
                     )
             )
         }
