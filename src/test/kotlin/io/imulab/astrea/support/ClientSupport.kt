@@ -97,17 +97,9 @@ object ClientSupport {
             }
     )
 
-    /**
-     * Returns a mocked client manager which can properly
-     */
-    fun clientManager(vararg clients: OAuthClient): ClientManager {
-        val manager = Mockito.mock(ClientManager::class.java)
-        clients.forEach { c ->
-            Mockito.`when`(manager.getClient(c.getId())).thenReturn(c)
-            Mockito.`when`(manager.getClient(Mockito.argThat { id ->
-                !clients.map { it.getId() }.contains(id)
-            } ?: "")).thenThrow(InvalidClientException.NotFound::class.java)
+    fun clientManager(vararg clients: OAuthClient): ClientManager = object : ClientManager {
+        override fun getClient(id: String): OAuthClient {
+            return clients.find { it.getId() == id } ?: throw InvalidClientException.NotFound()
         }
-        return manager
     }
 }

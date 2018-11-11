@@ -127,10 +127,6 @@ class OpenIdConnectRequestValidator(
                 if (authTime!!.isBefore(reqTime!!))
                     throw RequestParameterInvalidValueException(PARAM_ID_TOKEN, "auth_time happened after rat.")
             }
-
-            // TODO move this
-            private fun NumericDate.plusSeconds(seconds: Long): NumericDate =
-                    NumericDate.fromSeconds(this.value + seconds)
         }
     }
 }

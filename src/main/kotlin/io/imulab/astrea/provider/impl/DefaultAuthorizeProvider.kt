@@ -184,6 +184,7 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         }
 
         // JWT
+        // TODO refactor to jwtRs256 validator
         val jwtConsumer = JwtConsumerBuilder()
                 .setJwsAlgorithmConstraints(client.getRequestObjectSigningAlgorithm().toJwsAlgorithmConstraints())
                 .setSkipVerificationKeyResolutionOnNone()

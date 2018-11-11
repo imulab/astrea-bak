@@ -46,3 +46,6 @@ fun NumericDate.toLocalDateTime(): LocalDateTime {
 fun NumericDate.minusSeconds(seconds: Long): NumericDate {
     return NumericDate.fromSeconds(this.value - seconds)
 }
+
+fun NumericDate.plusSeconds(seconds: Long): NumericDate =
+        NumericDate.fromSeconds(this.value + seconds)

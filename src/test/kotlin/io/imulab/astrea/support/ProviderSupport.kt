@@ -4,6 +4,7 @@ import com.beust.klaxon.Klaxon
 import io.imulab.astrea.client.ClientManager
 import io.imulab.astrea.client.auth.ClientAuthenticator
 import io.imulab.astrea.domain.ScopeStrategy
+import io.imulab.astrea.domain.StringEqualityScopeStrategy
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.provider.impl.DefaultAccessProvider
@@ -16,6 +17,17 @@ import java.nio.charset.StandardCharsets
 object ProviderSupport {
 
     object Authorize {
+
+        fun forTestProvider(): DefaultAuthorizeProvider {
+            return DefaultAuthorizeProvider(
+                    authorizeHandler = mock(AuthorizeEndpointHandler::class.java),
+                    scopeStrategy = StringEqualityScopeStrategy,
+                    expectedAudience = "test",
+                    httpClient = mock(HttpClient::class.java),
+                    clientStore = ClientSupport.clientManager(ClientSupport.foo(), ClientSupport.bar()),
+                    jsonEncoder = mock(JsonEncoder::class.java)
+            )
+        }
 
         fun forTestJsonCapability(): DefaultAuthorizeProvider {
             return DefaultAuthorizeProvider(
