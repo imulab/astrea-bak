@@ -1,14 +1,25 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.jfrog.bintray.gradle.BintrayExtension
 import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-plugins {
-    java
-    kotlin("jvm") version "1.2.51"
-    id("jacoco")
+val astrea = "astrea"
+
+fun requireEnv(name: String, hard: Boolean = false): String {
+    return if (System.getenv(name) == null) {
+        val message = "Environment variable $name not set."
+        if (!hard) {
+            System.out.println(message)
+            ""
+        } else
+            throw IllegalStateException(message)
+    } else {
+        System.getenv(name)
+    }
 }
 
 group = "io.imulab"
-version = "0.0.1-SNAPSHOT"
+version = "0.8.0"
 
 repositories {
     jcenter()
@@ -16,6 +27,15 @@ repositories {
     maven {
         url = uri("https://dl.bintray.com/spekframework/spek")
     }
+}
+
+plugins {
+    java
+    kotlin("jvm") version "1.2.51"
+    id("jacoco")
+    `maven-publish`
+    id("com.github.johnrengelman.shadow") version "2.0.2"
+    id("com.jfrog.bintray") version "1.8.4"
 }
 
 dependencies {
@@ -76,4 +96,47 @@ tasks.withType<JacocoReport> {
 
 jacoco {
     toolVersion = "0.8.2"
+}
+
+val shadowJar: ShadowJar by tasks
+tasks.withType<ShadowJar> {
+    baseName = astrea
+    classifier = ""
+}
+
+publishing {
+    publications.invoke {
+        astrea(MavenPublication::class) {
+            artifactId = astrea
+            artifact(shadowJar)
+            pom {
+                withXml {
+                    asNode().appendNode("dependencies").let { depNode ->
+                        configurations.compile.allDependencies.forEach {
+                            depNode.appendNode("dependency").apply {
+                                appendNode("groupId", it.group)
+                                appendNode("artifactId", it.name)
+                                appendNode("version", it.version)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = requireEnv("BINTRAY_USER")
+    key = requireEnv("BINTRAY_KEY")
+    publish = true
+    setPublications(astrea)
+    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
+        repo = "oss"
+        name = astrea
+        userOrg = "imulab"
+        vcsUrl = "https://github.com/imulab/astrea"
+        setLabels("kotlin", "oauth2", "oidc")
+        setLicenses("MIT")
+    })
 }
