@@ -10,7 +10,6 @@ import io.imulab.astrea.domain.*
 import io.imulab.astrea.error.InvalidClientException
 import org.jose4j.jwk.JsonWebKey
 import org.jose4j.jwk.JsonWebKeySet
-import org.mockito.Mockito
 import java.nio.charset.StandardCharsets
 
 object ClientSupport {

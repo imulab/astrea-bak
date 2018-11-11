@@ -24,7 +24,7 @@ object ClientBearerAuthenticatorSpec : Spek({
     )
 
     describe("Authenticator should succeed") {
-        it ("""
+        it("""
             when client has proper authentication
         """.trimIndent()) {
             val properToken = TokenSupport.AccessToken.new().also {

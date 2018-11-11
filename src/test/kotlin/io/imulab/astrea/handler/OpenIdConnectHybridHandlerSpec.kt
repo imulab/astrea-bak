@@ -58,15 +58,15 @@ object OpenIdConnectHybridHandlerSpec : Spek({
         it("""
             should handle authorize request
         """.trimIndent()) {
-                flow.makeAuthorizeRequest(
-                        authTime = NumericDate.now().minusSeconds(300),
-                        reqAtTime = NumericDate.now().minusSeconds(600),
-                        responseTypes = setOf(ResponseType.Code, ResponseType.Token)
-                ) { authorizeRequest, authorizeResponse ->
-                    assertThatCode {
-                        handler.handleAuthorizeRequest(authorizeRequest, authorizeResponse)
-                    }.doesNotThrowAnyException()
-                }
+            flow.makeAuthorizeRequest(
+                    authTime = NumericDate.now().minusSeconds(300),
+                    reqAtTime = NumericDate.now().minusSeconds(600),
+                    responseTypes = setOf(ResponseType.Code, ResponseType.Token)
+            ) { authorizeRequest, authorizeResponse ->
+                assertThatCode {
+                    handler.handleAuthorizeRequest(authorizeRequest, authorizeResponse)
+                }.doesNotThrowAnyException()
+            }
         }
 
         it("""

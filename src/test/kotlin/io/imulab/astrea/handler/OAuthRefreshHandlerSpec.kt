@@ -22,7 +22,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDateTime
 
-object OAuthRefreshHandlerSpec: Spek({
+object OAuthRefreshHandlerSpec : Spek({
 
     val memoryStorage = MemoryStorage()
     val handler = OAuthRefreshHandler(
@@ -42,7 +42,7 @@ object OAuthRefreshHandlerSpec: Spek({
         it("""
             should handle access request
         """.trimIndent()) {
-            flow.makeAccessRequest {accessRequest ->
+            flow.makeAccessRequest { accessRequest ->
                 assertThat(handler.supports(accessRequest)).isTrue()
                 assertThatCode {
                     handler.handleAccessRequest(accessRequest)
@@ -73,7 +73,7 @@ object OAuthRefreshHandlerSpec: Spek({
         it("""
             should not be able to redeem old tokens again
         """.trimIndent()) {
-            flow.makeAccessRequest {accessRequest ->
+            flow.makeAccessRequest { accessRequest ->
                 assertThat(handler.supports(accessRequest)).isTrue()
                 assertThatExceptionOfType(InvalidGrantException.NotFound::class.java)
                         .isThrownBy { handler.handleAccessRequest(accessRequest) }

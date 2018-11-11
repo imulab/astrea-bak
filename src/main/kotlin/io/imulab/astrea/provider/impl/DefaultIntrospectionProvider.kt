@@ -48,7 +48,7 @@ class DefaultIntrospectionProvider(
         return introspectHandler.introspectToken(request)
     }
 
-    override fun encodeIntrospectReponse(writer: HttpResponseWriter, response: IntrospectResponse) {
+    override fun encodeIntrospectResponse(writer: HttpResponseWriter, response: IntrospectResponse) {
         writer.setStatus(200)
         writer.setHeader("Content-Type", "application/json;charset=UTF-8")
 

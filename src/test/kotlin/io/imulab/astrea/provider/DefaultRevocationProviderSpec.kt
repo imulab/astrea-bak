@@ -16,7 +16,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.util.*
 
-object DefaultRevocationProviderSpec: Spek({
+object DefaultRevocationProviderSpec : Spek({
 
     val memoryStorage = MemoryStorage()
     val provider: RevocationProvider = ProviderSupport.Revocation.forDefaultTest(memoryStorage)

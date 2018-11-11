@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-object OAuthRequestSpec: Spek({
+object OAuthRequestSpec : Spek({
 
     describe("merge") {
         it("should merge two requests") {
@@ -38,7 +38,7 @@ object OAuthRequestSpec: Spek({
     }
 
     describe("sanitize") {
-        it ("should remove unwanted fields") {
+        it("should remove unwanted fields") {
             val dirty = Request.Builder().also { b ->
                 b.client = ClientSupport.foo()
                 b.setForm(mutableMapOf(

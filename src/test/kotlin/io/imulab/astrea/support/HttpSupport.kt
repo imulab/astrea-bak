@@ -5,12 +5,11 @@ import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
 import io.imulab.astrea.domain.SPACE
 import io.imulab.astrea.spi.http.HttpRequestReader
-import io.imulab.astrea.spi.http.HttpResponseReader
 import io.imulab.astrea.spi.http.HttpResponseWriter
 import io.imulab.astrea.spi.http.UrlValues
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.*
-import org.mockito.Mockito.*
+import org.assertj.core.api.Assertions.assertThat
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import java.util.*
 
 object HttpSupport {

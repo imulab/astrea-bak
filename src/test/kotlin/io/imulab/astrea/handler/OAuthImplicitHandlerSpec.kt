@@ -16,7 +16,7 @@ import org.assertj.core.api.Assertions.*
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-object OAuthImplicitHandlerSpec: Spek({
+object OAuthImplicitHandlerSpec : Spek({
 
     val memoryStorage = MemoryStorage()
     val handler = OAuthImplicitHandler(

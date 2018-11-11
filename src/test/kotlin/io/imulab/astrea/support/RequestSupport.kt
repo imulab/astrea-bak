@@ -10,7 +10,6 @@ import io.imulab.astrea.domain.request.AccessRequest
 import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.request.DefaultAuthorizeRequest
 import io.imulab.astrea.domain.request.impl.DefaultAccessRequest
-import io.imulab.astrea.domain.session.JwtSession
 import io.imulab.astrea.domain.session.Session
 import io.imulab.astrea.domain.session.impl.DefaultJwtSession
 import io.imulab.astrea.domain.session.impl.DefaultSession

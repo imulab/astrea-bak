@@ -25,7 +25,7 @@ import org.mockito.Mockito.mock
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-object OAuthPkceHandlerSpec: Spek({
+object OAuthPkceHandlerSpec : Spek({
 
     val memoryStorage = MemoryStorage()
     val supportAllValidator: PkceValidator = PkceValidator.with(PlainPkceValidator, S256PkceValidator())
@@ -177,7 +177,7 @@ object OAuthPkceHandlerSpec: Spek({
                                  callback: (AuthorizeRequest, AuthorizeResponse) -> Unit) {
             val authorizeRequest = RequestSupport.newAuthorizeRequest(form = mapOf(
                     PARAM_CODE_CHALLENGE to listOf(getChallenge()),
-                    PARAM_CODE_CHALLENGE_METHOD  to listOf(method.specValue)
+                    PARAM_CODE_CHALLENGE_METHOD to listOf(method.specValue)
             ), client = ClientSupport.foo(isPublic = true))
             val authorizeResponse = DefaultAuthorizeResponse().also {
                 it.setCodeAsQuery(code.code)

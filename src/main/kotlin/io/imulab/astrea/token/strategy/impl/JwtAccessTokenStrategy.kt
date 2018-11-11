@@ -78,7 +78,7 @@ class JwtAccessTokenStrategy(private val jwtRs256: JwtRs256,
             is InvalidJwtException -> {
                 when {
                     t.errorDetails.any { it.errorCode == ErrorCodes.EXPIRED } -> throw InvalidGrantException.Expired(token)
-                    t.errorDetails.any{ it.errorCode == ErrorCodes.SIGNATURE_INVALID } -> throw InvalidGrantException.BadSignature(token)
+                    t.errorDetails.any { it.errorCode == ErrorCodes.SIGNATURE_INVALID } -> throw InvalidGrantException.BadSignature(token)
                     else -> throw InvalidGrantException.BadFormat(token)
                 }
             }

@@ -5,7 +5,7 @@ import io.imulab.astrea.domain.AuthMethod
 import io.imulab.astrea.domain.PARAM_CLIENT_ID
 import io.imulab.astrea.support.ClientSupport
 import io.imulab.astrea.support.HttpSupport
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -28,7 +28,7 @@ object ClientNoneAuthenticatorSpec : Spek({
                     .isEqualTo(foo.getId())
         }
 
-        it ("""
+        it("""
             when a public oidc client with auth_method=none authenticates
         """.trimIndent()) {
             val bar = ClientSupport.bar(isPublic = true, tokenEndpointAuthMethod = AuthMethod.None)

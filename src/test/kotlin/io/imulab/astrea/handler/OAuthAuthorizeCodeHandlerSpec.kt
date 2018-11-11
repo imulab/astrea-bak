@@ -17,7 +17,7 @@ import org.assertj.core.api.Assertions.*
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-object OAuthAuthorizeCodeHandlerSpec: Spek({
+object OAuthAuthorizeCodeHandlerSpec : Spek({
 
     val memoryStorage = MemoryStorage()
     val handler = OAuthAuthorizeCodeHandler(
