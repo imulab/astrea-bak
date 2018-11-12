@@ -1,7 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.jfrog.bintray.gradle.BintrayExtension
+import groovy.lang.GroovyObject
 import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
+import org.jfrog.gradle.plugin.artifactory.dsl.ResolverConfig
 
 val astrea = "astrea"
 
@@ -19,7 +21,7 @@ fun requireEnv(name: String, hard: Boolean = false): String {
 }
 
 group = "io.imulab"
-version = "0.8.0"
+version = "0.8.1"
 
 repositories {
     jcenter()
@@ -35,7 +37,7 @@ plugins {
     id("jacoco")
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "2.0.2"
-    id("com.jfrog.bintray") version "1.8.4"
+    id("com.jfrog.artifactory") version "4.8.1"
 }
 
 dependencies {
@@ -105,7 +107,7 @@ tasks.withType<ShadowJar> {
 }
 
 publishing {
-    publications.invoke {
+    (publications) {
         astrea(MavenPublication::class) {
             artifactId = astrea
             artifact(shadowJar)
@@ -126,17 +128,25 @@ publishing {
     }
 }
 
-bintray {
-    user = requireEnv("BINTRAY_USER")
-    key = requireEnv("BINTRAY_KEY")
-    publish = true
-    setPublications(astrea)
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "oss"
-        name = astrea
-        userOrg = "imulab"
-        vcsUrl = "https://github.com/imulab/astrea"
-        setLabels("kotlin", "oauth2", "oidc")
-        setLicenses("MIT")
+artifactory {
+    setContextUrl("http://artifactory.imulab.io/artifactory")
+    publish(delegateClosureOf<PublisherConfig> {
+        repository(delegateClosureOf<GroovyObject> {
+            setProperty("repoKey", "gradle-dev-local")
+            setProperty("username", "imulab")
+            setProperty("password", "AKCp5btVPSh6Yg2HfkA7TtjnKGQuvN7SRtARiiXRD6BJicG26vSro7dQ2WNzGuX84LxMcaNVn")
+            setProperty("maven", true)
+        })
+        defaults(delegateClosureOf<GroovyObject> {
+            invokeMethod("publications", astrea)
+        })
+    })
+    resolve(delegateClosureOf<ResolverConfig> {
+        repository(delegateClosureOf<GroovyObject> {
+            setProperty("repoKey", "gradle-dev")
+            setProperty("username", "imulab")
+            setProperty("password", "AKCp5btVPSh6Yg2HfkA7TtjnKGQuvN7SRtARiiXRD6BJicG26vSro7dQ2WNzGuX84LxMcaNVn")
+            setProperty("maven", true)
+        })
     })
 }
