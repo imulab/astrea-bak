@@ -21,7 +21,7 @@ fun requireEnv(name: String, hard: Boolean = false): String {
 }
 
 group = "io.imulab"
-version = "0.8.1"
+version = "0.8.2"
 
 repositories {
     jcenter()
@@ -133,8 +133,8 @@ artifactory {
     publish(delegateClosureOf<PublisherConfig> {
         repository(delegateClosureOf<GroovyObject> {
             setProperty("repoKey", "gradle-dev-local")
-            setProperty("username", "imulab")
-            setProperty("password", "AKCp5btVPSh6Yg2HfkA7TtjnKGQuvN7SRtARiiXRD6BJicG26vSro7dQ2WNzGuX84LxMcaNVn")
+            setProperty("username", requireEnv("ARTIFACTORY_USERNAME"))
+            setProperty("password", requireEnv("ARTIFACTORY_PASSWORD"))
             setProperty("maven", true)
         })
         defaults(delegateClosureOf<GroovyObject> {
@@ -144,8 +144,8 @@ artifactory {
     resolve(delegateClosureOf<ResolverConfig> {
         repository(delegateClosureOf<GroovyObject> {
             setProperty("repoKey", "gradle-dev")
-            setProperty("username", "imulab")
-            setProperty("password", "AKCp5btVPSh6Yg2HfkA7TtjnKGQuvN7SRtARiiXRD6BJicG26vSro7dQ2WNzGuX84LxMcaNVn")
+            setProperty("username", requireEnv("ARTIFACTORY_USERNAME"))
+            setProperty("password", requireEnv("ARTIFACTORY_PASSWORD"))
             setProperty("maven", true)
         })
     })
