@@ -1,27 +1,29 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.lang.GroovyObject
+import groovy.lang.MetaClass
 import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestFramework
+import org.gradle.kotlin.dsl.resolver.buildSrcSourceRootsFilePath
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.jfrog.gradle.plugin.artifactory.dsl.ResolverConfig
 
-val astrea = "astrea"
-
-fun requireEnv(name: String, hard: Boolean = false): String {
-    return if (System.getenv(name) == null) {
-        val message = "Environment variable $name not set."
-        if (!hard) {
-            System.out.println(message)
-            ""
-        } else
-            throw IllegalStateException(message)
-    } else {
-        System.getenv(name)
-    }
+object Version {
+    const val astrea = "0.8.7-SNAPSHOT"
+    const val kotlin = "1.3.0"
+    const val artifactory = "4.8.1"
+    const val junit = "5.3.1"
+    const val jose4j = "0.6.4"
+    const val mockito = "2.23.0"
+    const val jBcrypt = "0.4"
+    const val apacheHttpClient = "4.5.6"
+    const val klaxon = "3.0.1"
+    const val spek = "2.0.0-rc.1"
+    const val assertj = "3.11.1"
 }
 
+val astrea = "astrea"
 group = "io.imulab"
-version = "0.8.2"
+version = Version.astrea
 
 repositories {
     jcenter()
@@ -33,46 +35,40 @@ repositories {
 
 plugins {
     java
-    kotlin("jvm") version "1.2.51"
-    id("jacoco")
+    jacoco
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "2.0.2"
+    `build-scan`
+    kotlin("jvm") version "1.3.0"
+    id("org.jetbrains.dokka") version "0.9.16"
     id("com.jfrog.artifactory") version "4.8.1"
 }
 
 dependencies {
-    val versions = mapOf(
-            "kotlin" to "1.2.51",
-            "junit" to "5.3.1",
-            "junitPlatform" to "5.3.1",
-            "jose4j" to "0.6.4",
-            "mockito" to "2.23.0",
-            "jBCrypt" to "0.4",
-            "apacheHttpClient" to "4.5.6",
-            "klaxon" to "3.0.1",
-            "spek" to "2.0.0-rc.1",
-            "assertj" to "3.11.1"
-    )
+    implementation(kotlin(module = "stdlib-jdk8", version = Version.kotlin))
+    implementation("org.bitbucket.b_c:jose4j:${Version.jose4j}")
+    implementation("org.mindrot:jbcrypt:${Version.jBcrypt}")
+    implementation("org.apache.httpcomponents:httpclient:${Version.apacheHttpClient}")
 
-    implementation(kotlin("stdlib-jdk8"))
-    implementation("org.bitbucket.b_c:jose4j:${versions["jose4j"]}")
-    implementation("org.mindrot:jbcrypt:${versions["jBCrypt"]}")
-    implementation("org.apache.httpcomponents:httpclient:${versions["apacheHttpClient"]}")
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${versions["junit"]}")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${versions["junit"]}")
-    testImplementation("org.mockito:mockito-core:${versions["mockito"]}")
-    testImplementation("com.beust:klaxon:${versions["klaxon"]}")
-    testImplementation("org.spekframework.spek2:spek-dsl-jvm:${versions["spek"]}") {
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${Version.junit}")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:${Version.junit}")
+    testImplementation("org.mockito:mockito-core:${Version.mockito}")
+    testImplementation("com.beust:klaxon:${Version.klaxon}")
+    testImplementation("org.spekframework.spek2:spek-dsl-jvm:${Version.spek}") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    testImplementation("org.spekframework.spek2:spek-runner-junit5:${versions["spek"]}") {
+    testImplementation("org.spekframework.spek2:spek-runner-junit5:${Version.spek}") {
         exclude(group = "org.junit.platform")
         exclude(group = "org.jetbrains.kotlin")
     }
-    testImplementation("org.assertj:assertj-core:${versions["assertj"]}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${versions["junitPlatform"]}")
-    testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:${versions["kotlin"]}")
+    testImplementation("org.assertj:assertj-core:${Version.assertj}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Version.junit}")
+    testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect:${Version.kotlin}")
+}
+
+buildScan {
+    setTermsOfServiceUrl("https://gradle.com/terms-of-service")
+    setTermsOfServiceAgree("yes")
+    publishAlways()
 }
 
 tasks.withType<KotlinCompile> {
@@ -100,25 +96,32 @@ jacoco {
     toolVersion = "0.8.2"
 }
 
-val shadowJar: ShadowJar by tasks
-tasks.withType<ShadowJar> {
-    baseName = astrea
-    classifier = ""
+val dokka by tasks.getting(DokkaTask::class) {
+    outputFormat = "html"
+    outputDirectory = "$buildDir/javadoc"
+}
+
+val dokkaJar by tasks.creating(Jar::class) {
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    description = "Assembles Kotlin docs with Dokka"
+    classifier = "javadoc"
+    from(dokka)
 }
 
 publishing {
-    (publications) {
-        astrea(MavenPublication::class) {
-            artifactId = astrea
-            artifact(shadowJar)
+    publications {
+        create(astrea, MavenPublication::class.java) {
+            from(components["java"])
+            artifact(dokkaJar)
             pom {
                 withXml {
                     asNode().appendNode("dependencies").let { depNode ->
-                        configurations.compile.allDependencies.forEach {
+                        configurations.implementation.allDependencies.forEach {
                             depNode.appendNode("dependency").apply {
                                 appendNode("groupId", it.group)
                                 appendNode("artifactId", it.name)
                                 appendNode("version", it.version)
+                                appendNode("scope", "compile")
                             }
                         }
                     }
@@ -149,4 +152,17 @@ artifactory {
             setProperty("maven", true)
         })
     })
+}
+
+fun requireEnv(name: String, hard: Boolean = false): String {
+    return if (System.getenv(name) == null) {
+        val message = "Environment variable $name not set."
+        if (!hard) {
+            System.out.println(message)
+            ""
+        } else
+            throw IllegalStateException(message)
+    } else {
+        System.getenv(name)
+    }
 }
