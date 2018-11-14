@@ -106,9 +106,9 @@ class Request(private var id: String = UUID.randomUUID().toString(),
 
         fun appendForm(key: String, value: String) = apply {
             if (this.form.containsKey(key))
-                this.form[key] = mutableListOf<String>().apply {
-                    this@apply.addAll(this@Builder.form[key]!!)
-                    this@apply.add(value)
+                this.form[key] = mutableListOf<String>().also {
+                    it.addAll(this@Builder.form[key]!!)
+                    it.add(value)
                 }
             else
                 setForm(key, value)

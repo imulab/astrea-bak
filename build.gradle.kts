@@ -9,7 +9,7 @@ import org.jfrog.gradle.plugin.artifactory.dsl.ResolverConfig
 
 
 object Version {
-    const val astrea = "0.8.7-SNAPSHOT"
+    const val astrea = "0.8.7.2"
     const val kotlin = "1.3.0"
     const val artifactory = "4.8.1"
     const val junit = "5.3.1"

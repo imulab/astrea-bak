@@ -21,7 +21,7 @@ fun RedirectUri?.determineRedirectUri(registered: List<String>): String {
             throw RequestParameterInvalidValueException.MultipleRedirectUriRegistered()
     }
 
-    if (registered.contains(this!!))
+    if (registered.contains(this))
         return this
     else
         throw RequestParameterInvalidValueException.RougeRedirectUri(this)

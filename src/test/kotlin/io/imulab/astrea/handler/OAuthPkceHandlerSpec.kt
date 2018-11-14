@@ -176,7 +176,7 @@ object OAuthPkceHandlerSpec : Spek({
                                  method: CodeChallengeMethod = CodeChallengeMethod.S256,
                                  callback: (AuthorizeRequest, AuthorizeResponse) -> Unit) {
             val authorizeRequest = RequestSupport.newAuthorizeRequest(form = mapOf(
-                    PARAM_CODE_CHALLENGE to listOf(getChallenge()),
+                    PARAM_CODE_CHALLENGE to listOf(challenge),
                     PARAM_CODE_CHALLENGE_METHOD to listOf(method.specValue)
             ), client = ClientSupport.foo(isPublic = true))
             val authorizeResponse = DefaultAuthorizeResponse().also {

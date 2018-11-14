@@ -370,7 +370,7 @@ class Astrea(private val authorizeProvider: AuthorizeProvider,
                     accessTokenLifespan = Duration.ofSeconds(bom.accessTokenLifespanInSeconds),
                     accessTokenStorage = bom.accessTokenStorage,
                     refreshTokenStorage = bom.refreshTokenStorage,
-                    resourceOwnerAuthenticator = bom.resourceOwnerAuthenticator!!
+                    resourceOwnerAuthenticator = bom.resourceOwnerAuthenticator
             )
         }.value
 
@@ -381,7 +381,7 @@ class Astrea(private val authorizeProvider: AuthorizeProvider,
             OAuthPkceHandler(
                     authorizeCodeStrategy = bom.authorizeCodeStrategy ?: hmacAuthorizeCodeStrategy(bom),
                     allowPlainChallengeMethod = bom.allowPlainChallengeInPkce,
-                    pkceSessionStorage = bom.pkceSessionStorage!!,
+                    pkceSessionStorage = bom.pkceSessionStorage,
                     pkceValidator = mutableListOf<PkceValidator>().also { v ->
                         if (bom.allowPlainChallengeInPkce)
                             v.add(PlainPkceValidator)
@@ -408,7 +408,7 @@ class Astrea(private val authorizeProvider: AuthorizeProvider,
             OpenIdConnectAuthorizeCodeHandler(
                     authorizeCodeStrategy = bom.authorizeCodeStrategy ?: hmacAuthorizeCodeStrategy(bom),
                     openIdTokenStrategy = bom.idTokenStrategy ?: jwtIdTokenStrategy(bom),
-                    openIdConnectRequestStorage = bom.oidcRequestStorage!!,
+                    openIdConnectRequestStorage = bom.oidcRequestStorage,
                     openIdConnectRequestValidator = oidcRequestValidator(bom),
                     openIdConnectSafeStorageParameters = bom.oidcAuthorizeRequestParamsToStore
             )
@@ -434,7 +434,7 @@ class Astrea(private val authorizeProvider: AuthorizeProvider,
                     scopeStrategy = bom.scopeStrategy,
                     openIdConnectRequestValidator = oidcRequestValidator(bom),
                     openIdConnectSafeStorageParameters = bom.oidcAuthorizeRequestParamsToStore,
-                    openIdConnectRequestStorage = bom.oidcRequestStorage!!,
+                    openIdConnectRequestStorage = bom.oidcRequestStorage,
                     authorizeCodeStrategy = bom.authorizeCodeStrategy ?: hmacAuthorizeCodeStrategy(bom),
                     authorizeCodeStorage = bom.authorizeCodeStorage,
                     oAuthImplicitHandler = oauthImplicitHandler(bom),
