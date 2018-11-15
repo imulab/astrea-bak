@@ -1,0 +1,29 @@
+apply plugin: 'maven-publish'
+apply plugin: "com.jfrog.artifactory"
+
+apply from: "$rootDir/gradle/constants.gradle"
+
+publishing {
+    publications { pub ->
+        pub.create(astrea, MavenPublication) {
+            from(components["java"])
+            artifactId = "astrea"
+            artifact(dokkaJar)
+        }
+    }
+}
+
+artifactory {
+    contextUrl = "http://artifactory.imulab.io/artifactory"
+    publish {
+        repository {
+            repoKey = "gradle-dev-local"
+            username = System.getenv("ARTIFACTORY_USERNAME")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+            maven = true
+        }
+        defaults {
+            publications(astrea)
+        }
+    }
+}
