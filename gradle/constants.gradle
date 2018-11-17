@@ -2,7 +2,7 @@ ext {
     astrea = "astrea"
 
     /* versions */
-    v_astrea = "0.8.7.4"
+    v_astrea = "0.8.8.0"
     v_kotlin = "1.3.0"
     v_jose4j = "0.6.4"
     v_jBcrypt = "0.4"

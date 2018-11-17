@@ -81,7 +81,7 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
         }
     }
 
-    override fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest, error: Throwable) {
+    override fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest?, error: Throwable) {
         val exception = error as? OAuthException ?: OAuthException.ServerException(error)
 
         writer.run {

@@ -81,5 +81,5 @@ interface AccessProvider {
      * @param request oauth access request generated from [newAccessRequest], provided as reference.
      * @param error error captured, provided as data source.
      */
-    fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest, error: Throwable)
+    fun encodeAccessError(writer: HttpResponseWriter, request: AccessRequest?, error: Throwable)
 }

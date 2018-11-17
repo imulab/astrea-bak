@@ -119,10 +119,10 @@ class DefaultAuthorizeProvider(private val authorizeHandler: AuthorizeEndpointHa
         writer.setStatus(302)
     }
 
-    override fun encodeAuthorizeError(writer: HttpResponseWriter, request: AuthorizeRequest, error: Throwable) {
+    override fun encodeAuthorizeError(writer: HttpResponseWriter, request: AuthorizeRequest?, error: Throwable) {
         val exception = error as? OAuthException ?: OAuthException.ServerException(error)
 
-        if (!request.isRedirectUriValid()) {
+        if (request == null || !request.isRedirectUriValid()) {
             writer.setStatus(exception.statusCode())
             writer.setHeader("Content-Type", "application/json;charset=UTF-8")
             exception.extraHeaders().forEach(writer::setHeader)

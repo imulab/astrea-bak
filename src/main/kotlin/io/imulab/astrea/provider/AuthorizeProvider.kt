@@ -84,5 +84,5 @@ interface AuthorizeProvider {
      * @param request oauth authorize request generated from [newAuthorizeRequest], provided as reference.
      * @param error error captured, provided as data source.
      */
-    fun encodeAuthorizeError(writer: HttpResponseWriter, request: AuthorizeRequest, error: Throwable)
+    fun encodeAuthorizeError(writer: HttpResponseWriter, request: AuthorizeRequest?, error: Throwable)
 }
