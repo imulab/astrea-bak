@@ -47,6 +47,8 @@ class OAuthClientCredentialsHandler(
             }
         }
 
+        request.getRequestScopes().forEach { request.grantScope(it) }
+
         // set expiry
         request.getSession()!!.setExpiry(TokenType.AccessToken, LocalDateTime.now().plus(accessTokenLifespan))
     }
