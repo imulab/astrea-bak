@@ -18,6 +18,7 @@ import io.imulab.astrea.provider.AccessProvider
 import io.imulab.astrea.spi.http.HttpRequestReader
 import io.imulab.astrea.spi.http.HttpResponseWriter
 import io.imulab.astrea.spi.http.mustSingleValue
+import io.imulab.astrea.spi.http.singleValue
 import io.imulab.astrea.spi.json.JsonEncoder
 
 class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator,
@@ -37,7 +38,7 @@ class DefaultAccessProvider(private val clientAuthenticator: ClientAuthenticator
             reader.getForm().run {
                 b.setForm(this)
 
-                mustSingleValue(PARAM_SCOPE)
+                singleValue(PARAM_SCOPE)
                         .split(SPACE)
                         .filter { it.isNotEmpty() }
                         .forEach { b.addScopes(it) }
