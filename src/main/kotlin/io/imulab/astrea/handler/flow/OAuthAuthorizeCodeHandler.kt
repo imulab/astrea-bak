@@ -7,7 +7,9 @@ import io.imulab.astrea.domain.request.AuthorizeRequest
 import io.imulab.astrea.domain.response.AccessResponse
 import io.imulab.astrea.domain.response.AuthorizeResponse
 import io.imulab.astrea.error.InvalidGrantException
+import io.imulab.astrea.error.InvalidRequestException
 import io.imulab.astrea.error.InvalidScopeException
+import io.imulab.astrea.error.RequestParameterMissingException
 import io.imulab.astrea.handler.AuthorizeEndpointHandler
 import io.imulab.astrea.handler.TokenEndpointHandler
 import io.imulab.astrea.token.RefreshToken
@@ -92,8 +94,12 @@ class OAuthAuthorizeCodeHandler(
         // Compare and match the redirect URI to prevent any malicious redirection.
         val restoredRedirectUri = restoredRequest.getRedirectUri()
         val presentedRedirectUri = request.getRedirectUri()
-        if (restoredRedirectUri.isNotBlank() && restoredRedirectUri != presentedRedirectUri)
+        if (restoredRedirectUri.isNotBlank() && restoredRedirectUri != presentedRedirectUri) {
+            if (presentedRedirectUri.isBlank())
+                throw RequestParameterMissingException(PARAM_REDIRECT_URI)
             throw InvalidGrantException.RedirectUriMismatch(request.getCode())
+        }
+
 
         request.run {
             setSession(restoredRequest.getSession()!!)
