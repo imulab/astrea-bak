@@ -11,9 +11,8 @@ import io.imulab.astrea.domain.*
  * utilizes more than one mechanism for authenticating the
  * client, or is otherwise malformed.
  */
-sealed class InvalidRequestException(description: String? = null)
+abstract class InvalidRequestException(description: String? = null)
     : OAuthException("invalid_request", description) {
-
     override fun statusCode(): Int = 400
 }
 
