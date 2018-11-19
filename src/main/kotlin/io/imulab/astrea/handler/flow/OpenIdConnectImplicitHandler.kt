@@ -63,7 +63,7 @@ class OpenIdConnectImplicitHandler(
                 getResponseTypes().exactly(ResponseType.IdToken) ||
                         getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.IdToken))
 
-        return when {
+        return (getSession() is OidcSession) && when {
             !(getGrantedScopes().contains(SCOPE_OPENID) && idTokenOrPlusTokenResponseType) -> false
             getResponseTypes().contains(ResponseType.Code) -> false
             else -> true

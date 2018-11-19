@@ -102,7 +102,7 @@ class OpenIdConnectHybridHandler(
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
-        return when (this.getResponseTypes().size) {
+        return (getSession() is OidcSession) && when (this.getResponseTypes().size) {
             2 -> this.getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.Code)) ||
                     this.getResponseTypes().containsAll(listOf(ResponseType.IdToken, ResponseType.Code))
             3 -> this.getResponseTypes().containsAll(listOf(ResponseType.Token, ResponseType.Code, ResponseType.IdToken))

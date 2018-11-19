@@ -18,6 +18,7 @@ class OpenIdConnectRefreshHandler(
 ) : TokenEndpointHandler {
 
     override fun supports(request: AccessRequest): Boolean =
+            (request.getSession() is OidcSession) &&
             request.getGrantTypes().exactly(GrantType.RefreshToken) &&
                     request.getGrantedScopes().contains(SCOPE_OPENID) &&
                     request.getClient().mustGrantType(GrantType.RefreshToken, false)
