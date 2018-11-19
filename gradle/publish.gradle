@@ -3,12 +3,18 @@ apply plugin: "com.jfrog.artifactory"
 
 apply from: "$rootDir/gradle/constants.gradle"
 
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = "sources"
+}
+
 publishing {
     publications { pub ->
         pub.create(astrea, MavenPublication) {
             from(components["java"])
             artifactId = "astrea"
             artifact(dokkaJar)
+            artifact(sourcesJar)
         }
     }
 }

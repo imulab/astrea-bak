@@ -49,7 +49,7 @@ class OpenIdConnectAuthorizeCodeHandler(
     }
 
     private fun AuthorizeRequest.shouldHandle(): Boolean {
-        return this.getResponseTypes().exactly(ResponseType.Code) && this.getGrantedScopes().contains(SCOPE_OPENID)
+        return this.getResponseTypes().exactly(ResponseType.Code) && this.getSession() is OidcSession
     }
 
     // end: AuthorizeEndpointHandler -----------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ class OpenIdConnectAuthorizeCodeHandler(
     // start: TokenEndpointHandler -------------------------------------------------------------------------------------
 
     override fun supports(request: AccessRequest): Boolean =
-            request.getGrantTypes().exactly(GrantType.AuthorizationCode)
+            request.getGrantTypes().exactly(GrantType.AuthorizationCode) && request.getSession() is OidcSession
 
     override fun handleAccessRequest(request: AccessRequest) {}
 
